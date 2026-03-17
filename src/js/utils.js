@@ -88,6 +88,9 @@ var tmApp = {
   getLatestProfessionals: function () {
     return getLatestProfessionals();
   },
+  getHomeProfessionals: function () {
+    return getHomeProfessionals();
+  },
   getLocalidades: function () {
     return getLocalidades();
   },
@@ -421,6 +424,38 @@ export function getLatestProfessionals() {
   return fetchAPI('/ultimos-profesionales', {
     auth: false,
   });
+}
+
+export async function getHomeProfessionals() {
+  try {
+    const response = await getLatestProfessionals();
+    const items = response?.profesionales || [];
+    if (items.length) {
+      return items;
+    }
+  } catch (error) {
+    // Si falla el endpoint principal, usamos un fallback desde /profesionales.
+  }
+
+  const tokensResponse = await getProfessionalsList();
+  const tokens = tokensResponse?.empleados || [];
+  const professionals = [];
+
+  for (const token of tokens.slice(0, 6)) {
+    try {
+      const profile = await getProfessionalProfile(token);
+      professionals.push({
+        id: profile?.id,
+        nombre: profile?.nombre_completo || profile?.nombre || 'Profesional',
+        imagen: profile?.imagen || '/avatar.png',
+        token,
+      });
+    } catch (error) {
+      // Ignoramos perfiles que fallen para no bloquear el resto del listado.
+    }
+  }
+
+  return professionals;
 }
 
 export function getLocalidades() {

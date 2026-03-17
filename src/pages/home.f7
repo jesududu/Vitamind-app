@@ -50,7 +50,7 @@
   </div>
 </template>
 <script>
-  import { getLatestProfessionals, escapeHtml } from '../js/utils.js';
+  import { getHomeProfessionals, escapeHtml } from '../js/utils.js';
 
   export default (props, { $el, $on, $f7, $f7router }) => {
     const renderLatest = async () => {
@@ -58,8 +58,7 @@
       container.html('<div class="vm-loading">Cargando profesionales...</div>');
 
       try {
-        const response = await getLatestProfessionals();
-        const items = response?.profesionales || [];
+        const items = await getHomeProfessionals();
 
         if (!items.length) {
           container.html('<div class="vm-empty">No hay profesionales disponibles.</div>');
