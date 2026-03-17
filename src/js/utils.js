@@ -288,6 +288,10 @@ var tmApp = {
       return fallback;
     }
 
+    if (typeof error === 'string') {
+      return error;
+    }
+
     if (error.code === 'API_UNREACHABLE' || error.code === 'API_TIMEOUT') {
       return error.message;
     }
@@ -303,6 +307,18 @@ var tmApp = {
       if (firstMessage) {
         return firstMessage;
       }
+    }
+
+    if (typeof error.payload === 'string' && error.payload.trim()) {
+      return error.payload;
+    }
+
+    if (typeof error.payload?.message === 'string' && error.payload.message.trim()) {
+      return error.payload.message;
+    }
+
+    if (typeof error.status === 'number') {
+      return `${fallback} (HTTP ${error.status})`;
     }
 
     return error.message || fallback;

@@ -80,7 +80,8 @@
           </div>
         `).join(''));
       } catch (error) {
-        container.html(`<div class="vm-empty">${utils.escapeHtml(error.message)}</div>`);
+        const message = utils.getApiErrorMessage(error, 'No se pudieron cargar los profesionales');
+        container.html(`<div class="vm-empty">${utils.escapeHtml(message)}</div>`);
       }
     };
 
