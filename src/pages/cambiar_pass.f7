@@ -1,0 +1,43 @@
+<template>
+  <div class="page" data-name="cambiar-pass">
+    <div class="navbar">
+      <div class="navbar-bg"></div>
+      <div class="navbar-inner">
+        <div class="left"><a href="#" class="link back"><i class="icon icon-back"></i></a></div>
+        <div class="title">Cambiar contrasena</div>
+      </div>
+    </div>
+    <div class="page-content vm-page-content">
+      <div class="vm-form-card">
+        <div class="vm-section-title">Seguridad</div>
+        <p class="vm-muted">Esta pantalla sigue el plan de la app, pero el endpoint autenticado de cambio de contrasena todavia no esta disponible en la API.</p>
+        <div class="list no-hairlines-md">
+          <ul>
+            <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Nueva contrasena</div><div class="item-input-wrap"><input type="password" id="change-password" disabled /></div></div></li>
+            <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Confirmar contrasena</div><div class="item-input-wrap"><input type="password" id="change-password-confirmation" disabled /></div></div></li>
+          </ul>
+        </div>
+        <div class="vm-actions">
+          <a href="#" id="change-pass-submit" class="button button-fill">Probar endpoint</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+  import { changePassword, getApiErrorMessage } from '../js/utils.js';
+
+  export default (props, { $el, $on, $f7 }) => {
+    $on('pageInit', () => {
+      $el.find('#change-pass-submit').on('click', async () => {
+        try {
+          await changePassword();
+        } catch (error) {
+          $f7.dialog.alert(getApiErrorMessage(error, 'Endpoint no disponible'));
+        }
+      });
+    });
+
+    return $render;
+  };
+</script>

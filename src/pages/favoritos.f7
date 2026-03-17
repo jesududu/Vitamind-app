@@ -1,0 +1,88 @@
+<template>
+  <div class="page" data-name="favoritos">
+    <div class="navbar">
+      <div class="navbar-bg"></div>
+      <div class="navbar-inner">
+        <div class="left"><a href="#" class="link back"><i class="icon icon-back"></i></a></div>
+        <div class="title">Mis favoritos</div>
+      </div>
+    </div>
+    <div class="page-content vm-page-content">
+      <div id="favoritos-content" class="vm-list"></div>
+    </div>
+  </div>
+</template>
+<script>
+  import { getFavorites, removeFavorite, isAuthenticated, escapeHtml, getApiErrorMessage } from '../js/utils.js';
+
+  export default (props, { $el, $on, $f7 }) => {
+    const renderLoggedOut = () => {
+      $el.find('#favoritos-content').html(`
+        <div class="vm-form-card">
+          <div class="vm-section-title">Acceso paciente</div>
+          <p class="vm-muted">Necesitas iniciar sesion para ver tus profesionales favoritos.</p>
+          <div class="vm-actions">
+            <a href="/login/" class="button button-fill">Ir a login</a>
+          </div>
+        </div>
+      `);
+    };
+
+    const renderFavorites = async () => {
+      if (!isAuthenticated()) {
+        renderLoggedOut();
+        return;
+      }
+
+      try {
+        $el.find('#favoritos-content').html('<div class="vm-loading">Cargando favoritos...</div>');
+        const response = await getFavorites();
+        const favoritos = response?.favoritos || [];
+
+        if (!favoritos.length) {
+          $el.find('#favoritos-content').html('<div class="vm-card"><p class="vm-empty">No tienes profesionales favoritos todavia.</p></div>');
+          return;
+        }
+
+        $el.find('#favoritos-content').html(favoritos.map((favorito) => `
+          <div class="vm-card">
+            <div class="vm-professional">
+              <img src="${escapeHtml(favorito.imagen || '/avatar.png')}" alt="${escapeHtml(favorito.nombre || 'Profesional')}" />
+              <div>
+                <h3 class="vm-card-title">${escapeHtml(favorito.nombre || 'Profesional')}</h3>
+                <p class="vm-card-subtitle">${escapeHtml(favorito.credenciales || '')}</p>
+                <p class="vm-muted">${escapeHtml(favorito.direccion || '')}</p>
+                <div class="vm-actions">
+                  <a href="/profesional/${encodeURIComponent(favorito.token || favorito.id)}/" class="button button-fill button-small">Ver perfil</a>
+                  <a href="#" class="button button-outline button-small favorite-remove" data-id="${escapeHtml(favorito.id)}">Quitar</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        `).join(''));
+
+        $el.find('.favorite-remove').each((index, element) => {
+          element.addEventListener('click', async (event) => {
+            event.preventDefault();
+            try {
+              $f7.preloader.show();
+              await removeFavorite(element.dataset.id);
+              await renderFavorites();
+            } catch (error) {
+              $f7.dialog.alert(getApiErrorMessage(error, 'No se pudo eliminar el favorito'));
+            } finally {
+              $f7.preloader.hide();
+            }
+          });
+        });
+      } catch (error) {
+        $el.find('#favoritos-content').html(`<div class="vm-card"><p class="vm-empty">${escapeHtml(getApiErrorMessage(error, 'No se pudieron cargar tus favoritos'))}</p></div>`);
+      }
+    };
+
+    $on('pageInit', renderFavorites);
+    $on('pageAfterIn', renderFavorites);
+
+    return $render;
+  };
+</script>

@@ -1,0 +1,20 @@
+<template>
+  <div class="page" data-name="notificacion">
+    <div class="navbar">
+      <div class="navbar-bg"></div>
+      <div class="navbar-inner">
+        <div class="left"><a href="#" class="link back"><i class="icon icon-back"></i></a></div>
+        <div class="title">Detalle notificacion</div>
+      </div>
+    </div>
+    <div class="page-content vm-page-content">
+      <div class="vm-card">
+        <div class="vm-section-title">Pendiente de backend</div>
+        <p class="vm-muted">El detalle individual de notificacion quedara operativo cuando exista `GET /api/notificaciones/{id}`.</p>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+  export default () => $render;
+</script>

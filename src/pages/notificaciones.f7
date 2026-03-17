@@ -1,0 +1,38 @@
+<template>
+  <div class="page" data-name="notificaciones">
+    <div class="navbar">
+      <div class="navbar-bg"></div>
+      <div class="navbar-inner">
+        <div class="left"><a href="#" class="link back"><i class="icon icon-back"></i></a></div>
+        <div class="title">Notificaciones</div>
+      </div>
+    </div>
+    <div class="page-content vm-page-content">
+      <div class="vm-card">
+        <div class="vm-section-title">Centro de notificaciones</div>
+        <p class="vm-muted">La app ya tiene la pantalla preparada siguiendo el plan Buktiem, pero la API movil de notificaciones aun no esta publicada en `routes/api.php`.</p>
+        <div class="vm-actions">
+          <a href="#" id="notifications-check" class="button button-fill">Comprobar endpoint</a>
+        </div>
+        <div id="notifications-status" class="vm-inline-note"></div>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+  import { getNotifications, getApiErrorMessage } from '../js/utils.js';
+
+  export default (props, { $el, $on }) => {
+    $on('pageInit', () => {
+      $el.find('#notifications-check').on('click', async () => {
+        try {
+          await getNotifications();
+        } catch (error) {
+          $el.find('#notifications-status').text(getApiErrorMessage(error, 'Endpoint no disponible'));
+        }
+      });
+    });
+
+    return $render;
+  };
+</script>

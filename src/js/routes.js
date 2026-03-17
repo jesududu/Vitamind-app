@@ -9,6 +9,14 @@ import SettingsPage from '../pages/settings.f7';
 import LoginPage from '../pages/login.f7';
 import RegistroPage from '../pages/registro.f7';
 import ForgotPasswordPage from '../pages/forgot_password.f7';
+import EditarPerfilPage from '../pages/editar_perfil.f7';
+import CambiarPassPage from '../pages/cambiar_pass.f7';
+import FavoritosPage from '../pages/favoritos.f7';
+import NotificacionesPage from '../pages/notificaciones.f7';
+import NotificacionPage from '../pages/notificacion.f7';
+import TerminosPage from '../pages/terminos.f7';
+import NormasPage from '../pages/normas.f7';
+import InfoPage from '../pages/info.f7';
 import NotFoundPage from '../pages/404.f7';
 
 const routes = [
@@ -24,6 +32,14 @@ const routes = [
   { path: '/login/', component: LoginPage },
   { path: '/registro/', component: RegistroPage },
   { path: '/forgot-password/', component: ForgotPasswordPage },
+  { path: '/editar-perfil/', component: EditarPerfilPage },
+  { path: '/cambiar-pass/', component: CambiarPassPage },
+  { path: '/favoritos/', component: FavoritosPage },
+  { path: '/notificaciones/', component: NotificacionesPage },
+  { path: '/notificacion/:id/', component: NotificacionPage },
+  { path: '/terminos/', component: TerminosPage },
+  { path: '/normas/', component: NormasPage },
+  { path: '/info/', component: InfoPage },
   { path: '(.*)', component: NotFoundPage },
 ];
 

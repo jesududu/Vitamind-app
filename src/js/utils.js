@@ -3,10 +3,21 @@ import env from './env.js';
 export const storageKeys = {
   token: 'sanctum_token',
   pacienteId: 'paciente_id',
-   user: 'vitamind_datos_usu',
+  user: 'vitamind_datos_usu',
   appointmentDraft: 'vitamind_reserva_borrador',
   appointmentSelected: 'vitamind_cita_seleccionada',
   professionalMap: 'vitamind_professional_map',
+};
+
+export const missingApiEndpoints = {
+  registerDevice: '/register-device',
+  notifications: '/notificaciones',
+  notificationDetail: '/notificaciones/{id}',
+  notificationsUnreadCount: '/notificaciones/nuevas',
+  deleteNotification: '/notificaciones/{id}/eliminar',
+  appVersion: '/app-version',
+  changePassword: '/cambiar-pass',
+  deleteAccount: '/eliminar-cuenta',
 };
 
 export function getSession() {
@@ -172,8 +183,30 @@ export function forgotPassword(email) {
   });
 }
 
+export function resendVerificationEmail(email) {
+  return fetchAPI('/email/resend', {
+    method: 'POST',
+    auth: false,
+    data: { email },
+  });
+}
+
+export function resetPasswordFromToken(data) {
+  return fetchAPI('/password/reset-from-token', {
+    method: 'POST',
+    auth: false,
+    data,
+  });
+}
+
 export function getCurrentUser() {
   return fetchAPI('/user');
+}
+
+export function logout() {
+  return fetchAPI('/logout', {
+    method: 'POST',
+  });
 }
 
 export function updateProfile(data, file = null) {
@@ -197,6 +230,21 @@ export function updateProfile(data, file = null) {
 
 export function getLatestProfessionals() {
   return fetchAPI('/ultimos-profesionales', { auth: false });
+}
+
+export function getLocalidades() {
+  return fetchAPI('/localidades', {
+    method: 'POST',
+    auth: false,
+  });
+}
+
+export function getServicios(localidad = '') {
+  return fetchAPI('/servicios', {
+    method: 'POST',
+    auth: false,
+    data: { localidad },
+  });
 }
 
 export function searchProfessionals(filters = {}) {
@@ -271,6 +319,19 @@ export function removeFavorite(empleadoId) {
   });
 }
 
+export function getDynamicContent(funct) {
+  return fetchAPI('/cargarContenido', {
+    auth: false,
+    data: { funct },
+  });
+}
+
+export function getConditionDetail(tipo) {
+  return fetchAPI(`/condiciones/${tipo}`, {
+    auth: false,
+  });
+}
+
 export function escapeHtml(value = '') {
   return String(value)
     .replaceAll('&', '&amp;')
@@ -330,4 +391,65 @@ export async function resolveProfessionalTokenByEmployeeId(employeeId) {
   }
 
   return null;
+}
+
+function createMissingEndpointError(key) {
+  const endpoint = missingApiEndpoints[key];
+  const error = new Error(`Endpoint pendiente en backend: ${endpoint}`);
+  error.code = 'API_ENDPOINT_PENDING';
+  error.endpoint = endpoint;
+  return error;
+}
+
+export function registerDevice() {
+  throw createMissingEndpointError('registerDevice');
+}
+
+export function getNotifications() {
+  throw createMissingEndpointError('notifications');
+}
+
+export function getNotificationDetail() {
+  throw createMissingEndpointError('notificationDetail');
+}
+
+export function getNotificationsUnreadCount() {
+  throw createMissingEndpointError('notificationsUnreadCount');
+}
+
+export function deleteNotification() {
+  throw createMissingEndpointError('deleteNotification');
+}
+
+export function getAppVersion() {
+  throw createMissingEndpointError('appVersion');
+}
+
+export function changePassword() {
+  throw createMissingEndpointError('changePassword');
+}
+
+export function deleteAccount() {
+  throw createMissingEndpointError('deleteAccount');
+}
+
+export function getApiErrorMessage(error, fallback = 'No se pudo completar la solicitud') {
+  if (!error) {
+    return fallback;
+  }
+
+  if (error.code === 'API_ENDPOINT_PENDING' && error.endpoint) {
+    return `${error.message}.`;
+  }
+
+  const validationErrors = error.payload?.errors;
+  if (validationErrors && typeof validationErrors === 'object') {
+    const firstField = Object.keys(validationErrors)[0];
+    const firstMessage = validationErrors[firstField]?.[0];
+    if (firstMessage) {
+      return firstMessage;
+    }
+  }
+
+  return error.message || fallback;
 }

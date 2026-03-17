@@ -131,6 +131,27 @@ body {
   margin-top: 12px;
 }
 
+.vm-link-list {
+  display: grid;
+  gap: 10px;
+}
+
+.vm-link-item {
+  display: block;
+  padding: 14px 16px;
+  border: 1px solid var(--vm-border);
+  border-radius: 16px;
+  background: var(--vm-surface-soft);
+  color: var(--vm-secondary);
+  font-weight: 600;
+}
+
+.vm-link-item::after {
+  content: '>';
+  float: right;
+  color: var(--vm-text-muted);
+}
+
 .vm-chip {
   border-radius: 999px;
   padding: 7px 12px;
@@ -163,4 +184,25 @@ body {
 .vm-empty {
   padding: 18px;
   text-align: center;
+}
+
+.vm-richtext {
+  color: var(--vm-text);
+  line-height: 1.6;
+}
+
+.vm-richtext p:first-child {
+  margin-top: 0;
+}
+
+.vm-inline-note {
+  margin-top: 12px;
+  color: var(--vm-text-muted);
+  font-size: 14px;
+}
+
+.vm-profile-cover {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
 }

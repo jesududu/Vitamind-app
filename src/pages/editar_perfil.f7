@@ -1,0 +1,96 @@
+<template>
+  <div class="page" data-name="editar-perfil">
+    <div class="navbar">
+      <div class="navbar-bg"></div>
+      <div class="navbar-inner">
+        <div class="left"><a href="#" class="link back"><i class="icon icon-back"></i></a></div>
+        <div class="title">Editar perfil</div>
+      </div>
+    </div>
+    <div class="page-content vm-page-content">
+      <div class="vm-form-card">
+        <div class="vm-section-title">Datos del paciente</div>
+        <div class="vm-profile-cover">
+          <img id="profile-avatar" class="vm-avatar vm-avatar--lg" src="/avatar.png" alt="Avatar" />
+        </div>
+        <div class="list no-hairlines-md">
+          <ul>
+            <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Nombre</div><div class="item-input-wrap"><input type="text" id="profile-nombre" /></div></div></li>
+            <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Apellidos</div><div class="item-input-wrap"><input type="text" id="profile-apellidos" /></div></div></li>
+            <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Email</div><div class="item-input-wrap"><input type="email" id="profile-email" /></div></div></li>
+            <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Foto</div><div class="item-input-wrap"><input type="file" id="profile-image" accept="image/*" /></div></div></li>
+          </ul>
+        </div>
+        <div class="vm-actions">
+          <a href="#" id="profile-submit" class="button button-fill">Guardar cambios</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+  import { getCurrentUser, updateProfile, saveSession, getApiErrorMessage, isAuthenticated } from '../js/utils.js';
+
+  export default (props, { $el, $on, $f7, $store }) => {
+    const fillForm = (user) => {
+      const paciente = user?.paciente || {};
+      const nombre = paciente.nombre || user?.name?.split(' ')[0] || '';
+      const apellidos = paciente.apellidos || user?.name?.split(' ').slice(1).join(' ') || '';
+
+      $el.find('#profile-nombre').val(nombre);
+      $el.find('#profile-apellidos').val(apellidos);
+      $el.find('#profile-email').val(user?.email || paciente.email || '');
+      $el.find('#profile-avatar').attr('src', user?.imagen_url || '/avatar.png');
+    };
+
+    const loadProfile = async () => {
+      if (!isAuthenticated()) {
+        $f7.views.main.router.navigate('/login/');
+        return;
+      }
+
+      try {
+        $f7.preloader.show();
+        const user = await getCurrentUser();
+        fillForm(user);
+      } catch (error) {
+        $f7.dialog.alert(getApiErrorMessage(error, 'No se pudo cargar tu perfil'));
+      } finally {
+        $f7.preloader.hide();
+      }
+    };
+
+    $on('pageInit', () => {
+      loadProfile();
+
+      $el.find('#profile-submit').on('click', async () => {
+        try {
+          $f7.preloader.show();
+          const response = await updateProfile(
+            {
+              nombre: $el.find('#profile-nombre').val(),
+              apellidos: $el.find('#profile-apellidos').val(),
+              email: $el.find('#profile-email').val(),
+            },
+            $el.find('#profile-image')[0]?.files?.[0] || null,
+          );
+
+          const refreshedUser = await getCurrentUser();
+          saveSession({
+            token: $store.state.session.token,
+            user: refreshedUser,
+          });
+          $store.dispatch('refreshSession');
+          fillForm(refreshedUser);
+          $f7.dialog.alert(response?.message || 'Perfil actualizado correctamente');
+        } catch (error) {
+          $f7.dialog.alert(getApiErrorMessage(error, 'No se pudo guardar tu perfil'));
+        } finally {
+          $f7.preloader.hide();
+        }
+      });
+    });
+
+    return $render;
+  };
+</script>

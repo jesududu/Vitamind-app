@@ -1,0 +1,38 @@
+<template>
+  <div class="page" data-name="terminos">
+    <div class="navbar">
+      <div class="navbar-bg"></div>
+      <div class="navbar-inner">
+        <div class="left"><a href="#" class="link back"><i class="icon icon-back"></i></a></div>
+        <div class="title">Terminos</div>
+      </div>
+    </div>
+    <div class="page-content vm-page-content">
+      <div id="terminos-content"></div>
+    </div>
+  </div>
+</template>
+<script>
+  import { getConditionDetail, getApiErrorMessage, escapeHtml } from '../js/utils.js';
+
+  export default (props, { $el, $on }) => {
+    const load = async () => {
+      try {
+        $el.find('#terminos-content').html('<div class="vm-loading">Cargando contenido...</div>');
+        const response = await getConditionDetail('terminos');
+        const contenido = response?.contenido || {};
+        $el.find('#terminos-content').html(`
+          <div class="vm-card">
+            <div class="vm-section-title">${escapeHtml(contenido.nombre || 'Terminos')}</div>
+            <div class="vm-richtext">${contenido.descripcion || '<p class="vm-empty">No hay contenido disponible.</p>'}</div>
+          </div>
+        `);
+      } catch (error) {
+        $el.find('#terminos-content').html(`<div class="vm-card"><p class="vm-empty">${escapeHtml(getApiErrorMessage(error, 'No se pudo cargar el contenido'))}</p></div>`);
+      }
+    };
+
+    $on('pageInit', load);
+    return $render;
+  };
+</script>

@@ -12,7 +12,7 @@
   </div>
 </template>
 <script>
-  import { clearSession, getSession, isAuthenticated, escapeHtml } from '../js/utils.js';
+  import { clearSession, getSession, isAuthenticated, escapeHtml, logout } from '../js/utils.js';
 
   export default (props, { $el, $on, $f7, $store }) => {
     const render = () => {
@@ -22,11 +22,11 @@
         container.html(`
           <div class="vm-form-card">
             <div class="vm-section-title">Acceso paciente</div>
-            <p class="vm-muted">Desde aquí centralizamos el login, registro y gestión básica de la sesión del paciente.</p>
+            <p class="vm-muted">Desde aqui centralizamos el login, registro y gestion basica de la sesion del paciente.</p>
             <div class="vm-actions">
-              <a href="/login/" class="button button-fill">Iniciar sesión</a>
+              <a href="/login/" class="button button-fill">Iniciar sesion</a>
               <a href="/registro/" class="button button-outline">Crear cuenta</a>
-              <a href="/forgot-password/" class="button button-outline">Recuperar contraseña</a>
+              <a href="/forgot-password/" class="button button-outline">Recuperar contrasena</a>
             </div>
           </div>
         `);
@@ -38,17 +38,37 @@
 
       container.html(`
         <div class="vm-card">
-          <div class="vm-section-title">Sesión actual</div>
+          <div class="vm-section-title">Sesion actual</div>
           <div class="vm-kv"><span>Email</span><strong>${escapeHtml(user.email || '')}</strong></div>
           <div class="vm-kv"><span>Paciente ID</span><strong>${escapeHtml(user.paciente_id || session.pacienteId || '')}</strong></div>
           <div class="vm-kv"><span>User ID</span><strong>${escapeHtml(user.id || '')}</strong></div>
           <div class="vm-actions">
-            <a href="#" id="logout-button" class="button button-fill color-red">Cerrar sesión</a>
+            <a href="/editar-perfil/" class="button button-fill">Editar perfil</a>
+            <a href="/favoritos/" class="button button-outline">Mis favoritos</a>
+            <a href="/cambiar-pass/" class="button button-outline">Cambiar contrasena</a>
+          </div>
+        </div>
+        <div class="vm-card vm-section">
+          <div class="vm-section-title">Contenido y soporte</div>
+          <div class="vm-link-list">
+            <a href="/notificaciones/" class="vm-link-item">Notificaciones</a>
+            <a href="/terminos/" class="vm-link-item">Terminos</a>
+            <a href="/normas/" class="vm-link-item">Normas</a>
+            <a href="/info/" class="vm-link-item">Informacion</a>
+          </div>
+          <div class="vm-actions">
+            <a href="#" id="logout-button" class="button button-fill color-red">Cerrar sesion</a>
           </div>
         </div>
       `);
 
-      $el.find('#logout-button').on('click', () => {
+      $el.find('#logout-button').on('click', async () => {
+        try {
+          await logout();
+        } catch (error) {
+          // Si el token ya ha expirado, igualmente cerramos la sesion local.
+        }
+
         clearSession();
         $store.dispatch('refreshSession');
         render();
