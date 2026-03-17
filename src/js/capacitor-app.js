@@ -91,9 +91,21 @@ var capacitorApp = {
     var $ = f7.$;
     var Keyboard = window.Capacitor.Plugins.Keyboard;
     if (!Keyboard) return;
-    Keyboard.setResizeMode({ mode: 'native' });
-    Keyboard.setScroll({ isDisabled: true });
-    Keyboard.setAccessoryBarVisible({ isVisible: false });
+
+    const safeKeyboardCall = async (fnName, args) => {
+      if (typeof Keyboard[fnName] !== 'function') return;
+      try {
+        await Keyboard[fnName](args);
+      } catch (error) {
+        console.warn(`[VitaMind][keyboard] ${fnName} no disponible`, {
+          message: error?.message || error,
+        });
+      }
+    };
+
+    safeKeyboardCall('setResizeMode', { mode: 'native' });
+    safeKeyboardCall('setScroll', { isDisabled: true });
+    safeKeyboardCall('setAccessoryBarVisible', { isVisible: false });
     window.addEventListener('keyboardWillShow', () => {
       f7.input.scrollIntoView(document.activeElement, 0, true, true);
     });
@@ -104,7 +116,7 @@ var capacitorApp = {
       if (document.activeElement && $(document.activeElement).parents('.messagebar').length) {
         return;
       }
-      Keyboard.setAccessoryBarVisible({ isVisible: true });
+      safeKeyboardCall('setAccessoryBarVisible', { isVisible: true });
     });
 
     $(document).on(
@@ -115,9 +127,9 @@ var capacitorApp = {
         var type = e.target.type;
         var showForTypes = ['datetime-local', 'time', 'date', 'datetime'];
         if (nodeName === 'select' || showForTypes.indexOf(type) >= 0) {
-          Keyboard.setAccessoryBarVisible({ isVisible: true });
+          safeKeyboardCall('setAccessoryBarVisible', { isVisible: true });
         } else {
-          Keyboard.setAccessoryBarVisible({ isVisible: false });
+          safeKeyboardCall('setAccessoryBarVisible', { isVisible: false });
         }
       },
       true,
