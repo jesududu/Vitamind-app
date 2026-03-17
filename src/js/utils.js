@@ -331,7 +331,8 @@ export async function fetchAPI(endpoint, options = {}) {
       throw timeoutError;
     }
 
-    const networkError = new Error(`No se pudo conectar con la API en ${apiUrl}.`);
+    const causeMessage = error?.message ? ` Causa: ${error.message}` : '';
+    const networkError = new Error(`No se pudo conectar con la API en ${apiUrl}.${causeMessage}`);
     networkError.code = 'API_UNREACHABLE';
     networkError.endpoint = endpoint;
     networkError.cause = error;
