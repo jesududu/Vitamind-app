@@ -3,19 +3,19 @@
     <div class="views tabs safe-areas">
       <div class="toolbar toolbar-bottom tabbar tabbar-icons vm-tabbar">
         <div class="toolbar-inner">
-          <a href="#view-home" class="tab-link tab-link-active">
+          <a href="#view-home" id="btnHome" class="tab-link tab-link-active">
             <i class="icon material-icons">home</i>
             <span class="tabbar-label">Inicio</span>
           </a>
-          <a href="#view-search" class="tab-link">
+          <a href="#view-busqueda" id="btnBusqueda" class="tab-link">
             <i class="icon material-icons">search</i>
             <span class="tabbar-label">Buscar</span>
           </a>
-          <a href="#view-citas" class="tab-link">
+          <a href="#view-citas" id="btnCitas" class="tab-link">
             <i class="icon material-icons">calendar_month</i>
             <span class="tabbar-label">Citas</span>
           </a>
-          <a href="#view-settings" class="tab-link">
+          <a href="#view-settings" id="btnCuenta" class="tab-link">
             <i class="icon material-icons">person</i>
             <span class="tabbar-label">Cuenta</span>
           </a>
@@ -23,7 +23,7 @@
       </div>
 
       <div id="view-home" class="view view-main view-init tab tab-active" data-name="home" data-url="/home/"></div>
-      <div id="view-search" class="view view-init tab" data-name="search" data-url="/search/"></div>
+      <div id="view-busqueda" class="view view-init tab" data-name="search" data-url="/search/"></div>
       <div id="view-citas" class="view view-init tab" data-name="citas" data-url="/citas/"></div>
       <div id="view-settings" class="view view-init tab" data-name="settings" data-url="/settings/"></div>
     </div>

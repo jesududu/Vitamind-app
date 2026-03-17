@@ -1,5 +1,8 @@
 import env from './env.js';
 
+const apiUrl = env.apiUrl;
+const appUrl = env.appUrl;
+
 export const storageKeys = {
   token: 'sanctum_token',
   pacienteId: 'paciente_id',
@@ -18,6 +21,159 @@ export const missingApiEndpoints = {
   appVersion: '/app-version',
   changePassword: '/cambiar-pass',
   deleteAccount: '/eliminar-cuenta',
+};
+
+var vista_anterior = null;
+var handlingInvalidToken = false;
+
+var tmApp = {
+  f7: null,
+  i18n: null,
+  apiUrl,
+  appUrl,
+  vista_anterior,
+  handlingInvalidToken,
+  pagination: {
+    limit: 10,
+    offset: 0,
+  },
+
+  init: function (f7, i18n = null) {
+    tmApp.f7 = f7;
+    tmApp.i18n = i18n;
+  },
+
+  getSession: function () {
+    return getSession();
+  },
+  isAuthenticated: function () {
+    return isAuthenticated();
+  },
+  saveSession: function (payload = {}) {
+    return saveSession(payload);
+  },
+  clearSession: function () {
+    return clearSession();
+  },
+
+  fetchAPI: function (endpoint, options = {}) {
+    return fetchAPI(endpoint, options);
+  },
+
+  login: function (data) {
+    return login(data);
+  },
+  register: function (data) {
+    return register(data);
+  },
+  logout: function () {
+    return logout();
+  },
+  forgotPassword: function (email) {
+    return forgotPassword(email);
+  },
+  resendVerificationEmail: function (email) {
+    return resendVerificationEmail(email);
+  },
+  resetPasswordFromToken: function (data) {
+    return resetPasswordFromToken(data);
+  },
+  getCurrentUser: function () {
+    return getCurrentUser();
+  },
+  updateProfile: function (data, file = null) {
+    return updateProfile(data, file);
+  },
+
+  getLatestProfessionals: function () {
+    return getLatestProfessionals();
+  },
+  getLocalidades: function () {
+    return getLocalidades();
+  },
+  getServicios: function (localidad = '') {
+    return getServicios(localidad);
+  },
+  searchProfessionals: function (filters = {}) {
+    return searchProfessionals(filters);
+  },
+  getProfessionalsList: function (params = {}) {
+    return getProfessionalsList(params);
+  },
+  getProfessionalProfile: function (token) {
+    return getProfessionalProfile(token);
+  },
+  getProfessionalSlots: function (token, params = {}) {
+    return getProfessionalSlots(token, params);
+  },
+  resolveProfessionalTokenByEmployeeId: function (employeeId) {
+    return resolveProfessionalTokenByEmployeeId(employeeId);
+  },
+
+  createReservation: function (data) {
+    return createReservation(data);
+  },
+  getMyAppointments: function (params = {}) {
+    return getMyAppointments(params);
+  },
+  cancelAppointment: function (id) {
+    return cancelAppointment(id);
+  },
+
+  getFavorites: function () {
+    return getFavorites();
+  },
+  addFavorite: function (empleadoId) {
+    return addFavorite(empleadoId);
+  },
+  removeFavorite: function (empleadoId) {
+    return removeFavorite(empleadoId);
+  },
+
+  getDynamicContent: function (funct) {
+    return getDynamicContent(funct);
+  },
+  getConditionDetail: function (tipo) {
+    return getConditionDetail(tipo);
+  },
+
+  registerDevice: function () {
+    return registerDevice();
+  },
+  getNotifications: function () {
+    return getNotifications();
+  },
+  getNotificationDetail: function () {
+    return getNotificationDetail();
+  },
+  getNotificationsUnreadCount: function () {
+    return getNotificationsUnreadCount();
+  },
+  deleteNotification: function () {
+    return deleteNotification();
+  },
+  getAppVersion: function () {
+    return getAppVersion();
+  },
+  changePassword: function () {
+    return changePassword();
+  },
+  deleteAccount: function () {
+    return deleteAccount();
+  },
+
+  setStoredObject: function (key, value) {
+    return setStoredObject(key, value);
+  },
+  getStoredObject: function (key) {
+    return getStoredObject(key);
+  },
+  runApiDiagnostics: function () {
+    return runApiDiagnostics();
+  },
+  getApiErrorMessage: function (error, fallback) {
+    return getApiErrorMessage(error, fallback);
+  },
 };
 
 export function getSession() {
@@ -79,6 +235,7 @@ export function setStoredObject(key, value) {
 export function getStoredObject(key) {
   const raw = localStorage.getItem(key);
   if (!raw) return null;
+
   try {
     return JSON.parse(raw);
   } catch (error) {
@@ -99,6 +256,7 @@ export async function fetchAPI(endpoint, options = {}) {
   const headers = {
     Accept: 'application/json',
   };
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -106,8 +264,13 @@ export async function fetchAPI(endpoint, options = {}) {
     headers.Authorization = `Bearer ${session.token}`;
   }
 
-  const config = { method, headers, signal: controller.signal };
-  let url = `${env.apiUrl}${endpoint}`;
+  const config = {
+    method,
+    headers,
+    signal: controller.signal,
+  };
+
+  let url = `${apiUrl}${endpoint}`;
 
   if (data && method === 'GET') {
     const params = new URLSearchParams();
@@ -145,7 +308,7 @@ export async function fetchAPI(endpoint, options = {}) {
       throw timeoutError;
     }
 
-    const networkError = new Error(`No se pudo conectar con la API en ${env.apiUrl}.`);
+    const networkError = new Error(`No se pudo conectar con la API en ${apiUrl}.`);
     networkError.code = 'API_UNREACHABLE';
     networkError.endpoint = endpoint;
     networkError.cause = error;
@@ -158,7 +321,7 @@ export async function fetchAPI(endpoint, options = {}) {
   try {
     payload = raw ? JSON.parse(raw) : null;
   } catch (error) {
-    payload = { message: raw || 'Respuesta no válida del servidor' };
+    payload = { message: raw || 'Respuesta no valida del servidor' };
   }
 
   if (response.status === 401) {
@@ -196,6 +359,7 @@ export async function register(data) {
     auth: false,
     data,
   });
+
   saveSession(response);
   return response;
 }
@@ -254,7 +418,9 @@ export function updateProfile(data, file = null) {
 }
 
 export function getLatestProfessionals() {
-  return fetchAPI('/ultimos-profesionales', { auth: false });
+  return fetchAPI('/ultimos-profesionales', {
+    auth: false,
+  });
 }
 
 export function getLocalidades() {
@@ -293,7 +459,9 @@ export function getProfessionalsList(params = {}) {
 }
 
 export function getProfessionalProfile(token) {
-  return fetchAPI(`/profesional/${token}`, { auth: false });
+  return fetchAPI(`/profesional/${token}`, {
+    auth: false,
+  });
 }
 
 export function getProfessionalSlots(token, params = {}) {
@@ -304,6 +472,31 @@ export function getProfessionalSlots(token, params = {}) {
       ...params,
     },
   });
+}
+
+export async function resolveProfessionalTokenByEmployeeId(employeeId) {
+  const cache = getStoredObject(storageKeys.professionalMap) || {};
+  if (cache[employeeId]) {
+    return cache[employeeId];
+  }
+
+  const response = await getProfessionalsList();
+  const tokens = response?.empleados || [];
+
+  for (const token of tokens) {
+    try {
+      const profile = await getProfessionalProfile(token);
+      if (Number(profile?.id) === Number(employeeId)) {
+        cache[employeeId] = token;
+        setStoredObject(storageKeys.professionalMap, cache);
+        return token;
+      }
+    } catch (error) {
+      // Ignoramos fallos de perfiles individuales al resolver el token.
+    }
+  }
+
+  return null;
 }
 
 export function createReservation(data) {
@@ -317,7 +510,9 @@ export function createReservation(data) {
 }
 
 export function getMyAppointments(params = {}) {
-  return fetchAPI('/mis-citas', { data: params });
+  return fetchAPI('/mis-citas', {
+    data: params,
+  });
 }
 
 export function cancelAppointment(id) {
@@ -355,67 +550,6 @@ export function getConditionDetail(tipo) {
   return fetchAPI(`/condiciones/${tipo}`, {
     auth: false,
   });
-}
-
-export function escapeHtml(value = '') {
-  return String(value)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
-}
-
-export function formatDate(value) {
-  if (!value) return '';
-  return new Intl.DateTimeFormat('es-ES', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  }).format(new Date(value));
-}
-
-export function formatPrice(value) {
-  return new Intl.NumberFormat('es-ES', {
-    style: 'currency',
-    currency: 'EUR',
-  }).format(Number(value || 0));
-}
-
-export function formatDateTime(value) {
-  if (!value) return '';
-  return new Intl.DateTimeFormat('es-ES', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(value));
-}
-
-export async function resolveProfessionalTokenByEmployeeId(employeeId) {
-  const cache = getStoredObject(storageKeys.professionalMap) || {};
-  if (cache[employeeId]) {
-    return cache[employeeId];
-  }
-
-  const response = await getProfessionalsList();
-  const tokens = response?.empleados || [];
-
-  for (const token of tokens) {
-    try {
-      const profile = await getProfessionalProfile(token);
-      if (Number(profile?.id) === Number(employeeId)) {
-        cache[employeeId] = token;
-        setStoredObject(storageKeys.professionalMap, cache);
-        return token;
-      }
-    } catch (error) {
-      // Ignoramos fallos de perfiles individuales al resolver el token.
-    }
-  }
-
-  return null;
 }
 
 function createMissingEndpointError(key) {
@@ -460,7 +594,7 @@ export function deleteAccount() {
 
 export async function runApiDiagnostics() {
   const diagnostics = {
-    apiUrl: env.apiUrl,
+    apiUrl,
     checks: [],
   };
 
@@ -535,3 +669,43 @@ export function getApiErrorMessage(error, fallback = 'No se pudo completar la so
 
   return error.message || fallback;
 }
+
+export function escapeHtml(value = '') {
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+export function formatDate(value) {
+  if (!value) return '';
+
+  return new Intl.DateTimeFormat('es-ES', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(new Date(value));
+}
+
+export function formatPrice(value) {
+  return new Intl.NumberFormat('es-ES', {
+    style: 'currency',
+    currency: 'EUR',
+  }).format(Number(value || 0));
+}
+
+export function formatDateTime(value) {
+  if (!value) return '';
+
+  return new Intl.DateTimeFormat('es-ES', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(value));
+}
+
+export default tmApp;

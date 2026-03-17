@@ -124,16 +124,9 @@ var capacitorApp = {
     );
   },
   init: function (f7) {
-    // Save f7 instance
     capacitorApp.f7 = f7;
-
-    // Handle Android back button
     capacitorApp.handleAndroidBackButton();
-
-    // Handle Splash Screen
     capacitorApp.handleSplashscreen();
-
-    // Handle Keyboard
     capacitorApp.handleKeyboard();
   },
 };
