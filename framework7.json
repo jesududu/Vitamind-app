@@ -1,0 +1,25 @@
+{
+  "cwd": "/Users/jesusbueno/Desktop/vitamind-app",
+  "type": [
+    "capacitor"
+  ],
+  "name": "VitaMind",
+  "framework": "core",
+  "template": "tabs",
+  "bundler": "vite",
+  "cssPreProcessor": false,
+  "theming": {
+    "customColor": true,
+    "color": "#ff9f43",
+    "darkMode": false,
+    "iconFonts": true
+  },
+  "customBuild": false,
+  "pkg": "es.tmwebs.vitamind",
+  "capacitor": {
+    "platforms": [
+      "ios",
+      "android"
+    ]
+  }
+}

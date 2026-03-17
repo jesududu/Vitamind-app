@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <resources>
+        <color name="splash_background">#FFFFFF</color>
+        <color name="colorPrimary">#F2F2F2</color> <!-- Color de fondo del Splash -->
+        <color name="colorPrimaryDark">#dfb022</color> <!-- Puedes ajustarlo según necesites -->
+        <color name="colorAccent">#FF4081</color> <!-- Color de acento -->
+    </resources>

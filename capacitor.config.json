@@ -1,0 +1,19 @@
+{
+  "appId": "es.tmwebs.vitamind",
+  "appName": "VitaMind",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "www",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  },
+  "cordova": {},
+
+  "StatusBar": {
+      "overlaysWebView": false,
+      "style": "LIGHT",
+      "backgroundColor": "#f7f7f7"
+    }
+}
