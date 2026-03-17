@@ -10,11 +10,13 @@
     <div class="page-content vm-page-content">
       <div class="vm-card">
         <div class="vm-section-title">Pendiente de backend</div>
-        <p class="vm-muted">El detalle individual de notificacion quedara operativo cuando exista GET /api/notificaciones/{id}.</p>
+        <p class="vm-muted">El detalle individual de notificacion quedara operativo cuando exista el endpoint de detalle de notificaciones.</p>
       </div>
     </div>
   </div>
 </template>
 <script>
-  export default (props, { $render }) => $render;
+  export default () => {
+    return $render;
+  };
 </script>
