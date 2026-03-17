@@ -10,7 +10,7 @@
     <div class="page-content vm-page-content">
       <div class="vm-card">
         <div class="vm-section-title">Centro de notificaciones</div>
-        <p class="vm-muted">La app ya tiene la pantalla preparada siguiendo el plan Buktiem, pero la API movil de notificaciones aun no esta publicada en `routes/api.php`.</p>
+        <p class="vm-muted">La app ya tiene la pantalla preparada siguiendo el plan Buktiem, pero la API movil de notificaciones aun no esta publicada en routes/api.php.</p>
         <div class="vm-actions">
           <a href="#" id="notifications-check" class="button button-fill">Comprobar endpoint</a>
         </div>
