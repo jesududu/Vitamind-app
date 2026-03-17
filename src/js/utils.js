@@ -1,3 +1,4 @@
+import { Capacitor, CapacitorHttp } from '@capacitor/core';
 import env from './env.js';
 
 const apiUrl = env.apiUrl;
@@ -62,6 +63,46 @@ var tmApp = {
     return params.toString();
   },
 
+  isNativeApp: function () {
+    return Capacitor.isNativePlatform();
+  },
+
+  parseHttpResponseData: function (data) {
+    if (typeof data === 'string') {
+      try {
+        return JSON.parse(data);
+      } catch (error) {
+        return { message: data || 'Respuesta no valida del servidor' };
+      }
+    }
+
+    return data ?? null;
+  },
+
+  requestNativeHttp: async function (url, options = {}) {
+    const {
+      method = 'GET',
+      data = null,
+      headers = {},
+      timeout = 20000,
+    } = options;
+
+    const response = await CapacitorHttp.request({
+      url,
+      method,
+      headers,
+      data,
+      connectTimeout: timeout,
+      readTimeout: timeout,
+    });
+
+    return {
+      ok: response.status >= 200 && response.status < 300,
+      status: response.status,
+      data: tmApp.parseHttpResponseData(response.data),
+    };
+  },
+
   fetchAPI: async function (endpoint, options = {}) {
     const {
       method = 'GET',
@@ -117,8 +158,23 @@ var tmApp = {
     let raw = '';
 
     try {
-      response = await fetch(url, config);
-      raw = await response.text();
+      if (tmApp.isNativeApp()) {
+        const nativeResponse = await tmApp.requestNativeHttp(url, {
+          method,
+          data: isFormData ? data : (method === 'GET' ? null : data),
+          headers,
+          timeout,
+        });
+        response = {
+          ok: nativeResponse.ok,
+          status: nativeResponse.status,
+        };
+        raw = JSON.stringify(nativeResponse.data ?? {});
+      } else {
+        response = await fetch(url, config);
+        raw = await response.text();
+      }
+
       console.log('[VitaMind][fetchAPI] Response', {
         endpoint,
         status: response.status,
@@ -219,8 +275,23 @@ var tmApp = {
     let raw = '';
 
     try {
-      response = await fetch(url, config);
-      raw = await response.text();
+      if (tmApp.isNativeApp()) {
+        const nativeResponse = await tmApp.requestNativeHttp(url, {
+          method,
+          data: isFormData ? data : (method === 'GET' ? null : data),
+          headers,
+          timeout,
+        });
+        response = {
+          ok: nativeResponse.ok,
+          status: nativeResponse.status,
+        };
+        raw = JSON.stringify(nativeResponse.data ?? {});
+      } else {
+        response = await fetch(url, config);
+        raw = await response.text();
+      }
+
       console.log('[VitaMind][fetchPublic] Response', {
         status: response.status,
         ok: response.ok,
