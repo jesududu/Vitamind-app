@@ -427,6 +427,8 @@ export function getLatestProfessionals() {
 }
 
 export async function getHomeProfessionals() {
+  let latestError = null;
+
   try {
     const response = await getLatestProfessionals();
     const items = response?.profesionales || [];
@@ -434,25 +436,45 @@ export async function getHomeProfessionals() {
       return items;
     }
   } catch (error) {
-    // Si falla el endpoint principal, usamos un fallback desde /profesionales.
+    latestError = error;
   }
 
-  const tokensResponse = await getProfessionalsList();
-  const tokens = tokensResponse?.empleados || [];
+  let listError = null;
+  let tokens = [];
+
+  try {
+    const tokensResponse = await getProfessionalsList();
+    tokens = tokensResponse?.empleados || [];
+  } catch (error) {
+    listError = error;
+  }
+
   const professionals = [];
 
-  for (const token of tokens.slice(0, 6)) {
-    try {
-      const profile = await getProfessionalProfile(token);
-      professionals.push({
-        id: profile?.id,
-        nombre: profile?.nombre_completo || profile?.nombre || 'Profesional',
-        imagen: profile?.imagen || '/avatar.png',
-        token,
-      });
-    } catch (error) {
-      // Ignoramos perfiles que fallen para no bloquear el resto del listado.
-    }
+  if (tokens.length) {
+    const profiles = await Promise.allSettled(
+      tokens.slice(0, 6).map(async (token) => {
+        const profile = await getProfessionalProfile(token);
+        return {
+          id: profile?.id,
+          nombre: profile?.nombre_completo || profile?.nombre || 'Profesional',
+          imagen: profile?.imagen || '/avatar.png',
+          token,
+        };
+      }),
+    );
+
+    profiles.forEach((result) => {
+      if (result.status === 'fulfilled') {
+        professionals.push(result.value);
+      }
+    });
+  }
+
+  if (!professionals.length) {
+    const primaryMessage = latestError ? getApiErrorMessage(latestError) : 'Sin datos en /ultimos-profesionales';
+    const fallbackMessage = listError ? getApiErrorMessage(listError) : (tokens.length ? 'Los perfiles individuales no devolvieron datos' : 'Sin tokens en /profesionales');
+    throw new Error(`No se pudieron cargar profesionales. Principal: ${primaryMessage}. Fallback: ${fallbackMessage}.`);
   }
 
   return professionals;
