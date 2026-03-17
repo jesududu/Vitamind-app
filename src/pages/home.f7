@@ -50,7 +50,7 @@
   </div>
 </template>
 <script>
-  import { getHomeProfessionals, escapeHtml } from '../js/utils.js';
+  import utils from '../js/utils.js';
 
   export default (props, { $el, $on, $f7, $f7router }) => {
     const renderLatest = async () => {
@@ -58,7 +58,7 @@
       container.html('<div class="vm-loading">Cargando profesionales...</div>');
 
       try {
-        const items = await getHomeProfessionals();
+        const items = await utils.getHomeProfessionals();
 
         if (!items.length) {
           container.html('<div class="vm-empty">No hay profesionales disponibles.</div>');
@@ -68,9 +68,9 @@
         container.html(items.map((item) => `
           <div class="vm-card">
             <div class="vm-professional">
-              <img src="${escapeHtml(item.imagen)}" alt="${escapeHtml(item.nombre)}" />
+              <img src="${utils.escapeHtml(item.imagen)}" alt="${utils.escapeHtml(item.nombre)}" />
               <div>
-                <div class="vm-card-title">${escapeHtml(item.nombre)}</div>
+                <div class="vm-card-title">${utils.escapeHtml(item.nombre)}</div>
                 <div class="vm-card-subtitle">Perfil profesional publicado recientemente</div>
                 <div class="vm-actions">
                   <a href="/profesional/${encodeURIComponent(item.token)}/" class="button button-fill button-small">Ver perfil</a>
@@ -80,7 +80,7 @@
           </div>
         `).join(''));
       } catch (error) {
-        container.html(`<div class="vm-empty">${escapeHtml(error.message)}</div>`);
+        container.html(`<div class="vm-empty">${utils.escapeHtml(error.message)}</div>`);
       }
     };
 

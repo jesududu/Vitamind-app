@@ -12,34 +12,34 @@
   </div>
 </template>
 <script>
-  import { getMyAppointments, isAuthenticated, escapeHtml, formatDate, setStoredObject, storageKeys } from '../js/utils.js';
+  import utils from '../js/utils.js';
 
   export default (props, { $el, $on, $f7router }) => {
     const renderSection = (title, items = []) => `
       <div class="vm-card">
         <div class="vm-section-title">${title}</div>
         ${items.length ? items.map((item) => `
-          <div class="vm-service-item vm-cita-item" data-id="${escapeHtml(item.id)}">
-            <div class="vm-card-title">${escapeHtml(item.title || item.extendedProps?.servicio || 'Servicio')}</div>
-            <div class="vm-card-subtitle">${escapeHtml(item.extendedProps?.empleado || '')}</div>
+          <div class="vm-service-item vm-cita-item" data-id="${utils.escapeHtml(item.id)}">
+            <div class="vm-card-title">${utils.escapeHtml(item.title || item.extendedProps?.servicio || 'Servicio')}</div>
+            <div class="vm-card-subtitle">${utils.escapeHtml(item.extendedProps?.empleado || '')}</div>
             <div class="vm-chip-row">
-              <span class="vm-chip">${escapeHtml(formatDate(item.start))}</span>
-              <span class="vm-chip">${escapeHtml((item.start || '').split('T')[1]?.slice(0, 5) || '')}</span>
-              <span class="vm-chip">${escapeHtml(item.extendedProps?.empresa || '')}</span>
+              <span class="vm-chip">${utils.escapeHtml(utils.formatDate(item.start))}</span>
+              <span class="vm-chip">${utils.escapeHtml((item.start || '').split('T')[1]?.slice(0, 5) || '')}</span>
+              <span class="vm-chip">${utils.escapeHtml(item.extendedProps?.empresa || '')}</span>
             </div>
           </div>
-        `).join('') : '<div class="vm-empty">No hay citas en esta sección.</div>'}
+        `).join('') : '<div class="vm-empty">No hay citas en esta seccion.</div>'}
       </div>
     `;
 
     const loadAppointments = async () => {
       const container = $el.find('#citas-content');
 
-      if (!isAuthenticated()) {
+      if (!utils.isAuthenticated()) {
         container.html(`
           <div class="vm-form-card">
-            <div class="vm-section-title">Necesitas iniciar sesión</div>
-            <p class="vm-muted">Las citas solo están disponibles para pacientes autenticados.</p>
+            <div class="vm-section-title">Necesitas iniciar sesion</div>
+            <p class="vm-muted">Las citas solo estan disponibles para pacientes autenticados.</p>
             <div class="vm-actions">
               <a href="/login/" class="button button-fill">Ir a login</a>
             </div>
@@ -49,7 +49,7 @@
       }
 
       try {
-        const response = await getMyAppointments();
+        const response = await utils.getMyAppointments();
         container.html(
           renderSection('Activas', response?.activas?.data || []) +
           renderSection('Completadas', response?.completadas?.data || []) +
@@ -65,11 +65,11 @@
         $el.find('.vm-cita-item').on('click', (event) => {
           const cita = allAppointments.find((item) => String(item.id) === String(event.currentTarget.dataset.id));
           if (!cita) return;
-          setStoredObject(storageKeys.appointmentSelected, cita);
+          utils.setStoredObject(utils.storageKeys.appointmentSelected, cita);
           $f7router.navigate(`/cita-detalle/${encodeURIComponent(cita.id)}/`);
         });
       } catch (error) {
-        container.html(`<div class="vm-empty">${escapeHtml(error.message)}</div>`);
+        container.html(`<div class="vm-empty">${utils.escapeHtml(error.message)}</div>`);
       }
     };
 

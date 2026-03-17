@@ -13,16 +13,7 @@
   </div>
 </template>
 <script>
-  import {
-    escapeHtml,
-    formatPrice,
-    getProfessionalProfile,
-    getProfessionalSlots,
-    getSession,
-    isAuthenticated,
-    setStoredObject,
-    storageKeys,
-  } from '../js/utils.js';
+  import utils from '../js/utils.js';
 
   export default (props, { $el, $on, $f7route, $f7, $f7router }) => {
     let profile = null;
@@ -40,7 +31,7 @@
       slotsContainer.html('<div class="vm-loading">Cargando horarios...</div>');
 
       try {
-        const response = await getProfessionalSlots($f7route.params.token, {
+        const response = await utils.getProfessionalSlots($f7route.params.token, {
           fecha,
           servicio_id: servicioId,
         });
@@ -50,13 +41,13 @@
         const slots = servicio?.horarios?.[0]?.slots || [];
 
         if (!slots.length) {
-          slotsContainer.html('<div class="vm-empty">No hay horarios disponibles para esa selección.</div>');
+          slotsContainer.html('<div class="vm-empty">No hay horarios disponibles para esa seleccion.</div>');
           return;
         }
 
         slotsContainer.html(slots.map((slot) => `
-          <a href="#" class="button ${slot.disponible ? 'button-outline' : 'disabled'} vm-slot" data-inicio="${escapeHtml(slot.inicio)}" data-fin="${escapeHtml(slot.fin)}" data-disponible="${slot.disponible}">
-            ${escapeHtml(slot.inicio)}
+          <a href="#" class="button ${slot.disponible ? 'button-outline' : 'disabled'} vm-slot" data-inicio="${utils.escapeHtml(slot.inicio)}" data-fin="${utils.escapeHtml(slot.fin)}" data-disponible="${slot.disponible}">
+            ${utils.escapeHtml(slot.inicio)}
           </a>
         `).join(' '));
 
@@ -70,7 +61,7 @@
             token: $f7route.params.token,
             empleado_id: profile.id,
             empresa_id: profile.empresa_id,
-            paciente_id: getSession().pacienteId,
+            paciente_id: utils.getSession().pacienteId,
             servicio_id: servicioSeleccionado.id,
             servicio_titulo: servicioSeleccionado.titulo,
             profesional: profile.nombre_completo,
@@ -80,21 +71,21 @@
             nota: $el.find('#reserva-nota').val() || '',
             consulta_online: Boolean(servicioSeleccionado.consulta_online),
           };
-          setStoredObject(storageKeys.appointmentDraft, draft);
+          utils.setStoredObject(utils.storageKeys.appointmentDraft, draft);
           $f7router.navigate('/confirmar-reserva/');
         });
       } catch (error) {
-        slotsContainer.html(`<div class="vm-empty">${escapeHtml(error.message)}</div>`);
+        slotsContainer.html(`<div class="vm-empty">${utils.escapeHtml(error.message)}</div>`);
       }
     };
 
     const loadPage = async () => {
       const container = $el.find('#reservar-content');
 
-      if (!isAuthenticated()) {
+      if (!utils.isAuthenticated()) {
         container.html(`
           <div class="vm-form-card">
-            <div class="vm-section-title">Necesitas iniciar sesión</div>
+            <div class="vm-section-title">Necesitas iniciar sesion</div>
             <p class="vm-muted">Solo los pacientes autenticados pueden reservar citas.</p>
             <div class="vm-actions"><a href="/login/" class="button button-fill">Ir a login</a></div>
           </div>
@@ -103,11 +94,11 @@
       }
 
       try {
-        profile = await getProfessionalProfile($f7route.params.token);
+        profile = await utils.getProfessionalProfile($f7route.params.token);
         container.html(`
           <div class="vm-card">
-            <div class="vm-card-title">${escapeHtml(profile.nombre_completo)}</div>
-            <div class="vm-card-subtitle">${escapeHtml(profile.localidad || '')}</div>
+            <div class="vm-card-title">${utils.escapeHtml(profile.nombre_completo)}</div>
+            <div class="vm-card-subtitle">${utils.escapeHtml(profile.localidad || '')}</div>
           </div>
           <div class="vm-form-card">
             <div class="list no-hairlines-md">
@@ -118,7 +109,7 @@
                     <div class="item-input-wrap">
                       <select id="reserva-servicio">
                         <option value="">Selecciona un servicio</option>
-                        ${(profile.servicios || []).map((servicio) => `<option value="${escapeHtml(servicio.id)}">${escapeHtml(servicio.titulo)}</option>`).join('')}
+                        ${(profile.servicios || []).map((servicio) => `<option value="${utils.escapeHtml(servicio.id)}">${utils.escapeHtml(servicio.titulo)}</option>`).join('')}
                       </select>
                     </div>
                   </div>
@@ -135,14 +126,14 @@
                   <div class="item-inner">
                     <div class="item-title item-label">Nota</div>
                     <div class="item-input-wrap">
-                      <textarea id="reserva-nota" placeholder="Añade una nota si lo necesitas"></textarea>
+                      <textarea id="reserva-nota" placeholder="Anade una nota si lo necesitas"></textarea>
                     </div>
                   </div>
                 </li>
               </ul>
             </div>
             <div class="vm-chip-row">
-              ${(profile.servicios || []).map((servicio) => `<span class="vm-chip">${escapeHtml(servicio.titulo)}${formatPrice(servicio.precio || 0) !== formatPrice(0) ? ` · ${escapeHtml(formatPrice(servicio.precio))}` : ''}</span>`).join('')}
+              ${(profile.servicios || []).map((servicio) => `<span class="vm-chip">${utils.escapeHtml(servicio.titulo)}${utils.formatPrice(servicio.precio || 0) !== utils.formatPrice(0) ? ` · ${utils.escapeHtml(utils.formatPrice(servicio.precio))}` : ''}</span>`).join('')}
             </div>
           </div>
           <div class="vm-card">
@@ -156,7 +147,7 @@
         $el.find('#reserva-servicio').on('change', renderSlots);
         $el.find('#reserva-fecha').on('change', renderSlots);
       } catch (error) {
-        container.html(`<div class="vm-empty">${escapeHtml(error.message)}</div>`);
+        container.html(`<div class="vm-empty">${utils.escapeHtml(error.message)}</div>`);
       }
     };
 

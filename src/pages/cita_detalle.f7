@@ -13,17 +13,11 @@
   </div>
 </template>
 <script>
-  import {
-    cancelAppointment,
-    escapeHtml,
-    formatDateTime,
-    getStoredObject,
-    storageKeys,
-  } from '../js/utils.js';
+  import utils from '../js/utils.js';
 
   export default (props, { $el, $on, $f7route, $f7, $f7router }) => {
     const render = () => {
-      const cita = getStoredObject(storageKeys.appointmentSelected);
+      const cita = utils.getStoredObject(utils.storageKeys.appointmentSelected);
       const container = $el.find('#detalle-content');
 
       if (!cita || String(cita.id) !== String($f7route.params.id)) {
@@ -34,15 +28,15 @@
       const props = cita.extendedProps || {};
       container.html(`
         <div class="vm-card">
-          <div class="vm-section-title">${escapeHtml(cita.title || props.servicio || 'Cita')}</div>
-          <div class="vm-kv"><span>Inicio</span><strong>${escapeHtml(formatDateTime(cita.start))}</strong></div>
-          <div class="vm-kv"><span>Fin</span><strong>${escapeHtml(formatDateTime(cita.end))}</strong></div>
-          <div class="vm-kv"><span>Profesional</span><strong>${escapeHtml(props.empleado || '')}</strong></div>
-          <div class="vm-kv"><span>Empresa</span><strong>${escapeHtml(props.empresa || '')}</strong></div>
-          <div class="vm-kv"><span>Dirección</span><strong>${escapeHtml(props.direccion || '')}</strong></div>
-          <div class="vm-kv"><span>Modalidad</span><strong>${escapeHtml(props.modalidad || '')}</strong></div>
-          <div class="vm-kv"><span>Estado</span><strong>${escapeHtml(cita.estado || '')}</strong></div>
-          <div class="vm-kv"><span>Nota</span><strong>${escapeHtml(props.nota || 'Sin nota')}</strong></div>
+          <div class="vm-section-title">${utils.escapeHtml(cita.title || props.servicio || 'Cita')}</div>
+          <div class="vm-kv"><span>Inicio</span><strong>${utils.escapeHtml(utils.formatDateTime(cita.start))}</strong></div>
+          <div class="vm-kv"><span>Fin</span><strong>${utils.escapeHtml(utils.formatDateTime(cita.end))}</strong></div>
+          <div class="vm-kv"><span>Profesional</span><strong>${utils.escapeHtml(props.empleado || '')}</strong></div>
+          <div class="vm-kv"><span>Empresa</span><strong>${utils.escapeHtml(props.empresa || '')}</strong></div>
+          <div class="vm-kv"><span>Dirección</span><strong>${utils.escapeHtml(props.direccion || '')}</strong></div>
+          <div class="vm-kv"><span>Modalidad</span><strong>${utils.escapeHtml(props.modalidad || '')}</strong></div>
+          <div class="vm-kv"><span>Estado</span><strong>${utils.escapeHtml(cita.estado || '')}</strong></div>
+          <div class="vm-kv"><span>Nota</span><strong>${utils.escapeHtml(props.nota || 'Sin nota')}</strong></div>
           ${cita.estado === 'activa' ? '<div class="vm-actions"><a href="#" id="cancelar-cita-btn" class="button button-fill color-red">Cancelar cita</a></div>' : ''}
         </div>
       `);
@@ -50,7 +44,7 @@
       $el.find('#cancelar-cita-btn').on('click', async () => {
         try {
           $f7.preloader.show();
-          const response = await cancelAppointment(cita.id);
+          const response = await utils.cancelAppointment(cita.id);
           $f7.dialog.alert(response.message || 'Cita cancelada');
           $f7router.navigate('/citas/');
         } catch (error) {

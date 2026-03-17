@@ -13,22 +13,22 @@
   </div>
 </template>
 <script>
-  import { getConditionDetail, getApiErrorMessage, escapeHtml } from '../js/utils.js';
+  import utils from '../js/utils.js';
 
   export default (props, { $el, $on }) => {
     const load = async () => {
       try {
         $el.find('#info-content').html('<div class="vm-loading">Cargando contenido...</div>');
-        const response = await getConditionDetail('informacion');
+        const response = await utils.getConditionDetail('informacion');
         const contenido = response?.contenido || {};
         $el.find('#info-content').html(`
           <div class="vm-card">
-            <div class="vm-section-title">${escapeHtml(contenido.nombre || 'Informacion')}</div>
+            <div class="vm-section-title">${utils.escapeHtml(contenido.nombre || 'Informacion')}</div>
             <div class="vm-richtext">${contenido.descripcion || '<p class="vm-empty">No hay contenido disponible.</p>'}</div>
           </div>
         `);
       } catch (error) {
-        $el.find('#info-content').html(`<div class="vm-card"><p class="vm-empty">${escapeHtml(getApiErrorMessage(error, 'No se pudo cargar el contenido'))}</p></div>`);
+        $el.find('#info-content').html(`<div class="vm-card"><p class="vm-empty">${utils.escapeHtml(utils.getApiErrorMessage(error, 'No se pudo cargar el contenido'))}</p></div>`);
       }
     };
 

@@ -12,20 +12,13 @@
   </div>
 </template>
 <script>
-  import {
-    clearSession,
-    getSession,
-    isAuthenticated,
-    escapeHtml,
-    logout,
-    runApiDiagnostics,
-  } from '../js/utils.js';
+  import utils from '../js/utils.js';
 
   export default (props, { $el, $on, $f7, $store }) => {
     const render = () => {
       const container = $el.find('#settings-content');
 
-      if (!isAuthenticated()) {
+      if (!utils.isAuthenticated()) {
         container.html(`
           <div class="vm-form-card">
             <div class="vm-section-title">Acceso paciente</div>
@@ -40,15 +33,15 @@
         return;
       }
 
-      const session = getSession();
+      const session = utils.getSession();
       const user = session.user || {};
 
       container.html(`
         <div class="vm-card">
           <div class="vm-section-title">Sesion actual</div>
-          <div class="vm-kv"><span>Email</span><strong>${escapeHtml(user.email || '')}</strong></div>
-          <div class="vm-kv"><span>Paciente ID</span><strong>${escapeHtml(user.paciente_id || session.pacienteId || '')}</strong></div>
-          <div class="vm-kv"><span>User ID</span><strong>${escapeHtml(user.id || '')}</strong></div>
+          <div class="vm-kv"><span>Email</span><strong>${utils.escapeHtml(user.email || '')}</strong></div>
+          <div class="vm-kv"><span>Paciente ID</span><strong>${utils.escapeHtml(user.paciente_id || session.pacienteId || '')}</strong></div>
+          <div class="vm-kv"><span>User ID</span><strong>${utils.escapeHtml(user.id || '')}</strong></div>
           <div class="vm-actions">
             <a href="/editar-perfil/" class="button button-fill">Editar perfil</a>
             <a href="/favoritos/" class="button button-outline">Mis favoritos</a>
@@ -66,7 +59,7 @@
         </div>
         <div class="vm-card vm-section">
           <div class="vm-section-title">Diagnostico API</div>
-          <div class="vm-kv"><span>Base URL</span><strong>${escapeHtml('https://app.vitamind.es/api')}</strong></div>
+          <div class="vm-kv"><span>Base URL</span><strong>${utils.escapeHtml('https://app.vitamind.es/api')}</strong></div>
           <div class="vm-actions">
             <a href="#" id="diagnostics-button" class="button button-outline">Probar conexion</a>
           </div>
@@ -82,13 +75,13 @@
         output.text('Ejecutando comprobaciones...');
 
         try {
-          const diagnostics = await runApiDiagnostics();
+          const diagnostics = await utils.runApiDiagnostics();
           const lines = diagnostics.checks.map((check) => {
             const status = check.ok ? 'OK' : check.skipped ? 'SKIP' : 'ERROR';
             const sample = check.sample ? ` (${check.sample})` : '';
             return `${status} - ${check.name}: ${check.message}${sample}`;
           });
-          output.html(lines.map((line) => `<div>${escapeHtml(line)}</div>`).join(''));
+          output.html(lines.map((line) => `<div>${utils.escapeHtml(line)}</div>`).join(''));
         } catch (error) {
           output.text(error.message || 'No se pudo ejecutar el diagnostico');
         }
@@ -96,12 +89,12 @@
 
       $el.find('#logout-button').on('click', async () => {
         try {
-          await logout();
+          await utils.logout();
         } catch (error) {
           // Si el token ya ha expirado, igualmente cerramos la sesion local.
         }
 
-        clearSession();
+        utils.clearSession();
         $store.dispatch('refreshSession');
         render();
         $f7.views.main.router.navigate('/home/');

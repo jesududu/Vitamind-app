@@ -13,34 +13,27 @@
   </div>
 </template>
 <script>
-  import {
-    createReservation,
-    escapeHtml,
-    formatDate,
-    getStoredObject,
-    setStoredObject,
-    storageKeys,
-  } from '../js/utils.js';
+  import utils from '../js/utils.js';
 
   export default (props, { $el, $on, $f7, $f7router }) => {
     const render = () => {
-      const draft = getStoredObject(storageKeys.appointmentDraft);
+      const draft = utils.getStoredObject(utils.storageKeys.appointmentDraft);
       const container = $el.find('#confirmar-content');
 
       if (!draft) {
-        container.html('<div class="vm-form-card"><div class="vm-section-title">No hay reserva en preparación</div></div>');
+        container.html('<div class="vm-form-card"><div class="vm-section-title">No hay reserva en preparacion</div></div>');
         return;
       }
 
       container.html(`
         <div class="vm-card">
           <div class="vm-section-title">Resumen</div>
-          <div class="vm-kv"><span>Profesional</span><strong>${escapeHtml(draft.profesional)}</strong></div>
-          <div class="vm-kv"><span>Servicio</span><strong>${escapeHtml(draft.servicio_titulo)}</strong></div>
-          <div class="vm-kv"><span>Fecha</span><strong>${escapeHtml(formatDate(draft.fecha))}</strong></div>
-          <div class="vm-kv"><span>Hora</span><strong>${escapeHtml(draft.hora_inicio.slice(0, 5))}</strong></div>
-          <div class="vm-kv"><span>Modalidad</span><strong>${draft.consulta_online ? 'Online o presencial según servicio' : 'Presencial'}</strong></div>
-          <div class="vm-kv"><span>Nota</span><strong>${escapeHtml(draft.nota || 'Sin nota')}</strong></div>
+          <div class="vm-kv"><span>Profesional</span><strong>${utils.escapeHtml(draft.profesional)}</strong></div>
+          <div class="vm-kv"><span>Servicio</span><strong>${utils.escapeHtml(draft.servicio_titulo)}</strong></div>
+          <div class="vm-kv"><span>Fecha</span><strong>${utils.escapeHtml(utils.formatDate(draft.fecha))}</strong></div>
+          <div class="vm-kv"><span>Hora</span><strong>${utils.escapeHtml(draft.hora_inicio.slice(0, 5))}</strong></div>
+          <div class="vm-kv"><span>Modalidad</span><strong>${draft.consulta_online ? 'Online o presencial segun servicio' : 'Presencial'}</strong></div>
+          <div class="vm-kv"><span>Nota</span><strong>${utils.escapeHtml(draft.nota || 'Sin nota')}</strong></div>
           <div class="vm-actions">
             <a href="#" id="confirmar-reserva-btn" class="button button-fill">Confirmar cita</a>
           </div>
@@ -50,7 +43,7 @@
       $el.find('#confirmar-reserva-btn').on('click', async () => {
         try {
           $f7.preloader.show();
-          const response = await createReservation({
+          const response = await utils.createReservation({
             paciente_id: draft.paciente_id,
             servicio_id: draft.servicio_id,
             empleado_id: draft.empleado_id,
@@ -60,7 +53,7 @@
             hora_fin: draft.hora_fin,
             nota: draft.nota,
           });
-          setStoredObject(storageKeys.appointmentDraft, null);
+          utils.setStoredObject(utils.storageKeys.appointmentDraft, null);
           $f7.dialog.alert(response.message || 'Reserva confirmada');
           $f7router.navigate('/citas/');
         } catch (error) {

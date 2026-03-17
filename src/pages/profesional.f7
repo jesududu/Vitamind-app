@@ -13,14 +13,7 @@
   </div>
 </template>
 <script>
-  import {
-    addFavorite,
-    escapeHtml,
-    getFavorites,
-    getProfessionalProfile,
-    isAuthenticated,
-    removeFavorite,
-  } from '../js/utils.js';
+  import utils from '../js/utils.js';
 
   export default (props, { $el, $on, $f7route, $f7 }) => {
     let employeeId = null;
@@ -29,7 +22,7 @@
     const syncFavoriteButton = () => {
       const button = $el.find('#favorite-button');
       if (!button.length) return;
-      button.text(isFavorite ? 'Quitar favorito' : 'Añadir favorito');
+      button.text(isFavorite ? 'Quitar favorito' : 'Anadir favorito');
     };
 
     const loadProfile = async () => {
@@ -38,12 +31,12 @@
 
       try {
         const token = $f7route.params.token;
-        const profile = await getProfessionalProfile(token);
+        const profile = await utils.getProfessionalProfile(token);
         employeeId = profile?.id || null;
 
-        if (isAuthenticated() && employeeId) {
+        if (utils.isAuthenticated() && employeeId) {
           try {
-            const favorites = await getFavorites();
+            const favorites = await utils.getFavorites();
             isFavorite = (favorites?.favoritos || []).some((item) => Number(item.id) === Number(employeeId));
           } catch (error) {
             isFavorite = false;
@@ -53,27 +46,27 @@
         container.html(`
           <div class="vm-card">
             <div class="vm-detail-header">
-              <img class="vm-avatar vm-avatar--lg" src="${escapeHtml(profile.imagen)}" alt="${escapeHtml(profile.nombre_completo)}" />
+              <img class="vm-avatar vm-avatar--lg" src="${utils.escapeHtml(profile.imagen)}" alt="${utils.escapeHtml(profile.nombre_completo)}" />
               <div>
-                <div class="vm-card-title">${escapeHtml(profile.nombre_completo)}</div>
-                <div class="vm-card-subtitle">${escapeHtml(profile.localidad || '')}</div>
+                <div class="vm-card-title">${utils.escapeHtml(profile.nombre_completo)}</div>
+                <div class="vm-card-subtitle">${utils.escapeHtml(profile.localidad || '')}</div>
                 <div class="vm-chip-row">
-                  ${profile.telefono ? `<span class="vm-chip">${escapeHtml(profile.telefono)}</span>` : ''}
-                  ${profile.numero_colegiado ? `<span class="vm-chip">${escapeHtml(profile.numero_colegiado)}</span>` : ''}
+                  ${profile.telefono ? `<span class="vm-chip">${utils.escapeHtml(profile.telefono)}</span>` : ''}
+                  ${profile.numero_colegiado ? `<span class="vm-chip">${utils.escapeHtml(profile.numero_colegiado)}</span>` : ''}
                 </div>
               </div>
             </div>
             <div class="vm-actions">
-              ${isAuthenticated() ? '<a href="#" id="favorite-button" class="button button-outline button-small"></a>' : '<a href="/login/" class="button button-outline button-small">Inicia sesión para guardar</a>'}
+              ${utils.isAuthenticated() ? '<a href="#" id="favorite-button" class="button button-outline button-small"></a>' : '<a href="/login/" class="button button-outline button-small">Inicia sesion para guardar</a>'}
               <a href="/reservar/${encodeURIComponent(token)}/" class="button button-fill button-small">Reservar</a>
             </div>
           </div>
 
           <div class="vm-card">
             <div class="vm-section-title">Contacto</div>
-            <div class="vm-kv"><span>Dirección</span><strong>${escapeHtml(profile.direccion || 'Sin dirección')}</strong></div>
-            <div class="vm-kv"><span>Localidad</span><strong>${escapeHtml(profile.localidad || 'Sin localidad')}</strong></div>
-            <div class="vm-kv"><span>País</span><strong>${escapeHtml(profile.pais || 'Sin país')}</strong></div>
+            <div class="vm-kv"><span>Direccion</span><strong>${utils.escapeHtml(profile.direccion || 'Sin direccion')}</strong></div>
+            <div class="vm-kv"><span>Localidad</span><strong>${utils.escapeHtml(profile.localidad || 'Sin localidad')}</strong></div>
+            <div class="vm-kv"><span>Pais</span><strong>${utils.escapeHtml(profile.pais || 'Sin pais')}</strong></div>
           </div>
 
           <div class="vm-card">
@@ -81,10 +74,10 @@
             <div class="vm-service-list">
               ${(profile.servicios || []).length ? profile.servicios.map((servicio) => `
                 <div class="vm-service-item">
-                  <div class="vm-card-title">${escapeHtml(servicio.titulo)}</div>
+                  <div class="vm-card-title">${utils.escapeHtml(servicio.titulo)}</div>
                   <div class="vm-card-subtitle">${servicio.consulta_online ? 'Consulta online disponible' : 'Consulta presencial'}</div>
                 </div>
-              `).join('') : '<div class="vm-empty">Este profesional no tiene servicios cargados todavía.</div>'}
+              `).join('') : '<div class="vm-empty">Este profesional no tiene servicios cargados todavia.</div>'}
             </div>
           </div>
         `);
@@ -94,10 +87,10 @@
           try {
             if (!employeeId) return;
             if (isFavorite) {
-              await removeFavorite(employeeId);
+              await utils.removeFavorite(employeeId);
               isFavorite = false;
             } else {
-              await addFavorite(employeeId);
+              await utils.addFavorite(employeeId);
               isFavorite = true;
             }
             syncFavoriteButton();
@@ -106,7 +99,7 @@
           }
         });
       } catch (error) {
-        container.html(`<div class="vm-empty">${escapeHtml(error.message)}</div>`);
+        container.html(`<div class="vm-empty">${utils.escapeHtml(error.message)}</div>`);
       }
     };
 

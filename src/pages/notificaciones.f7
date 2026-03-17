@@ -20,15 +20,15 @@
   </div>
 </template>
 <script>
-  import { getNotifications, getApiErrorMessage } from '../js/utils.js';
+  import utils from '../js/utils.js';
 
   export default (props, { $el, $on }) => {
     $on('pageInit', () => {
       $el.find('#notifications-check').on('click', async () => {
         try {
-          await getNotifications();
+          await utils.getNotifications();
         } catch (error) {
-          $el.find('#notifications-status').text(getApiErrorMessage(error, 'Endpoint no disponible'));
+          $el.find('#notifications-status').text(utils.getApiErrorMessage(error, 'Endpoint no disponible'));
         }
       });
     });

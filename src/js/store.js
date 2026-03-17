@@ -1,9 +1,9 @@
 import { createStore } from 'framework7';
-import { getSession } from './utils.js';
+import utils from './utils.js';
 
 const store = createStore({
   state: {
-    session: getSession(),
+    session: utils.getSession(),
   },
   getters: {
     isAuthenticated({ state }) {
@@ -15,7 +15,7 @@ const store = createStore({
   },
   actions: {
     refreshSession({ state }) {
-      state.session = getSession();
+      state.session = utils.getSession();
     },
   },
 });

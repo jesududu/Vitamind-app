@@ -29,7 +29,7 @@
   </div>
 </template>
 <script>
-  import { getCurrentUser, updateProfile, saveSession, getApiErrorMessage, isAuthenticated } from '../js/utils.js';
+  import utils from '../js/utils.js';
 
   export default (props, { $el, $on, $f7, $store }) => {
     const fillForm = (user) => {
@@ -44,17 +44,17 @@
     };
 
     const loadProfile = async () => {
-      if (!isAuthenticated()) {
+      if (!utils.isAuthenticated()) {
         $f7.views.main.router.navigate('/login/');
         return;
       }
 
       try {
         $f7.preloader.show();
-        const user = await getCurrentUser();
+        const user = await utils.getCurrentUser();
         fillForm(user);
       } catch (error) {
-        $f7.dialog.alert(getApiErrorMessage(error, 'No se pudo cargar tu perfil'));
+        $f7.dialog.alert(utils.getApiErrorMessage(error, 'No se pudo cargar tu perfil'));
       } finally {
         $f7.preloader.hide();
       }
@@ -66,7 +66,7 @@
       $el.find('#profile-submit').on('click', async () => {
         try {
           $f7.preloader.show();
-          const response = await updateProfile(
+          const response = await utils.updateProfile(
             {
               nombre: $el.find('#profile-nombre').val(),
               apellidos: $el.find('#profile-apellidos').val(),
@@ -75,8 +75,8 @@
             $el.find('#profile-image')[0]?.files?.[0] || null,
           );
 
-          const refreshedUser = await getCurrentUser();
-          saveSession({
+          const refreshedUser = await utils.getCurrentUser();
+          utils.saveSession({
             token: $store.state.session.token,
             user: refreshedUser,
           });
@@ -84,7 +84,7 @@
           fillForm(refreshedUser);
           $f7.dialog.alert(response?.message || 'Perfil actualizado correctamente');
         } catch (error) {
-          $f7.dialog.alert(getApiErrorMessage(error, 'No se pudo guardar tu perfil'));
+          $f7.dialog.alert(utils.getApiErrorMessage(error, 'No se pudo guardar tu perfil'));
         } finally {
           $f7.preloader.hide();
         }

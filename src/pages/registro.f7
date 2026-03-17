@@ -28,14 +28,14 @@
   </div>
 </template>
 <script>
-  import { register } from '../js/utils.js';
+  import utils from '../js/utils.js';
 
   export default (props, { $el, $on, $f7, $store }) => {
     $on('pageInit', () => {
       $el.find('#register-submit').on('click', async () => {
         try {
           $f7.preloader.show();
-          const response = await register({
+          const response = await utils.register({
             nombre: $el.find('#reg-nombre').val(),
             apellidos: $el.find('#reg-apellidos').val(),
             telefono: $el.find('#reg-telefono').val(),

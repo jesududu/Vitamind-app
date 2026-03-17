@@ -3,7 +3,7 @@ import env from './env.js';
 const apiUrl = env.apiUrl;
 const appUrl = env.appUrl;
 
-export const storageKeys = {
+const storageKeys = {
   token: 'sanctum_token',
   pacienteId: 'paciente_id',
   user: 'vitamind_datos_usu',
@@ -12,7 +12,7 @@ export const storageKeys = {
   professionalMap: 'vitamind_professional_map',
 };
 
-export const missingApiEndpoints = {
+const missingApiEndpoints = {
   registerDevice: '/register-device',
   notifications: '/notificaciones',
   notificationDetail: '/notificaciones/{id}',
@@ -33,6 +33,8 @@ var tmApp = {
   appUrl,
   vista_anterior,
   handlingInvalidToken,
+  storageKeys,
+  missingApiEndpoints,
   pagination: {
     limit: 10,
     offset: 0,
@@ -54,6 +56,12 @@ var tmApp = {
   },
   clearSession: function () {
     return clearSession();
+  },
+  setStoredObject: function (key, value) {
+    return setStoredObject(key, value);
+  },
+  getStoredObject: function (key) {
+    return getStoredObject(key);
   },
 
   fetchAPI: function (endpoint, options = {}) {
@@ -165,21 +173,27 @@ var tmApp = {
     return deleteAccount();
   },
 
-  setStoredObject: function (key, value) {
-    return setStoredObject(key, value);
-  },
-  getStoredObject: function (key) {
-    return getStoredObject(key);
-  },
   runApiDiagnostics: function () {
     return runApiDiagnostics();
   },
   getApiErrorMessage: function (error, fallback) {
     return getApiErrorMessage(error, fallback);
   },
+  escapeHtml: function (value = '') {
+    return escapeHtml(value);
+  },
+  formatDate: function (value) {
+    return formatDate(value);
+  },
+  formatPrice: function (value) {
+    return formatPrice(value);
+  },
+  formatDateTime: function (value) {
+    return formatDateTime(value);
+  },
 };
 
-export function getSession() {
+function getSession() {
   const token = localStorage.getItem(storageKeys.token);
   const pacienteId = localStorage.getItem(storageKeys.pacienteId);
   const rawUser = localStorage.getItem(storageKeys.user);
@@ -200,11 +214,11 @@ export function getSession() {
   };
 }
 
-export function isAuthenticated() {
+function isAuthenticated() {
   return Boolean(getSession().token);
 }
 
-export function saveSession(payload = {}) {
+function saveSession(payload = {}) {
   const token = payload.token || null;
   const user = payload.user || null;
 
@@ -223,11 +237,11 @@ export function saveSession(payload = {}) {
   return getSession();
 }
 
-export function clearSession() {
+function clearSession() {
   Object.values(storageKeys).forEach((key) => localStorage.removeItem(key));
 }
 
-export function setStoredObject(key, value) {
+function setStoredObject(key, value) {
   if (value === null) {
     localStorage.removeItem(key);
     return;
@@ -235,7 +249,7 @@ export function setStoredObject(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
-export function getStoredObject(key) {
+function getStoredObject(key) {
   const raw = localStorage.getItem(key);
   if (!raw) return null;
 
@@ -246,7 +260,7 @@ export function getStoredObject(key) {
   }
 }
 
-export async function fetchAPI(endpoint, options = {}) {
+async function fetchAPI(endpoint, options = {}) {
   const {
     method = 'GET',
     data = null,
@@ -362,7 +376,7 @@ export async function fetchAPI(endpoint, options = {}) {
   return payload;
 }
 
-export async function login(data) {
+async function login(data) {
   const response = await fetchAPI('/login', {
     method: 'POST',
     auth: false,
@@ -377,7 +391,7 @@ export async function login(data) {
   return response;
 }
 
-export async function register(data) {
+async function register(data) {
   const response = await fetchAPI('/register', {
     method: 'POST',
     auth: false,
@@ -388,7 +402,7 @@ export async function register(data) {
   return response;
 }
 
-export function forgotPassword(email) {
+function forgotPassword(email) {
   return fetchAPI('/forgot-password', {
     method: 'POST',
     auth: false,
@@ -396,7 +410,7 @@ export function forgotPassword(email) {
   });
 }
 
-export function resendVerificationEmail(email) {
+function resendVerificationEmail(email) {
   return fetchAPI('/email/resend', {
     method: 'POST',
     auth: false,
@@ -404,7 +418,7 @@ export function resendVerificationEmail(email) {
   });
 }
 
-export function resetPasswordFromToken(data) {
+function resetPasswordFromToken(data) {
   return fetchAPI('/password/reset-from-token', {
     method: 'POST',
     auth: false,
@@ -412,17 +426,17 @@ export function resetPasswordFromToken(data) {
   });
 }
 
-export function getCurrentUser() {
+function getCurrentUser() {
   return fetchAPI('/user');
 }
 
-export function logout() {
+function logout() {
   return fetchAPI('/logout', {
     method: 'POST',
   });
 }
 
-export function updateProfile(data, file = null) {
+function updateProfile(data, file = null) {
   if (!file) {
     return fetchAPI('/user/update', {
       method: 'POST',
@@ -441,13 +455,13 @@ export function updateProfile(data, file = null) {
   });
 }
 
-export function getLatestProfessionals() {
+function getLatestProfessionals() {
   return fetchAPI('/ultimos-profesionales', {
     auth: false,
   });
 }
 
-export async function getHomeProfessionals() {
+async function getHomeProfessionals() {
   let latestError = null;
 
   console.log('[VitaMind][home] Iniciando carga de profesionales');
@@ -527,14 +541,14 @@ export async function getHomeProfessionals() {
   return professionals;
 }
 
-export function getLocalidades() {
+function getLocalidades() {
   return fetchAPI('/localidades', {
     method: 'POST',
     auth: false,
   });
 }
 
-export function getServicios(localidad = '') {
+function getServicios(localidad = '') {
   return fetchAPI('/servicios', {
     method: 'POST',
     auth: false,
@@ -542,7 +556,7 @@ export function getServicios(localidad = '') {
   });
 }
 
-export function searchProfessionals(filters = {}) {
+function searchProfessionals(filters = {}) {
   return fetchAPI('/horarios-por-localidad', {
     method: 'POST',
     auth: isAuthenticated(),
@@ -555,20 +569,20 @@ export function searchProfessionals(filters = {}) {
   });
 }
 
-export function getProfessionalsList(params = {}) {
+function getProfessionalsList(params = {}) {
   return fetchAPI('/profesionales', {
     auth: false,
     data: params,
   });
 }
 
-export function getProfessionalProfile(token) {
+function getProfessionalProfile(token) {
   return fetchAPI(`/profesional/${token}`, {
     auth: false,
   });
 }
 
-export function getProfessionalSlots(token, params = {}) {
+function getProfessionalSlots(token, params = {}) {
   return fetchAPI(`/horarios/por-token/${token}`, {
     auth: isAuthenticated(),
     data: {
@@ -578,7 +592,7 @@ export function getProfessionalSlots(token, params = {}) {
   });
 }
 
-export async function resolveProfessionalTokenByEmployeeId(employeeId) {
+async function resolveProfessionalTokenByEmployeeId(employeeId) {
   const cache = getStoredObject(storageKeys.professionalMap) || {};
   if (cache[employeeId]) {
     return cache[employeeId];
@@ -603,7 +617,7 @@ export async function resolveProfessionalTokenByEmployeeId(employeeId) {
   return null;
 }
 
-export function createReservation(data) {
+function createReservation(data) {
   return fetchAPI('/reserva', {
     method: 'POST',
     data: {
@@ -613,44 +627,44 @@ export function createReservation(data) {
   });
 }
 
-export function getMyAppointments(params = {}) {
+function getMyAppointments(params = {}) {
   return fetchAPI('/mis-citas', {
     data: params,
   });
 }
 
-export function cancelAppointment(id) {
+function cancelAppointment(id) {
   return fetchAPI(`/citas/${id}/cancelar`, {
     method: 'POST',
   });
 }
 
-export function getFavorites() {
+function getFavorites() {
   return fetchAPI('/favoritos');
 }
 
-export function addFavorite(empleadoId) {
+function addFavorite(empleadoId) {
   return fetchAPI('/favoritos/add', {
     method: 'POST',
     data: { empleado_id: empleadoId },
   });
 }
 
-export function removeFavorite(empleadoId) {
+function removeFavorite(empleadoId) {
   return fetchAPI('/favoritos/remove', {
     method: 'POST',
     data: { empleado_id: empleadoId },
   });
 }
 
-export function getDynamicContent(funct) {
+function getDynamicContent(funct) {
   return fetchAPI('/cargarContenido', {
     auth: false,
     data: { funct },
   });
 }
 
-export function getConditionDetail(tipo) {
+function getConditionDetail(tipo) {
   return fetchAPI(`/condiciones/${tipo}`, {
     auth: false,
   });
@@ -664,39 +678,39 @@ function createMissingEndpointError(key) {
   return error;
 }
 
-export function registerDevice() {
+function registerDevice() {
   throw createMissingEndpointError('registerDevice');
 }
 
-export function getNotifications() {
+function getNotifications() {
   throw createMissingEndpointError('notifications');
 }
 
-export function getNotificationDetail() {
+function getNotificationDetail() {
   throw createMissingEndpointError('notificationDetail');
 }
 
-export function getNotificationsUnreadCount() {
+function getNotificationsUnreadCount() {
   throw createMissingEndpointError('notificationsUnreadCount');
 }
 
-export function deleteNotification() {
+function deleteNotification() {
   throw createMissingEndpointError('deleteNotification');
 }
 
-export function getAppVersion() {
+function getAppVersion() {
   throw createMissingEndpointError('appVersion');
 }
 
-export function changePassword() {
+function changePassword() {
   throw createMissingEndpointError('changePassword');
 }
 
-export function deleteAccount() {
+function deleteAccount() {
   throw createMissingEndpointError('deleteAccount');
 }
 
-export async function runApiDiagnostics() {
+async function runApiDiagnostics() {
   const diagnostics = {
     apiUrl,
     checks: [],
@@ -749,7 +763,7 @@ export async function runApiDiagnostics() {
   return diagnostics;
 }
 
-export function getApiErrorMessage(error, fallback = 'No se pudo completar la solicitud') {
+function getApiErrorMessage(error, fallback = 'No se pudo completar la solicitud') {
   if (!error) {
     return fallback;
   }
@@ -774,7 +788,7 @@ export function getApiErrorMessage(error, fallback = 'No se pudo completar la so
   return error.message || fallback;
 }
 
-export function escapeHtml(value = '') {
+function escapeHtml(value = '') {
   return String(value)
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
@@ -783,7 +797,7 @@ export function escapeHtml(value = '') {
     .replaceAll("'", '&#39;');
 }
 
-export function formatDate(value) {
+function formatDate(value) {
   if (!value) return '';
 
   return new Intl.DateTimeFormat('es-ES', {
@@ -793,14 +807,14 @@ export function formatDate(value) {
   }).format(new Date(value));
 }
 
-export function formatPrice(value) {
+function formatPrice(value) {
   return new Intl.NumberFormat('es-ES', {
     style: 'currency',
     currency: 'EUR',
   }).format(Number(value || 0));
 }
 
-export function formatDateTime(value) {
+function formatDateTime(value) {
   if (!value) return '';
 
   return new Intl.DateTimeFormat('es-ES', {

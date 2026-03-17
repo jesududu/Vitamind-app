@@ -42,14 +42,14 @@
   </div>
 </template>
 <script>
-  import { login } from '../js/utils.js';
+  import utils from '../js/utils.js';
 
   export default (props, { $el, $on, $f7, $store }) => {
     $on('pageInit', () => {
       $el.find('#login-submit').on('click', async () => {
         try {
           $f7.preloader.show();
-          await login({
+          await utils.login({
             email: $el.find('#login-email').val(),
             password: $el.find('#login-password').val(),
             remember: true,

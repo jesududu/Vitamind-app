@@ -25,15 +25,15 @@
   </div>
 </template>
 <script>
-  import { changePassword, getApiErrorMessage } from '../js/utils.js';
+  import utils from '../js/utils.js';
 
   export default (props, { $el, $on, $f7 }) => {
     $on('pageInit', () => {
       $el.find('#change-pass-submit').on('click', async () => {
         try {
-          await changePassword();
+          await utils.changePassword();
         } catch (error) {
-          $f7.dialog.alert(getApiErrorMessage(error, 'Endpoint no disponible'));
+          $f7.dialog.alert(utils.getApiErrorMessage(error, 'Endpoint no disponible'));
         }
       });
     });
