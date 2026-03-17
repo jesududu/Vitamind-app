@@ -295,14 +295,34 @@ export async function fetchAPI(endpoint, options = {}) {
     }
   }
 
+  console.log('[VitaMind][fetchAPI] Request', {
+    endpoint,
+    method,
+    auth,
+    url,
+    hasData: Boolean(data),
+  });
+
   let response;
   let raw = '';
 
   try {
     response = await fetch(url, config);
     raw = await response.text();
+    console.log('[VitaMind][fetchAPI] Response', {
+      endpoint,
+      status: response.status,
+      ok: response.ok,
+      rawPreview: raw ? raw.slice(0, 240) : '',
+    });
   } catch (error) {
     clearTimeout(timeoutId);
+    console.error('[VitaMind][fetchAPI] Network error', {
+      endpoint,
+      method,
+      url,
+      message: error?.message || error,
+    });
 
     if (error.name === 'AbortError') {
       const timeoutError = new Error('La API ha tardado demasiado en responder.');
@@ -429,14 +449,24 @@ export function getLatestProfessionals() {
 export async function getHomeProfessionals() {
   let latestError = null;
 
+  console.log('[VitaMind][home] Iniciando carga de profesionales');
+
   try {
     const response = await getLatestProfessionals();
     const items = response?.profesionales || [];
+    console.log('[VitaMind][home] Resultado /ultimos-profesionales', {
+      total: items.length,
+      responseKeys: response ? Object.keys(response) : [],
+    });
     if (items.length) {
       return items;
     }
   } catch (error) {
     latestError = error;
+    console.error('[VitaMind][home] Error /ultimos-profesionales', {
+      message: getApiErrorMessage(error),
+      endpoint: error?.endpoint || '/ultimos-profesionales',
+    });
   }
 
   let listError = null;
@@ -445,8 +475,16 @@ export async function getHomeProfessionals() {
   try {
     const tokensResponse = await getProfessionalsList();
     tokens = tokensResponse?.empleados || [];
+    console.log('[VitaMind][home] Resultado /profesionales', {
+      total: tokens.length,
+      responseKeys: tokensResponse ? Object.keys(tokensResponse) : [],
+    });
   } catch (error) {
     listError = error;
+    console.error('[VitaMind][home] Error /profesionales', {
+      message: getApiErrorMessage(error),
+      endpoint: error?.endpoint || '/profesionales',
+    });
   }
 
   const professionals = [];
@@ -467,9 +505,17 @@ export async function getHomeProfessionals() {
     profiles.forEach((result) => {
       if (result.status === 'fulfilled') {
         professionals.push(result.value);
+      } else {
+        console.error('[VitaMind][home] Error cargando perfil individual', {
+          message: result.reason?.message || result.reason,
+        });
       }
     });
   }
+
+  console.log('[VitaMind][home] Profesionales finales', {
+    total: professionals.length,
+  });
 
   if (!professionals.length) {
     const primaryMessage = latestError ? getApiErrorMessage(latestError) : 'Sin datos en /ultimos-profesionales';
