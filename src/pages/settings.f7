@@ -15,8 +15,10 @@
   import utils from '../js/utils.js';
 
   export default (props, { $el, $on, $f7, $store }) => {
+    const pageEl = $f7.$($el);
+
     const render = () => {
-      const container = $el.find('#settings-content');
+      const container = pageEl.find('#settings-content');
 
       if (!utils.isAuthenticated()) {
         container.html(`
@@ -70,8 +72,8 @@
         </div>
       `);
 
-      $el.find('#diagnostics-button').on('click', async () => {
-        const output = $el.find('#diagnostics-output');
+      pageEl.find('#diagnostics-button').on('click', async () => {
+        const output = pageEl.find('#diagnostics-output');
         output.text('Ejecutando comprobaciones...');
 
         try {
@@ -87,7 +89,7 @@
         }
       });
 
-      $el.find('#logout-button').on('click', async () => {
+      pageEl.find('#logout-button').on('click', async () => {
         try {
           await utils.logout();
         } catch (error) {

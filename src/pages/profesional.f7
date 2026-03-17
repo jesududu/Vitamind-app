@@ -16,17 +16,18 @@
   import utils from '../js/utils.js';
 
   export default (props, { $el, $on, $f7route, $f7 }) => {
+    const pageEl = $f7.$($el);
     let employeeId = null;
     let isFavorite = false;
 
     const syncFavoriteButton = () => {
-      const button = $el.find('#favorite-button');
+      const button = pageEl.find('#favorite-button');
       if (!button.length) return;
       button.text(isFavorite ? 'Quitar favorito' : 'Anadir favorito');
     };
 
     const loadProfile = async () => {
-      const container = $el.find('#profile-content');
+      const container = pageEl.find('#profile-content');
       container.html('<div class="vm-loading">Cargando perfil profesional...</div>');
 
       try {
@@ -83,7 +84,7 @@
         `);
 
         syncFavoriteButton();
-        $el.find('#favorite-button').on('click', async () => {
+        pageEl.find('#favorite-button').on('click', async () => {
           try {
             if (!employeeId) return;
             if (isFavorite) {

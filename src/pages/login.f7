@@ -45,13 +45,15 @@
   import utils from '../js/utils.js';
 
   export default (props, { $el, $on, $f7, $store }) => {
+    const pageEl = $f7.$($el);
+
     $on('pageInit', () => {
-      $el.find('#login-submit').on('click', async () => {
+      pageEl.find('#login-submit').on('click', async () => {
         try {
           $f7.preloader.show();
           await utils.login({
-            email: $el.find('#login-email').val(),
-            password: $el.find('#login-password').val(),
+            email: pageEl.find('#login-email').val(),
+            password: pageEl.find('#login-password').val(),
             remember: true,
           });
           $store.dispatch('refreshSession');

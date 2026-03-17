@@ -46,10 +46,12 @@
   import utils from '../js/utils.js';
 
   export default (props, { $el, $on, $f7route, $f7router, $f7 }) => {
+    const pageEl = $f7.$($el);
+
     const renderResults = async () => {
-      const container = $el.find('#search-results');
-      const localidad = $el.find('#search-localidad').val();
-      const query = $el.find('#search-query').val();
+      const container = pageEl.find('#search-results');
+      const localidad = pageEl.find('#search-localidad').val();
+      const query = pageEl.find('#search-query').val();
 
       if (!localidad && !query) {
         container.html('<div class="vm-empty">Selecciona una localidad o escribe el nombre de un profesional.</div>');
@@ -100,7 +102,7 @@
           `;
         }).join(''));
 
-        $el.find('.vm-open-profile').on('click', async (event) => {
+        pageEl.find('.vm-open-profile').on('click', async (event) => {
           const empleadoId = event.currentTarget.dataset.empleadoId;
           try {
             $f7.preloader.show();
@@ -122,9 +124,9 @@
 
     $on('pageInit', () => {
       const query = $f7route.query || {};
-      if (query.localidad) $el.find('#search-localidad').val(query.localidad);
-      if (query.query) $el.find('#search-query').val(query.query);
-      $el.find('#search-submit').on('click', renderResults);
+      if (query.localidad) pageEl.find('#search-localidad').val(query.localidad);
+      if (query.query) pageEl.find('#search-query').val(query.query);
+      pageEl.find('#search-submit').on('click', renderResults);
 
       if (query.localidad || query.query) {
         renderResults();

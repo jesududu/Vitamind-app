@@ -53,8 +53,10 @@
   import utils from '../js/utils.js';
 
   export default (props, { $el, $on, $f7, $f7router }) => {
+    const pageEl = $f7.$($el);
+
     const renderLatest = async () => {
-      const container = $el.find('#latest-professionals');
+      const container = pageEl.find('#latest-professionals');
       container.html('<div class="vm-loading">Cargando profesionales...</div>');
 
       try {
@@ -86,8 +88,8 @@
     };
 
     const openSearch = () => {
-      const localidad = $el.find('#home-localidad').val();
-      const query = $el.find('#home-query').val();
+      const localidad = pageEl.find('#home-localidad').val();
+      const query = pageEl.find('#home-query').val();
       const params = new URLSearchParams();
 
       if (localidad) params.set('localidad', localidad);
@@ -99,8 +101,8 @@
 
     $on('pageInit', () => {
       renderLatest();
-      $el.find('#home-search-button').on('click', openSearch);
-      $el.find('.ptr-content').on('ptr:refresh', async () => {
+      pageEl.find('#home-search-button').on('click', openSearch);
+      pageEl.find('.ptr-content').on('ptr:refresh', async () => {
         await renderLatest();
         $f7.ptr.done();
       });
