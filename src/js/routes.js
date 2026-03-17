@@ -1,7 +1,10 @@
 import HomePage from '../pages/home.f7';
 import SearchPage from '../pages/search.f7';
 import ProfesionalPage from '../pages/profesional.f7';
+import ReservarPage from '../pages/reservar.f7';
+import ConfirmarReservaPage from '../pages/confirmar_reserva.f7';
 import CitasPage from '../pages/citas.f7';
+import CitaDetallePage from '../pages/cita_detalle.f7';
 import SettingsPage from '../pages/settings.f7';
 import LoginPage from '../pages/login.f7';
 import RegistroPage from '../pages/registro.f7';
@@ -13,7 +16,10 @@ const routes = [
   { path: '/home/', component: HomePage },
   { path: '/search/', component: SearchPage },
   { path: '/profesional/:token/', component: ProfesionalPage },
+  { path: '/reservar/:token/', component: ReservarPage },
+  { path: '/confirmar-reserva/', component: ConfirmarReservaPage },
   { path: '/citas/', component: CitasPage },
+  { path: '/cita-detalle/:id/', component: CitaDetallePage },
   { path: '/settings/', component: SettingsPage },
   { path: '/login/', component: LoginPage },
   { path: '/registro/', component: RegistroPage },

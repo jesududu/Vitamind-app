@@ -3,7 +3,10 @@ import env from './env.js';
 export const storageKeys = {
   token: 'sanctum_token',
   pacienteId: 'paciente_id',
-  user: 'vitamind_datos_usu',
+   user: 'vitamind_datos_usu',
+  appointmentDraft: 'vitamind_reserva_borrador',
+  appointmentSelected: 'vitamind_cita_seleccionada',
+  professionalMap: 'vitamind_professional_map',
 };
 
 export function getSession() {
@@ -52,6 +55,24 @@ export function saveSession(payload = {}) {
 
 export function clearSession() {
   Object.values(storageKeys).forEach((key) => localStorage.removeItem(key));
+}
+
+export function setStoredObject(key, value) {
+  if (value === null) {
+    localStorage.removeItem(key);
+    return;
+  }
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+export function getStoredObject(key) {
+  const raw = localStorage.getItem(key);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch (error) {
+    return null;
+  }
 }
 
 export async function fetchAPI(endpoint, options = {}) {
@@ -191,12 +212,45 @@ export function searchProfessionals(filters = {}) {
   });
 }
 
+export function getProfessionalsList(params = {}) {
+  return fetchAPI('/profesionales', {
+    auth: false,
+    data: params,
+  });
+}
+
 export function getProfessionalProfile(token) {
   return fetchAPI(`/profesional/${token}`, { auth: false });
 }
 
+export function getProfessionalSlots(token, params = {}) {
+  return fetchAPI(`/horarios/por-token/${token}`, {
+    auth: isAuthenticated(),
+    data: {
+      paciente_id: getSession().pacienteId,
+      ...params,
+    },
+  });
+}
+
+export function createReservation(data) {
+  return fetchAPI('/reserva', {
+    method: 'POST',
+    data: {
+      origen: 'app',
+      ...data,
+    },
+  });
+}
+
 export function getMyAppointments(params = {}) {
   return fetchAPI('/mis-citas', { data: params });
+}
+
+export function cancelAppointment(id) {
+  return fetchAPI(`/citas/${id}/cancelar`, {
+    method: 'POST',
+  });
 }
 
 export function getFavorites() {
@@ -240,4 +294,40 @@ export function formatPrice(value) {
     style: 'currency',
     currency: 'EUR',
   }).format(Number(value || 0));
+}
+
+export function formatDateTime(value) {
+  if (!value) return '';
+  return new Intl.DateTimeFormat('es-ES', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(value));
+}
+
+export async function resolveProfessionalTokenByEmployeeId(employeeId) {
+  const cache = getStoredObject(storageKeys.professionalMap) || {};
+  if (cache[employeeId]) {
+    return cache[employeeId];
+  }
+
+  const response = await getProfessionalsList();
+  const tokens = response?.empleados || [];
+
+  for (const token of tokens) {
+    try {
+      const profile = await getProfessionalProfile(token);
+      if (Number(profile?.id) === Number(employeeId)) {
+        cache[employeeId] = token;
+        setStoredObject(storageKeys.professionalMap, cache);
+        return token;
+      }
+    } catch (error) {
+      // Ignoramos fallos de perfiles individuales al resolver el token.
+    }
+  }
+
+  return null;
 }

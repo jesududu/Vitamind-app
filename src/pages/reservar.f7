@@ -1,0 +1,167 @@
+<template>
+  <div class="page" data-name="reservar">
+    <div class="navbar">
+      <div class="navbar-bg"></div>
+      <div class="navbar-inner">
+        <div class="left"><a href="#" class="link back"><i class="icon icon-back"></i></a></div>
+        <div class="title">Reservar cita</div>
+      </div>
+    </div>
+    <div class="page-content vm-page-content">
+      <div id="reservar-content" class="vm-loading">Cargando disponibilidad...</div>
+    </div>
+  </div>
+</template>
+<script>
+  import {
+    escapeHtml,
+    formatPrice,
+    getProfessionalProfile,
+    getProfessionalSlots,
+    getSession,
+    isAuthenticated,
+    setStoredObject,
+    storageKeys,
+  } from '../js/utils.js';
+
+  export default (props, { $el, $on, $f7route, $f7, $f7router }) => {
+    let profile = null;
+
+    const renderSlots = async () => {
+      const servicioId = $el.find('#reserva-servicio').val();
+      const fecha = $el.find('#reserva-fecha').val();
+      const slotsContainer = $el.find('#reserva-slots');
+
+      if (!servicioId || !fecha) {
+        slotsContainer.html('<div class="vm-empty">Selecciona servicio y fecha para ver horarios.</div>');
+        return;
+      }
+
+      slotsContainer.html('<div class="vm-loading">Cargando horarios...</div>');
+
+      try {
+        const response = await getProfessionalSlots($f7route.params.token, {
+          fecha,
+          servicio_id: servicioId,
+        });
+        const fechas = response?.fechas || [];
+        const firstEmployee = Object.values(fechas[0]?.empleados || {})[0];
+        const servicio = firstEmployee?.servicios?.find((item) => String(item.id) === String(servicioId));
+        const slots = servicio?.horarios?.[0]?.slots || [];
+
+        if (!slots.length) {
+          slotsContainer.html('<div class="vm-empty">No hay horarios disponibles para esa selección.</div>');
+          return;
+        }
+
+        slotsContainer.html(slots.map((slot) => `
+          <a href="#" class="button ${slot.disponible ? 'button-outline' : 'disabled'} vm-slot" data-inicio="${escapeHtml(slot.inicio)}" data-fin="${escapeHtml(slot.fin)}" data-disponible="${slot.disponible}">
+            ${escapeHtml(slot.inicio)}
+          </a>
+        `).join(' '));
+
+        $el.find('.vm-slot').on('click', (event) => {
+          if (event.currentTarget.dataset.disponible !== 'true') {
+            return;
+          }
+
+          const servicioSeleccionado = profile.servicios.find((item) => String(item.id) === String(servicioId));
+          const draft = {
+            token: $f7route.params.token,
+            empleado_id: profile.id,
+            empresa_id: profile.empresa_id,
+            paciente_id: getSession().pacienteId,
+            servicio_id: servicioSeleccionado.id,
+            servicio_titulo: servicioSeleccionado.titulo,
+            profesional: profile.nombre_completo,
+            fecha,
+            hora_inicio: `${event.currentTarget.dataset.inicio}:00`,
+            hora_fin: `${event.currentTarget.dataset.fin}:00`,
+            nota: $el.find('#reserva-nota').val() || '',
+            consulta_online: Boolean(servicioSeleccionado.consulta_online),
+          };
+          setStoredObject(storageKeys.appointmentDraft, draft);
+          $f7router.navigate('/confirmar-reserva/');
+        });
+      } catch (error) {
+        slotsContainer.html(`<div class="vm-empty">${escapeHtml(error.message)}</div>`);
+      }
+    };
+
+    const loadPage = async () => {
+      const container = $el.find('#reservar-content');
+
+      if (!isAuthenticated()) {
+        container.html(`
+          <div class="vm-form-card">
+            <div class="vm-section-title">Necesitas iniciar sesión</div>
+            <p class="vm-muted">Solo los pacientes autenticados pueden reservar citas.</p>
+            <div class="vm-actions"><a href="/login/" class="button button-fill">Ir a login</a></div>
+          </div>
+        `);
+        return;
+      }
+
+      try {
+        profile = await getProfessionalProfile($f7route.params.token);
+        container.html(`
+          <div class="vm-card">
+            <div class="vm-card-title">${escapeHtml(profile.nombre_completo)}</div>
+            <div class="vm-card-subtitle">${escapeHtml(profile.localidad || '')}</div>
+          </div>
+          <div class="vm-form-card">
+            <div class="list no-hairlines-md">
+              <ul>
+                <li class="item-content item-input">
+                  <div class="item-inner">
+                    <div class="item-title item-label">Servicio</div>
+                    <div class="item-input-wrap">
+                      <select id="reserva-servicio">
+                        <option value="">Selecciona un servicio</option>
+                        ${(profile.servicios || []).map((servicio) => `<option value="${escapeHtml(servicio.id)}">${escapeHtml(servicio.titulo)}</option>`).join('')}
+                      </select>
+                    </div>
+                  </div>
+                </li>
+                <li class="item-content item-input">
+                  <div class="item-inner">
+                    <div class="item-title item-label">Fecha</div>
+                    <div class="item-input-wrap">
+                      <input type="date" id="reserva-fecha" />
+                    </div>
+                  </div>
+                </li>
+                <li class="item-content item-input">
+                  <div class="item-inner">
+                    <div class="item-title item-label">Nota</div>
+                    <div class="item-input-wrap">
+                      <textarea id="reserva-nota" placeholder="Añade una nota si lo necesitas"></textarea>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="vm-chip-row">
+              ${(profile.servicios || []).map((servicio) => `<span class="vm-chip">${escapeHtml(servicio.titulo)}${formatPrice(servicio.precio || 0) !== formatPrice(0) ? ` · ${escapeHtml(formatPrice(servicio.precio))}` : ''}</span>`).join('')}
+            </div>
+          </div>
+          <div class="vm-card">
+            <div class="vm-section-title">Horarios disponibles</div>
+            <div id="reserva-slots" class="vm-chip-row">
+              <div class="vm-empty">Selecciona servicio y fecha para ver horarios.</div>
+            </div>
+          </div>
+        `);
+
+        $el.find('#reserva-servicio').on('change', renderSlots);
+        $el.find('#reserva-fecha').on('change', renderSlots);
+      } catch (error) {
+        container.html(`<div class="vm-empty">${escapeHtml(error.message)}</div>`);
+      }
+    };
+
+    $on('pageInit', loadPage);
+
+    return $render;
+  };
+</script>

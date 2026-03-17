@@ -43,9 +43,9 @@
   </div>
 </template>
 <script>
-  import { searchProfessionals, escapeHtml, formatPrice } from '../js/utils.js';
+  import { searchProfessionals, escapeHtml, formatPrice, resolveProfessionalTokenByEmployeeId } from '../js/utils.js';
 
-  export default (props, { $el, $on, $f7route }) => {
+  export default (props, { $el, $on, $f7route, $f7router, $f7 }) => {
     const renderResults = async () => {
       const container = $el.find('#search-results');
       const localidad = $el.find('#search-localidad').val();
@@ -92,13 +92,29 @@
                     ${item.distancia ? `<span class="vm-chip">${escapeHtml(item.distancia)} km</span>` : ''}
                   </div>
                   <div class="vm-actions">
-                    <a href="/profesional/${encodeURIComponent(item.token || '')}/" class="button button-fill button-small">Abrir perfil</a>
+                    <a href="#" class="button button-fill button-small vm-open-profile" data-empleado-id="${escapeHtml(item.id)}">Abrir perfil</a>
                   </div>
                 </div>
               </div>
             </div>
           `;
         }).join(''));
+
+        $el.find('.vm-open-profile').on('click', async (event) => {
+          const empleadoId = event.currentTarget.dataset.empleadoId;
+          try {
+            $f7.preloader.show();
+            const token = await resolveProfessionalTokenByEmployeeId(empleadoId);
+            if (!token) {
+              throw new Error('No se pudo localizar el token del profesional.');
+            }
+            $f7router.navigate(`/profesional/${encodeURIComponent(token)}/`);
+          } catch (error) {
+            $f7.dialog.alert(error.message);
+          } finally {
+            $f7.preloader.hide();
+          }
+        });
       } catch (error) {
         container.html(`<div class="vm-empty">${escapeHtml(error.message)}</div>`);
       }

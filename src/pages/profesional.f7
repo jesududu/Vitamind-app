@@ -65,6 +65,7 @@
             </div>
             <div class="vm-actions">
               ${isAuthenticated() ? '<a href="#" id="favorite-button" class="button button-outline button-small"></a>' : '<a href="/login/" class="button button-outline button-small">Inicia sesión para guardar</a>'}
+              <a href="/reservar/${encodeURIComponent(token)}/" class="button button-fill button-small">Reservar</a>
             </div>
           </div>
 

@@ -12,20 +12,20 @@
   </div>
 </template>
 <script>
-  import { getMyAppointments, isAuthenticated, escapeHtml, formatDate } from '../js/utils.js';
+  import { getMyAppointments, isAuthenticated, escapeHtml, formatDate, setStoredObject, storageKeys } from '../js/utils.js';
 
-  export default (props, { $el, $on }) => {
+  export default (props, { $el, $on, $f7router }) => {
     const renderSection = (title, items = []) => `
       <div class="vm-card">
         <div class="vm-section-title">${title}</div>
         ${items.length ? items.map((item) => `
-          <div class="vm-service-item">
-            <div class="vm-card-title">${escapeHtml(item.servicio?.titulo || 'Servicio')}</div>
-            <div class="vm-card-subtitle">${escapeHtml(item.empleado?.nombre || '')} ${escapeHtml(item.empleado?.apellidos || '')}</div>
+          <div class="vm-service-item vm-cita-item" data-id="${escapeHtml(item.id)}">
+            <div class="vm-card-title">${escapeHtml(item.title || item.extendedProps?.servicio || 'Servicio')}</div>
+            <div class="vm-card-subtitle">${escapeHtml(item.extendedProps?.empleado || '')}</div>
             <div class="vm-chip-row">
-              <span class="vm-chip">${escapeHtml(formatDate(item.fecha))}</span>
-              <span class="vm-chip">${escapeHtml(item.hora_inicio || '')}</span>
-              <span class="vm-chip">${escapeHtml(item.empresa?.razon_social || '')}</span>
+              <span class="vm-chip">${escapeHtml(formatDate(item.start))}</span>
+              <span class="vm-chip">${escapeHtml((item.start || '').split('T')[1]?.slice(0, 5) || '')}</span>
+              <span class="vm-chip">${escapeHtml(item.extendedProps?.empresa || '')}</span>
             </div>
           </div>
         `).join('') : '<div class="vm-empty">No hay citas en esta sección.</div>'}
@@ -55,6 +55,19 @@
           renderSection('Completadas', response?.completadas?.data || []) +
           renderSection('Canceladas', response?.canceladas?.data || [])
         );
+
+        const allAppointments = [
+          ...(response?.activas?.data || []),
+          ...(response?.completadas?.data || []),
+          ...(response?.canceladas?.data || []),
+        ];
+
+        $el.find('.vm-cita-item').on('click', (event) => {
+          const cita = allAppointments.find((item) => String(item.id) === String(event.currentTarget.dataset.id));
+          if (!cita) return;
+          setStoredObject(storageKeys.appointmentSelected, cita);
+          $f7router.navigate(`/cita-detalle/${encodeURIComponent(cita.id)}/`);
+        });
       } catch (error) {
         container.html(`<div class="vm-empty">${escapeHtml(error.message)}</div>`);
       }
