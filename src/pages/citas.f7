@@ -1,0 +1,67 @@
+<template>
+  <div class="page" data-name="citas">
+    <div class="navbar">
+      <div class="navbar-bg"></div>
+      <div class="navbar-inner">
+        <div class="title">Mis citas</div>
+      </div>
+    </div>
+    <div class="page-content vm-page-content">
+      <div id="citas-content" class="vm-loading">Cargando citas...</div>
+    </div>
+  </div>
+</template>
+<script>
+  import { getMyAppointments, isAuthenticated, escapeHtml, formatDate } from '../js/utils.js';
+
+  export default (props, { $el, $on }) => {
+    const renderSection = (title, items = []) => `
+      <div class="vm-card">
+        <div class="vm-section-title">${title}</div>
+        ${items.length ? items.map((item) => `
+          <div class="vm-service-item">
+            <div class="vm-card-title">${escapeHtml(item.servicio?.titulo || 'Servicio')}</div>
+            <div class="vm-card-subtitle">${escapeHtml(item.empleado?.nombre || '')} ${escapeHtml(item.empleado?.apellidos || '')}</div>
+            <div class="vm-chip-row">
+              <span class="vm-chip">${escapeHtml(formatDate(item.fecha))}</span>
+              <span class="vm-chip">${escapeHtml(item.hora_inicio || '')}</span>
+              <span class="vm-chip">${escapeHtml(item.empresa?.razon_social || '')}</span>
+            </div>
+          </div>
+        `).join('') : '<div class="vm-empty">No hay citas en esta sección.</div>'}
+      </div>
+    `;
+
+    const loadAppointments = async () => {
+      const container = $el.find('#citas-content');
+
+      if (!isAuthenticated()) {
+        container.html(`
+          <div class="vm-form-card">
+            <div class="vm-section-title">Necesitas iniciar sesión</div>
+            <p class="vm-muted">Las citas solo están disponibles para pacientes autenticados.</p>
+            <div class="vm-actions">
+              <a href="/login/" class="button button-fill">Ir a login</a>
+            </div>
+          </div>
+        `);
+        return;
+      }
+
+      try {
+        const response = await getMyAppointments();
+        container.html(
+          renderSection('Activas', response?.activas?.data || []) +
+          renderSection('Completadas', response?.completadas?.data || []) +
+          renderSection('Canceladas', response?.canceladas?.data || [])
+        );
+      } catch (error) {
+        container.html(`<div class="vm-empty">${escapeHtml(error.message)}</div>`);
+      }
+    };
+
+    $on('pageInit', loadAppointments);
+
+    return $render;
+  };
+</script>

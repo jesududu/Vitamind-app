@@ -1,85 +1,111 @@
 <template>
   <div class="page" data-name="home">
-    <!-- Top Navbar -->
-    <div class="navbar navbar-large">
+    <div class="navbar">
       <div class="navbar-bg"></div>
       <div class="navbar-inner">
-        <div class="left">
-          <a href="#" class="link icon-only panel-open" data-panel="left">
-            <i class="icon f7-icons if-not-md">menu</i>
-            <i class="icon material-icons if-md">menu</i>
-          </a>
-        </div>
-        <div class="title sliding">VitaMind</div>
-        <div class="right">
-          <a href="#" class="link icon-only panel-open" data-panel="right">
-            <i class="icon f7-icons if-not-md">menu</i>
-            <i class="icon material-icons if-md">menu</i>
-          </a>
-        </div>
-        <div class="title-large">
-          <div class="title-large-text">VitaMind</div>
-        </div>
+        <div class="title">VitaMind</div>
       </div>
     </div>
+    <div class="page-content vm-page-content ptr-content" data-ptr-distance="70">
+      <div class="ptr-preloader"><div class="preloader"></div><div class="ptr-arrow"></div></div>
 
-    <!-- Scrollable page content-->
-    <div class="page-content">
-      <div class="block">
-        <p>This is an example of tabs-layout application. The main point of such tabbed layout is that each tab contains independent view with its own routing and navigation.</p>
+      <section class="vm-hero">
+        <h1>Encuentra el profesional adecuado</h1>
+        <p>Base móvil para pacientes conectada al backend real de VitaMind.</p>
+      </section>
 
-        <p>Each tab/view may have different layout, different navbar type (dynamic, fixed or static) or without navbar like this tab.</p>
-      </div>
-      <div class="block-title">Navigation</div>
-      <div class="list list-strong inset list-dividers-ios">
-        <ul>
-          <li>
-            <a href="/about/" class="item-content item-link">
+      <section class="vm-section vm-search-card">
+        <div class="list no-hairlines-md">
+          <ul>
+            <li class="item-content item-input">
               <div class="item-inner">
-                <div class="item-title">About</div>
+                <div class="item-title item-label">Localidad</div>
+                <div class="item-input-wrap">
+                  <input type="text" id="home-localidad" placeholder="Madrid, Córdoba..." />
+                </div>
               </div>
-            </a>
-          </li>
-          <li>
-            <a href="/form/" class="item-content item-link">
+            </li>
+            <li class="item-content item-input">
               <div class="item-inner">
-                <div class="item-title">Form</div>
+                <div class="item-title item-label">Profesional o servicio</div>
+                <div class="item-input-wrap">
+                  <input type="text" id="home-query" placeholder="Psicología, ansiedad, terapia..." />
+                </div>
               </div>
-            </a>
-          </li>
-        </ul>
-      </div>
+            </li>
+          </ul>
+        </div>
+        <div class="vm-actions">
+          <a href="#" id="home-search-button" class="button button-fill">Buscar</a>
+        </div>
+      </section>
 
-      <div class="block-title">Modals</div>
-      <div class="block grid grid-cols-2 grid-gap">
-        <a href="#" class="button button-fill popup-open" data-popup="#my-popup">Popup</a>
-        <a href="#" class="button button-fill login-screen-open" data-login-screen="#my-login-screen">Login Screen</a>
-      </div>
-
-      <div class="block-title">Panels</div>
-      <div class="block grid grid-cols-2 grid-gap">
-        <a href="#" class="button button-fill panel-open" data-panel="left">Left Panel</a>
-        <a href="#" class="button button-fill panel-open" data-panel="right">Right Panel</a>
-      </div>
-
-      <div class="list list-strong inset list-dividers-ios links-list">
-        <ul>
-          <li>
-            <a href="/dynamic-route/blog/45/post/125/?foo=bar#about">Dynamic (Component) Route</a>
-          </li>
-          <li>
-            <a href="/load-something-that-doesnt-exist/">Default Route (404)</a>
-          </li>
-          <li>
-            <a href="/request-and-load/user/123456/">Request Data & Load</a>
-          </li>
-        </ul>
-      </div>
+      <section class="vm-section">
+        <div class="vm-section-title">Últimos profesionales</div>
+        <div id="latest-professionals" class="vm-list">
+          <div class="vm-loading">Cargando profesionales...</div>
+        </div>
+      </section>
     </div>
   </div>
 </template>
 <script>
-export default () => {
-  return $render;
-}
+  import { getLatestProfessionals, escapeHtml } from '../js/utils.js';
+
+  export default (props, { $el, $on, $f7, $f7router }) => {
+    const renderLatest = async () => {
+      const container = $el.find('#latest-professionals');
+      container.html('<div class="vm-loading">Cargando profesionales...</div>');
+
+      try {
+        const response = await getLatestProfessionals();
+        const items = response?.profesionales || [];
+
+        if (!items.length) {
+          container.html('<div class="vm-empty">No hay profesionales disponibles.</div>');
+          return;
+        }
+
+        container.html(items.map((item) => `
+          <div class="vm-card">
+            <div class="vm-professional">
+              <img src="${escapeHtml(item.imagen)}" alt="${escapeHtml(item.nombre)}" />
+              <div>
+                <div class="vm-card-title">${escapeHtml(item.nombre)}</div>
+                <div class="vm-card-subtitle">Perfil profesional publicado recientemente</div>
+                <div class="vm-actions">
+                  <a href="/profesional/${encodeURIComponent(item.token)}/" class="button button-fill button-small">Ver perfil</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        `).join(''));
+      } catch (error) {
+        container.html(`<div class="vm-empty">${escapeHtml(error.message)}</div>`);
+      }
+    };
+
+    const openSearch = () => {
+      const localidad = $el.find('#home-localidad').val();
+      const query = $el.find('#home-query').val();
+      const params = new URLSearchParams();
+
+      if (localidad) params.set('localidad', localidad);
+      if (query) params.set('query', query);
+
+      const suffix = params.toString() ? `?${params.toString()}` : '';
+      $f7router.navigate(`/search/${suffix}`);
+    };
+
+    $on('pageInit', () => {
+      renderLatest();
+      $el.find('#home-search-button').on('click', openSearch);
+      $el.find('.ptr-content').on('ptr:refresh', async () => {
+        await renderLatest();
+        $f7.ptr.done();
+      });
+    });
+
+    return $render;
+  };
 </script>

@@ -1,0 +1,69 @@
+<template>
+  <div class="page" data-name="login">
+    <div class="navbar">
+      <div class="navbar-bg"></div>
+      <div class="navbar-inner">
+        <div class="left"><a href="#" class="link back"><i class="icon icon-back"></i></a></div>
+        <div class="title">Login</div>
+      </div>
+    </div>
+    <div class="page-content vm-page-content">
+      <div class="vm-form-card">
+        <div class="vm-section-title">Iniciar sesión como paciente</div>
+        <div class="list no-hairlines-md">
+          <ul>
+            <li class="item-content item-input">
+              <div class="item-inner">
+                <div class="item-title item-label">Email</div>
+                <div class="item-input-wrap">
+                  <input type="email" id="login-email" placeholder="tucorreo@ejemplo.com" />
+                </div>
+              </div>
+            </li>
+            <li class="item-content item-input">
+              <div class="item-inner">
+                <div class="item-title item-label">Contraseña</div>
+                <div class="item-input-wrap">
+                  <input type="password" id="login-password" placeholder="••••••••" />
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div class="vm-actions">
+          <a href="#" id="login-submit" class="button button-fill">Entrar</a>
+        </div>
+        <div class="vm-actions">
+          <a href="/forgot-password/" class="button button-outline">He olvidado mi contraseña</a>
+          <a href="/registro/" class="button button-outline">Crear cuenta</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+  import { login } from '../js/utils.js';
+
+  export default (props, { $el, $on, $f7, $store }) => {
+    $on('pageInit', () => {
+      $el.find('#login-submit').on('click', async () => {
+        try {
+          $f7.preloader.show();
+          await login({
+            email: $el.find('#login-email').val(),
+            password: $el.find('#login-password').val(),
+            remember: true,
+          });
+          $store.dispatch('refreshSession');
+          $f7.views.main.router.navigate('/home/');
+        } catch (error) {
+          $f7.dialog.alert(error.message);
+        } finally {
+          $f7.preloader.hide();
+        }
+      });
+    });
+
+    return $render;
+  };
+</script>

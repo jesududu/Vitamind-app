@@ -1,0 +1,120 @@
+<template>
+  <div class="page" data-name="search">
+    <div class="navbar">
+      <div class="navbar-bg"></div>
+      <div class="navbar-inner">
+        <div class="title">Buscar</div>
+      </div>
+    </div>
+    <div class="page-content vm-page-content">
+      <section class="vm-search-card">
+        <div class="list no-hairlines-md">
+          <ul>
+            <li class="item-content item-input">
+              <div class="item-inner">
+                <div class="item-title item-label">Localidad</div>
+                <div class="item-input-wrap">
+                  <input type="text" id="search-localidad" placeholder="Ciudad o provincia" />
+                </div>
+              </div>
+            </li>
+            <li class="item-content item-input">
+              <div class="item-inner">
+                <div class="item-title item-label">Profesional o servicio</div>
+                <div class="item-input-wrap">
+                  <input type="text" id="search-query" placeholder="Nombre o especialidad" />
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div class="vm-actions">
+          <a href="#" class="button button-fill" id="search-submit">Buscar disponibilidad</a>
+        </div>
+      </section>
+
+      <section class="vm-section">
+        <div class="vm-section-title">Resultados</div>
+        <div id="search-results" class="vm-list">
+          <div class="vm-empty">Introduce una localidad válida o un nombre de profesional para comenzar.</div>
+        </div>
+      </section>
+    </div>
+  </div>
+</template>
+<script>
+  import { searchProfessionals, escapeHtml, formatPrice } from '../js/utils.js';
+
+  export default (props, { $el, $on, $f7route }) => {
+    const renderResults = async () => {
+      const container = $el.find('#search-results');
+      const localidad = $el.find('#search-localidad').val();
+      const query = $el.find('#search-query').val();
+
+      if (!localidad && !query) {
+        container.html('<div class="vm-empty">Selecciona una localidad o escribe el nombre de un profesional.</div>');
+        return;
+      }
+
+      container.html('<div class="vm-loading">Consultando horarios disponibles...</div>');
+
+      try {
+        const response = await searchProfessionals({ localidad, query });
+        const fechas = response?.fechas || [];
+        const profesionales = new Map();
+
+        fechas.forEach((fechaItem) => {
+          Object.values(fechaItem.empleados || {}).forEach((empleado) => {
+            if (!profesionales.has(empleado.id)) {
+              profesionales.set(empleado.id, { ...empleado, primeraFecha: fechaItem.fecha });
+            }
+          });
+        });
+
+        const items = [...profesionales.values()];
+        if (!items.length) {
+          container.html('<div class="vm-empty">No hemos encontrado disponibilidad con esos filtros.</div>');
+          return;
+        }
+
+        container.html(items.map((item) => {
+          const servicio = item.servicios?.[0];
+          return `
+            <div class="vm-card">
+              <div class="vm-professional">
+                <img src="${escapeHtml(item.foto)}" alt="${escapeHtml(item.nombre_completo)}" />
+                <div>
+                  <div class="vm-card-title">${escapeHtml(item.nombre_completo)}</div>
+                  <div class="vm-card-subtitle">${escapeHtml(item.empresa_nombre || item.direccion || '')}</div>
+                  <div class="vm-chip-row">
+                    ${servicio ? `<span class="vm-chip">${escapeHtml(servicio.titulo)}</span>` : ''}
+                    ${servicio?.precio ? `<span class="vm-chip">${escapeHtml(formatPrice(servicio.precio))}</span>` : ''}
+                    ${item.distancia ? `<span class="vm-chip">${escapeHtml(item.distancia)} km</span>` : ''}
+                  </div>
+                  <div class="vm-actions">
+                    <a href="/profesional/${encodeURIComponent(item.token || '')}/" class="button button-fill button-small">Abrir perfil</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join(''));
+      } catch (error) {
+        container.html(`<div class="vm-empty">${escapeHtml(error.message)}</div>`);
+      }
+    };
+
+    $on('pageInit', () => {
+      const query = $f7route.query || {};
+      if (query.localidad) $el.find('#search-localidad').val(query.localidad);
+      if (query.query) $el.find('#search-query').val(query.query);
+      $el.find('#search-submit').on('click', renderResults);
+
+      if (query.localidad || query.query) {
+        renderResults();
+      }
+    });
+
+    return $render;
+  };
+</script>

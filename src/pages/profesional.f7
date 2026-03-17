@@ -1,0 +1,116 @@
+<template>
+  <div class="page" data-name="profesional">
+    <div class="navbar">
+      <div class="navbar-bg"></div>
+      <div class="navbar-inner">
+        <div class="left"><a href="#" class="link back"><i class="icon icon-back"></i></a></div>
+        <div class="title">Profesional</div>
+      </div>
+    </div>
+    <div class="page-content vm-page-content">
+      <div id="profile-content" class="vm-loading">Cargando perfil profesional...</div>
+    </div>
+  </div>
+</template>
+<script>
+  import {
+    addFavorite,
+    escapeHtml,
+    getFavorites,
+    getProfessionalProfile,
+    isAuthenticated,
+    removeFavorite,
+  } from '../js/utils.js';
+
+  export default (props, { $el, $on, $f7route, $f7 }) => {
+    let employeeId = null;
+    let isFavorite = false;
+
+    const syncFavoriteButton = () => {
+      const button = $el.find('#favorite-button');
+      if (!button.length) return;
+      button.text(isFavorite ? 'Quitar favorito' : 'Añadir favorito');
+    };
+
+    const loadProfile = async () => {
+      const container = $el.find('#profile-content');
+      container.html('<div class="vm-loading">Cargando perfil profesional...</div>');
+
+      try {
+        const token = $f7route.params.token;
+        const profile = await getProfessionalProfile(token);
+        employeeId = profile?.id || null;
+
+        if (isAuthenticated() && employeeId) {
+          try {
+            const favorites = await getFavorites();
+            isFavorite = (favorites?.favoritos || []).some((item) => Number(item.id) === Number(employeeId));
+          } catch (error) {
+            isFavorite = false;
+          }
+        }
+
+        container.html(`
+          <div class="vm-card">
+            <div class="vm-detail-header">
+              <img class="vm-avatar vm-avatar--lg" src="${escapeHtml(profile.imagen)}" alt="${escapeHtml(profile.nombre_completo)}" />
+              <div>
+                <div class="vm-card-title">${escapeHtml(profile.nombre_completo)}</div>
+                <div class="vm-card-subtitle">${escapeHtml(profile.localidad || '')}</div>
+                <div class="vm-chip-row">
+                  ${profile.telefono ? `<span class="vm-chip">${escapeHtml(profile.telefono)}</span>` : ''}
+                  ${profile.numero_colegiado ? `<span class="vm-chip">${escapeHtml(profile.numero_colegiado)}</span>` : ''}
+                </div>
+              </div>
+            </div>
+            <div class="vm-actions">
+              ${isAuthenticated() ? '<a href="#" id="favorite-button" class="button button-outline button-small"></a>' : '<a href="/login/" class="button button-outline button-small">Inicia sesión para guardar</a>'}
+            </div>
+          </div>
+
+          <div class="vm-card">
+            <div class="vm-section-title">Contacto</div>
+            <div class="vm-kv"><span>Dirección</span><strong>${escapeHtml(profile.direccion || 'Sin dirección')}</strong></div>
+            <div class="vm-kv"><span>Localidad</span><strong>${escapeHtml(profile.localidad || 'Sin localidad')}</strong></div>
+            <div class="vm-kv"><span>País</span><strong>${escapeHtml(profile.pais || 'Sin país')}</strong></div>
+          </div>
+
+          <div class="vm-card">
+            <div class="vm-section-title">Servicios</div>
+            <div class="vm-service-list">
+              ${(profile.servicios || []).length ? profile.servicios.map((servicio) => `
+                <div class="vm-service-item">
+                  <div class="vm-card-title">${escapeHtml(servicio.titulo)}</div>
+                  <div class="vm-card-subtitle">${servicio.consulta_online ? 'Consulta online disponible' : 'Consulta presencial'}</div>
+                </div>
+              `).join('') : '<div class="vm-empty">Este profesional no tiene servicios cargados todavía.</div>'}
+            </div>
+          </div>
+        `);
+
+        syncFavoriteButton();
+        $el.find('#favorite-button').on('click', async () => {
+          try {
+            if (!employeeId) return;
+            if (isFavorite) {
+              await removeFavorite(employeeId);
+              isFavorite = false;
+            } else {
+              await addFavorite(employeeId);
+              isFavorite = true;
+            }
+            syncFavoriteButton();
+          } catch (error) {
+            $f7.dialog.alert(error.message);
+          }
+        });
+      } catch (error) {
+        container.html(`<div class="vm-empty">${escapeHtml(error.message)}</div>`);
+      }
+    };
+
+    $on('pageInit', loadProfile);
+
+    return $render;
+  };
+</script>

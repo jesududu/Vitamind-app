@@ -1,0 +1,59 @@
+<template>
+  <div class="page" data-name="registro">
+    <div class="navbar">
+      <div class="navbar-bg"></div>
+      <div class="navbar-inner">
+        <div class="left"><a href="#" class="link back"><i class="icon icon-back"></i></a></div>
+        <div class="title">Registro</div>
+      </div>
+    </div>
+    <div class="page-content vm-page-content">
+      <div class="vm-form-card">
+        <div class="vm-section-title">Crear cuenta paciente</div>
+        <div class="list no-hairlines-md">
+          <ul>
+            <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Nombre</div><div class="item-input-wrap"><input type="text" id="reg-nombre" /></div></div></li>
+            <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Apellidos</div><div class="item-input-wrap"><input type="text" id="reg-apellidos" /></div></div></li>
+            <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Teléfono</div><div class="item-input-wrap"><input type="tel" id="reg-telefono" /></div></div></li>
+            <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Email</div><div class="item-input-wrap"><input type="email" id="reg-email" /></div></div></li>
+            <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Contraseña</div><div class="item-input-wrap"><input type="password" id="reg-password" /></div></div></li>
+            <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Confirmar contraseña</div><div class="item-input-wrap"><input type="password" id="reg-password-confirmation" /></div></div></li>
+          </ul>
+        </div>
+        <div class="vm-actions">
+          <a href="#" id="register-submit" class="button button-fill">Crear cuenta</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+  import { register } from '../js/utils.js';
+
+  export default (props, { $el, $on, $f7, $store }) => {
+    $on('pageInit', () => {
+      $el.find('#register-submit').on('click', async () => {
+        try {
+          $f7.preloader.show();
+          const response = await register({
+            nombre: $el.find('#reg-nombre').val(),
+            apellidos: $el.find('#reg-apellidos').val(),
+            telefono: $el.find('#reg-telefono').val(),
+            email: $el.find('#reg-email').val(),
+            password: $el.find('#reg-password').val(),
+            password_confirmation: $el.find('#reg-password-confirmation').val(),
+          });
+          $store.dispatch('refreshSession');
+          $f7.dialog.alert(response.message || 'Registro completado');
+          $f7.views.main.router.navigate('/home/');
+        } catch (error) {
+          $f7.dialog.alert(error.message);
+        } finally {
+          $f7.preloader.hide();
+        }
+      });
+    });
+
+    return $render;
+  };
+</script>
