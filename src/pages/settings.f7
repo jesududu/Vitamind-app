@@ -12,7 +12,14 @@
   </div>
 </template>
 <script>
-  import { clearSession, getSession, isAuthenticated, escapeHtml, logout } from '../js/utils.js';
+  import {
+    clearSession,
+    getSession,
+    isAuthenticated,
+    escapeHtml,
+    logout,
+    runApiDiagnostics,
+  } from '../js/utils.js';
 
   export default (props, { $el, $on, $f7, $store }) => {
     const render = () => {
@@ -56,11 +63,36 @@
             <a href="/normas/" class="vm-link-item">Normas</a>
             <a href="/info/" class="vm-link-item">Informacion</a>
           </div>
+        </div>
+        <div class="vm-card vm-section">
+          <div class="vm-section-title">Diagnostico API</div>
+          <div class="vm-kv"><span>Base URL</span><strong>${escapeHtml('https://app.vitamind.es/api')}</strong></div>
+          <div class="vm-actions">
+            <a href="#" id="diagnostics-button" class="button button-outline">Probar conexion</a>
+          </div>
+          <div id="diagnostics-output" class="vm-inline-note">Ejecuta esta prueba desde el movil para comprobar si la app llega al backend.</div>
           <div class="vm-actions">
             <a href="#" id="logout-button" class="button button-fill color-red">Cerrar sesion</a>
           </div>
         </div>
       `);
+
+      $el.find('#diagnostics-button').on('click', async () => {
+        const output = $el.find('#diagnostics-output');
+        output.text('Ejecutando comprobaciones...');
+
+        try {
+          const diagnostics = await runApiDiagnostics();
+          const lines = diagnostics.checks.map((check) => {
+            const status = check.ok ? 'OK' : check.skipped ? 'SKIP' : 'ERROR';
+            const sample = check.sample ? ` (${check.sample})` : '';
+            return `${status} - ${check.name}: ${check.message}${sample}`;
+          });
+          output.html(lines.map((line) => `<div>${escapeHtml(line)}</div>`).join(''));
+        } catch (error) {
+          output.text(error.message || 'No se pudo ejecutar el diagnostico');
+        }
+      });
 
       $el.find('#logout-button').on('click', async () => {
         try {

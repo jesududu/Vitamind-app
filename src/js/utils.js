@@ -92,18 +92,21 @@ export async function fetchAPI(endpoint, options = {}) {
     data = null,
     auth = true,
     isFormData = false,
+    timeout = 20000,
   } = options;
 
   const session = getSession();
   const headers = {
     Accept: 'application/json',
   };
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   if (auth && session.token) {
     headers.Authorization = `Bearer ${session.token}`;
   }
 
-  const config = { method, headers };
+  const config = { method, headers, signal: controller.signal };
   let url = `${env.apiUrl}${endpoint}`;
 
   if (data && method === 'GET') {
@@ -126,8 +129,30 @@ export async function fetchAPI(endpoint, options = {}) {
     }
   }
 
-  const response = await fetch(url, config);
-  const raw = await response.text();
+  let response;
+  let raw = '';
+
+  try {
+    response = await fetch(url, config);
+    raw = await response.text();
+  } catch (error) {
+    clearTimeout(timeoutId);
+
+    if (error.name === 'AbortError') {
+      const timeoutError = new Error('La API ha tardado demasiado en responder.');
+      timeoutError.code = 'API_TIMEOUT';
+      timeoutError.endpoint = endpoint;
+      throw timeoutError;
+    }
+
+    const networkError = new Error(`No se pudo conectar con la API en ${env.apiUrl}.`);
+    networkError.code = 'API_UNREACHABLE';
+    networkError.endpoint = endpoint;
+    networkError.cause = error;
+    throw networkError;
+  }
+
+  clearTimeout(timeoutId);
 
   let payload = null;
   try {
@@ -433,9 +458,66 @@ export function deleteAccount() {
   throw createMissingEndpointError('deleteAccount');
 }
 
+export async function runApiDiagnostics() {
+  const diagnostics = {
+    apiUrl: env.apiUrl,
+    checks: [],
+  };
+
+  const checks = [
+    {
+      name: 'ultimos-profesionales',
+      run: () => getLatestProfessionals(),
+    },
+    {
+      name: 'localidades',
+      run: () => getLocalidades(),
+    },
+    {
+      name: 'user',
+      requiresAuth: true,
+      run: () => getCurrentUser(),
+    },
+  ];
+
+  for (const check of checks) {
+    if (check.requiresAuth && !isAuthenticated()) {
+      diagnostics.checks.push({
+        name: check.name,
+        ok: false,
+        skipped: true,
+        message: 'Requiere sesion iniciada',
+      });
+      continue;
+    }
+
+    try {
+      const payload = await check.run();
+      diagnostics.checks.push({
+        name: check.name,
+        ok: true,
+        message: 'OK',
+        sample: payload ? Object.keys(payload).slice(0, 5).join(', ') : 'sin contenido',
+      });
+    } catch (error) {
+      diagnostics.checks.push({
+        name: check.name,
+        ok: false,
+        message: getApiErrorMessage(error),
+      });
+    }
+  }
+
+  return diagnostics;
+}
+
 export function getApiErrorMessage(error, fallback = 'No se pudo completar la solicitud') {
   if (!error) {
     return fallback;
+  }
+
+  if (error.code === 'API_UNREACHABLE' || error.code === 'API_TIMEOUT') {
+    return error.message;
   }
 
   if (error.code === 'API_ENDPOINT_PENDING' && error.endpoint) {
