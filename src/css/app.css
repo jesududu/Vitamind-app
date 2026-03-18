@@ -53,9 +53,9 @@ body {
 }
 
 .vm-home-navbar-inner {
-  min-height: 118px;
-  padding-top: calc(env(safe-area-inset-top, 0px) + 18px);
-  padding-bottom: 10px;
+  min-height: 156px;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 28px);
+  padding-bottom: 18px;
   display: flex;
   align-items: center;
 }
@@ -65,6 +65,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding-top: 18px;
 }
 
 .vm-home-nav-spacer {
@@ -80,12 +81,13 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  top: calc(env(safe-area-inset-top, 0px) + 34px);
 }
 
 .vm-home-logo {
   display: block;
   max-width: 100%;
-  max-height: 70px;
+  max-height: 78px;
   object-fit: contain;
   border-radius: 18px;
 }
@@ -126,7 +128,7 @@ body {
 }
 
 .page[data-name="home"] .vm-page-content {
-  padding-top: calc(env(safe-area-inset-top, 0px) + 168px);
+  padding-top: calc(env(safe-area-inset-top, 0px) + 214px);
 }
 
 .page[data-name="home"] .vm-search-card {
