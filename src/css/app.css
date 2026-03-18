@@ -244,6 +244,8 @@ body {
   gap: 10px;
   float: left;
   min-width: 100%;
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
 .horario {
@@ -264,6 +266,7 @@ body {
   text-align: center;
   cursor: pointer;
   flex: 0 0 auto;
+  box-sizing: border-box;
 }
 
 .horario.selected,

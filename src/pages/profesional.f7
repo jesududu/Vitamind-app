@@ -172,7 +172,7 @@
         }
 
         calendarProfessional = $f7.calendar.create({
-          containerEl: '#calendario-profesional',
+          containerEl: calendarEl,
           monthNames: months,
           value: [new Date(selectedDate)],
           minDate: today,
@@ -311,16 +311,22 @@
       $update();
 
       try {
-        const response = await utils.getProfessionalAvailabilityHtml({
+        const response = await utils.getProfessionalSlots($f7route.params.token, {
           fecha: selectedDate,
           servicio_id: selectedServiceId,
-          empleado_id: profile.id,
-          empresa_id: profile.empresa_id || null,
-          paciente_id: utils.getSession().pacienteId,
         });
 
-        if (response && response.estado === 'DONE' && response.filas) {
-          renderScheduleHtml(response.filas);
+        const fechas = (response && response.fechas) || [];
+        const firstDate = fechas[0] || {};
+        const firstEmployee = Object.values(firstDate.empleados || {})[0];
+        const employeeServices = (firstEmployee && firstEmployee.servicios) || [];
+        const servicio = employeeServices.find((item) => String(item.id) === String(selectedServiceId));
+        const horario = servicio && servicio.horarios && servicio.horarios.length ? servicio.horarios[0] : null;
+        const slots = (horario && horario.slots) || [];
+        const filas = utils.buildHorarioRowsHtml(slots);
+
+        if (filas) {
+          renderScheduleHtml(filas);
         } else {
           renderScheduleHtml('');
           slotsMessage = 'No hay horarios disponibles para esta fecha.';

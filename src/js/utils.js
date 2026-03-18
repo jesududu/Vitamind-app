@@ -834,6 +834,27 @@ var tmApp = {
     });
   },
 
+  buildHorarioRowsHtml: function (slots = []) {
+    let filas = '';
+
+    slots.forEach((slot) => {
+      if ((typeof slot.disponible !== 'undefined' && !slot.disponible) || slot.fuera_de_rango) {
+        return;
+      }
+
+      const inicio = String(slot.inicio || '').substring(0, 5);
+      const fin = String(slot.fin || '').substring(0, 5);
+
+      filas += '<div class="horario hora" data-selected="false" data-daypart="morning" ' +
+        `data-hora-servicio="${tmApp.escapeHtml(inicio)}" data-horafin-servicio="${tmApp.escapeHtml(fin)}" ` +
+        'style="margin-top:20px;padding:15px;color:#000;">' +
+        `<div class="time-slot-container"><div class="">${tmApp.escapeHtml(inicio)}</div></div>` +
+        '</div>';
+    });
+
+    return filas;
+  },
+
   resolveProfessionalTokenByEmployeeId: async function (employeeId) {
     const cache = tmApp.getStoredObject(tmApp.storageKeys.professionalMap) || {};
     if (cache[employeeId]) {
