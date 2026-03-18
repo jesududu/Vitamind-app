@@ -90,7 +90,7 @@
           </div>
 
           <div class="vm-card vm-profile-booking vm-prof-calendar-card">
-            <div class="block block-strong inset vm-prof-calendar-block">
+            <div class="block block-strong vm-prof-calendar-block">
               <div id="calendario-profesional"></div>
             </div>
           </div>

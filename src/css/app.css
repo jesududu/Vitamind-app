@@ -267,13 +267,13 @@ body {
 }
 
 .vm-prof-calendar-block {
-  margin: 10px 0;
-  padding: 18px 18px 20px;
+  margin: 0;
+  padding: 12px 8px 16px;
   background: #fff;
 }
 
 .vm-prof-calendar-card {
-  padding-bottom: 8px;
+  padding: 10px 8px 12px;
 }
 
 #calendario-profesional .calendar-day-today .calendar-day-number {
