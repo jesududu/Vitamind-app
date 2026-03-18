@@ -204,10 +204,6 @@ body {
   min-height: 80px;
 }
 
-.vm-calendar-card {
-  margin: 12px 0 0;
-}
-
 .calendar-custom-toolbar {
   background: none;
 }
@@ -221,44 +217,42 @@ body {
   color: var(--vm-secondary);
 }
 
-.vm-calendar-card .calendar-day-today .calendar-day-number {
+#calendario-profesional .calendar-day-today .calendar-day-number {
   color: var(--vm-primary);
 }
 
-.vm-calendar-card .calendar-day-selected .calendar-day-number {
+#calendario-profesional .calendar-day-selected .calendar-day-number {
   background-color: var(--vm-primary);
   color: #fff;
 }
 
-.contenedor-horarios-tm,
-.vm-horarios-wrap {
+.contenedor-horarios-tm {
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  background: transparent;
-  padding: 0 0 6px;
+  background: none;
+  padding: 0 15px;
 }
 
-.contenedor-horarios-tm::-webkit-scrollbar,
-.vm-horarios-wrap::-webkit-scrollbar {
+.contenedor-horarios-tm::-webkit-scrollbar {
   display: none;
 }
 
-.divHorarios,
-.vm-horarios-row {
+.divHorarios {
   display: flex;
+  overflow-x: scroll;
   gap: 10px;
   float: left;
   min-width: 100%;
 }
 
-.horario,
-.vm-horario {
+.horario {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 100px;
   min-width: 100px;
+  max-width: 100px;
   height: auto;
   padding: 20px 12px;
   border: 1px solid var(--vm-primary);
@@ -269,19 +263,28 @@ body {
   font-weight: 600;
   text-align: center;
   cursor: pointer;
+  flex: 0 0 auto;
 }
 
 .horario.selected,
-.vm-horario.selected,
-.vm-horario:active {
+.horario:active {
   background: var(--vm-primary);
   color: #fff;
 }
 
-.horario.disabled,
-.vm-horario.disabled {
+.horario.disabled {
   opacity: 0.4;
   pointer-events: none;
+}
+
+.noDisponibilidad {
+  background: none;
+}
+
+.noDisponibilidad p {
+  text-align: center;
+  margin: 0;
+  color: var(--vm-text-muted);
 }
 
 .vm-favorite-btn {

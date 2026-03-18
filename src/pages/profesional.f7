@@ -88,7 +88,7 @@
               </ul>
             </div>
 
-            <div class="block block-strong inset vm-calendar-card">
+            <div class="block block-strong inset">
               <div id="calendario-profesional"></div>
             </div>
           </div>
@@ -99,25 +99,27 @@
               ${loadingSlots && $h`
                 <div class="vm-loading">Cargando horarios...</div>
               `}
-              ${!loadingSlots && slotsMessage && $h`
-                <div class="vm-empty">${slotsMessage}</div>
-              `}
               ${!loadingSlots && !slotsMessage && getVisibleSlots().length ? $h`
-                <div class="contenedor-horarios-tm vm-horarios-wrap">
-                  <div class="divHorarios vm-horarios-row">
+                <div class="contenedor-horarios-tm">
+                  <div class="divHorarios">
                     ${getVisibleSlots().map((slot) => $h`
                       <a
                         href="#"
-                        class="horario vm-horario ${slot.disponible ? '' : 'disabled'} ${selectedSlotKey === `${slot.inicio}-${slot.fin}` ? 'selected' : ''}"
+                        class="horario ${slot.disponible ? '' : 'disabled'} ${selectedSlotKey === `${slot.inicio}-${slot.fin}` ? 'selected' : ''}"
                         @click=${(event) => {
                           event.preventDefault();
                           selectSlot(slot);
                         }}
                       >
-                        ${slot.inicio}
+                        ${slot.inicio} - ${slot.fin}
                       </a>
                     `)}
                   </div>
+                </div>
+              ` : ''}
+              ${!loadingSlots && slotsMessage ? $h`
+                <div class="block noDisponibilidad">
+                  <p>${slotsMessage}</p>
                 </div>
               ` : ''}
               ${!loadingSlots && !slotsMessage && slots.length > 6 ? $h`
@@ -150,6 +152,20 @@
     let initialized = false;
     let calendarProfessional = null;
     let selectedSlotKey = '';
+    const months = [
+      'Enero',
+      'Febrero',
+      'Marzo',
+      'Abril',
+      'Mayo',
+      'Junio',
+      'Julio',
+      'Agosto',
+      'Septiembre',
+      'Octubre',
+      'Noviembre',
+      'Diciembre',
+    ];
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -187,6 +203,7 @@
 
         calendarProfessional = $f7.calendar.create({
           containerEl: '#calendario-profesional',
+          monthNames: months,
           value: [new Date(selectedDate)],
           minDate: today,
           renderToolbar: function () {
@@ -200,10 +217,9 @@
           },
           on: {
             init: function (calendar) {
-              const monthNames = calendar.params.monthNames;
               const toolbarEl = currentPage.querySelector('.calendar-custom-toolbar');
               if (toolbarEl) {
-                toolbarEl.querySelector('.center').textContent = monthNames[calendar.currentMonth] + ', ' + calendar.currentYear;
+                toolbarEl.querySelector('.center').textContent = `${months[calendar.currentMonth]} ${calendar.currentYear}`;
                 toolbarEl.querySelector('.left .link').addEventListener('click', () => calendar.prevMonth());
                 toolbarEl.querySelector('.right .link').addEventListener('click', () => calendar.nextMonth());
               }
@@ -211,7 +227,7 @@
             monthYearChangeStart: function (calendar) {
               const toolbarEl = currentPage.querySelector('.calendar-custom-toolbar');
               if (toolbarEl) {
-                toolbarEl.querySelector('.center').textContent = calendar.params.monthNames[calendar.currentMonth] + ', ' + calendar.currentYear;
+                toolbarEl.querySelector('.center').textContent = `${months[calendar.currentMonth]} ${calendar.currentYear}`;
               }
             },
             change: function (calendar) {
