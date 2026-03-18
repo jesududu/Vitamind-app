@@ -31,7 +31,7 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default (props, { $el, $on, $f7, $store, $render }) => {
+  export default function (props, { $el, $on, $f7, $store, $render }) {
     const fillForm = (user) => {
       const paciente = (user && user.paciente) || {};
       const userNameParts = ((user && user.name) || '').split(' ');
@@ -93,5 +93,5 @@
     });
 
     return $render;
-  };
+  }
 </script>

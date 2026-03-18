@@ -21,7 +21,7 @@
   </div>
 </template>
 <script>
-  export default (props, { $f7route, $store }) => {
+  export default function (props, { $f7route, $store }) {
     const products = $store.getters.products;
     const productId = $f7route.params.id;
     let currentProduct;
@@ -32,5 +32,5 @@
     });
 
     return $render;
-  };
+  }
 </script>

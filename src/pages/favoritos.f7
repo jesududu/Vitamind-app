@@ -15,7 +15,7 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default (props, { $el, $on, $f7, $render }) => {
+  export default function (props, { $el, $on, $f7, $render }) {
     const renderLoggedOut = () => {
       $el.find('#favoritos-content').html(`
         <div class="vm-form-card">
@@ -84,5 +84,5 @@
     $on('pageAfterIn', renderFavorites);
 
     return $render;
-  };
+  }
 </script>

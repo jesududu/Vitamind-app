@@ -29,7 +29,7 @@
   </div>
 </template>
 <script>
-  export default (props, { $store }) => {
+  export default function (props, { $store }) {
     const products = $store.getters.products;
 
     const addProduct = () => {

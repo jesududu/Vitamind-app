@@ -22,7 +22,7 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default (props, { $el, $on, $render }) => {
+  export default function (props, { $el, $on, $render }) {
     $on('pageInit', () => {
       $el.find('#notifications-check').on('click', async () => {
         try {
@@ -34,5 +34,5 @@
     });
 
     return $render;
-  };
+  }
 </script>

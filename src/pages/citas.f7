@@ -14,7 +14,7 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default (props, { $el, $on, $f7router, $f7, $render }) => {
+  export default function (props, { $el, $on, $f7router, $f7, $render }) {
     const getPageEl = () => (typeof $el !== 'undefined' && $el && typeof $el.find === 'function' ? $el : $f7.$($el));
 
     const renderSection = (title, items = []) => `
@@ -79,5 +79,5 @@
     $on('pageInit', loadAppointments);
 
     return $render;
-  };
+  }
 </script>

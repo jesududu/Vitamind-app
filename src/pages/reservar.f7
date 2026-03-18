@@ -15,7 +15,7 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default (props, { $el, $on, $f7route, $f7, $f7router, $render }) => {
+  export default function (props, { $el, $on, $f7route, $f7, $f7router, $render }) {
     let profile = null;
 
     const renderSlots = async () => {
@@ -158,5 +158,5 @@
     $on('pageInit', loadPage);
 
     return $render;
-  };
+  }
 </script>

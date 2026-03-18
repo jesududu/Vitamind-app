@@ -27,7 +27,7 @@
   </div>
 </template>
 <script>
-  export default (props) => {
+  export default function (props) {
     const user = props.user;
 
     return $render;

@@ -15,7 +15,7 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default (props, { $el, $on, $f7route, $f7, $render }) => {
+  export default function (props, { $el, $on, $f7route, $f7, $render }) {
     const getPageEl = () => (typeof $el !== 'undefined' && $el && typeof $el.find === 'function' ? $el : $f7.$($el));
     let employeeId = null;
     let isFavorite = false;
@@ -109,5 +109,5 @@
     $on('pageInit', loadProfile);
 
     return $render;
-  };
+  }
 </script>
