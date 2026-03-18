@@ -66,7 +66,7 @@
           </div>
 
           <div class="vm-card vm-profile-booking">
-            <div class="vm-section-title">Reservar cita</div>
+            <div class="vm-section-title">Servicio</div>
             <div class="list no-hairlines-md">
               <ul>
                 <li class="item-content item-input">
@@ -87,7 +87,10 @@
                 </li>
               </ul>
             </div>
+          </div>
 
+          <div class="vm-card vm-profile-booking vm-prof-calendar-card">
+            <div class="vm-section-title">Calendario</div>
             <div class="block block-strong inset vm-prof-calendar-block">
               <div id="calendario-profesional"></div>
             </div>
