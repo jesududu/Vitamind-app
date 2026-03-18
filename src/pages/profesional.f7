@@ -20,9 +20,9 @@
         <div class="vm-profile-layout">
           <div class="vm-card vm-profile-main">
             <div class="vm-profile-image-wrap">
-              <img class="vm-profile-image" src="${profileImage}" alt="${profileName}" />
+              <img class="vm-profile-image" src="${getProfileImage()}" alt="${getProfileName()}" />
             </div>
-            <div class="vm-card-title">${profileName}</div>
+            <div class="vm-card-title">${getProfileName()}</div>
             <div class="vm-card-subtitle">${profile.localidad || 'Localidad no disponible'}</div>
 
             <div class="vm-profile-meta">
@@ -52,7 +52,7 @@
 
             <div class="vm-section-title">Servicios</div>
             <div class="vm-service-list">
-              ${services.length ? services.map((servicio) => $h`
+              ${getServices().length ? getServices().map((servicio) => $h`
                 <div class="vm-service-item">
                   <div class="vm-card-title">${servicio.titulo}</div>
                   <div class="vm-card-subtitle">${servicio.consulta_online ? 'Consulta online disponible' : 'Consulta presencial'}</div>
@@ -85,7 +85,7 @@
                     <div class="item-title item-label">Servicio</div>
                     <div class="item-input-wrap">
                       <select id="profile-servicio" @change=${onServiceChange}>
-                        ${services.length ? services.map((servicio) => $h`
+                        ${getServices().length ? getServices().map((servicio) => $h`
                           <option value="${servicio.id}" selected=${String(servicio.id) === String(selectedServiceId)}>
                             ${servicio.titulo}
                           </option>
@@ -111,9 +111,9 @@
               ${!loadingSlots && slotsMessage && $h`
                 <div class="vm-empty">${slotsMessage}</div>
               `}
-              ${!loadingSlots && !slotsMessage && visibleSlots.length ? $h`
+              ${!loadingSlots && !slotsMessage && getVisibleSlots().length ? $h`
                 <div class="vm-horas-group">
-                  ${visibleSlots.map((slot) => $h`
+                  ${getVisibleSlots().map((slot) => $h`
                     <button class="button ${slot.disponible ? 'button-outline' : 'disabled'} vm-hora-item" @click=${() => selectSlot(slot)}>
                       ${slot.inicio} - ${slot.fin}
                     </button>
@@ -153,10 +153,12 @@
     let selectedDate = today;
     let selectedServiceId = '';
 
-    const profileName = profile ? (profile.nombre_completo || profile.nombre || 'Profesional') : 'Profesional';
-    const profileImage = profile ? (profile.imagen || '/images/avatar/01.jpg') : '/images/avatar/01.jpg';
-    const services = profile && profile.servicios ? profile.servicios : [];
-    const visibleSlots = showAllSlots ? slots : slots.slice(0, 6);
+    const getProfileName = () => (profile ? (profile.nombre_completo || profile.nombre || 'Profesional') : 'Profesional');
+    const getProfileImage = () => (
+      profile ? utils.normalizeProfessionalImage(profile.imagen || profile.imagen_url) : '/images/avatar/01.jpg'
+    );
+    const getServices = () => (profile && Array.isArray(profile.servicios) ? profile.servicios : []);
+    const getVisibleSlots = () => (showAllSlots ? slots : slots.slice(0, 6));
 
     const onDateChange = (event) => {
       selectedDate = event.target.value;
@@ -193,7 +195,7 @@
     const selectSlot = (slot) => {
       if (!slot.disponible || !profile) return;
 
-      const selectedService = services.find((item) => String(item.id) === String(selectedServiceId));
+      const selectedService = getServices().find((item) => String(item.id) === String(selectedServiceId));
       if (!selectedService) return;
 
       const draft = {
@@ -203,7 +205,7 @@
         paciente_id: utils.getSession().pacienteId,
         servicio_id: selectedService.id,
         servicio_titulo: selectedService.titulo,
-        profesional: profileName,
+        profesional: getProfileName(),
         fecha: selectedDate,
         hora_inicio: slot.inicio.length === 5 ? `${slot.inicio}:00` : slot.inicio,
         hora_fin: slot.fin.length === 5 ? `${slot.fin}:00` : slot.fin,
@@ -273,7 +275,7 @@
         const token = $f7route.params.token;
         profile = await utils.getProfessionalProfile(token);
         employeeId = profile && profile.id ? profile.id : null;
-        selectedServiceId = services.length ? String(services[0].id) : '';
+        selectedServiceId = getServices().length ? String(getServices()[0].id) : '';
 
         if (utils.isAuthenticated() && employeeId) {
           try {
@@ -284,7 +286,7 @@
           }
         }
 
-        if (services.length) {
+        if (getServices().length) {
           await loadSlots();
         } else {
           slots = [];
