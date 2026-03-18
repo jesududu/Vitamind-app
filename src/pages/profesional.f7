@@ -88,7 +88,7 @@
               </ul>
             </div>
 
-            <div class="block block-strong inset" style="margin-top: 10px; margin-bottom: 10px;">
+            <div class="block block-strong inset vm-prof-calendar-block">
               <div id="calendario-profesional"></div>
             </div>
           </div>

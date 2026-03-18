@@ -218,6 +218,12 @@ body {
   color: var(--vm-secondary);
 }
 
+.vm-prof-calendar-block {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding: 12px;
+}
+
 #calendario-profesional .calendar-day-today .calendar-day-number {
   color: var(--vm-primary);
 }
