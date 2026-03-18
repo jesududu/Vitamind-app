@@ -296,6 +296,11 @@
     const selectSlot = (slot) => {
       if (!profile) return;
 
+      if (!utils.isAuthenticated()) {
+        $f7.dialog.alert('Debes iniciar sesion para reservar una cita.');
+        return;
+      }
+
       const selectedService = getServices().find((item) => String(item.id) === String(selectedServiceId));
       if (!selectedService) return;
 

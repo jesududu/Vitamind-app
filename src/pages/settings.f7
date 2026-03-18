@@ -2,124 +2,192 @@
   <div class="page" data-name="settings">
     <div class="navbar">
       <div class="navbar-bg"></div>
-      <div class="navbar-inner">
+      <div class="navbar-inner sliding">
         <div class="title">Cuenta</div>
       </div>
     </div>
     <div class="page-content vm-page-content">
-      <div id="settings-content">
-        <div class="vm-form-card">
-          <div class="vm-section-title">Cargando cuenta</div>
-          <p class="vm-muted">Preparando la informacion del paciente...</p>
+      ${!logeado && $h`
+        <div class="block">
+          <h1 style="font-size: 50px; margin-bottom: 0px; margin-top: 0px;">Hola</h1>
+          <p>Bienvenido a VitaMind. Desde aqui puedes acceder a tu cuenta de paciente.</p>
         </div>
-      </div>
+
+        <div class="block">
+          <div class="row" style="margin-top: 10px;">
+            <a href="/login/" class="col button button-large button-fill login-button" style="text-transform:none;">Iniciar sesion</a>
+          </div>
+          <div class="row" style="margin-top: 10px;">
+            <a href="/registro/" class="col button button-large button-outline login-button" style="text-transform:none;">Crear cuenta</a>
+          </div>
+          <div class="row" style="margin-top: 10px;">
+            <a href="/forgot-password/" class="col button button-large button-outline login-button" style="text-transform:none;">Recuperar contrasena</a>
+          </div>
+          <div class="row" style="margin-top: 10px;">
+            <p style="text-align: center; width: 100%;" class="version">Version ${version_app}</p>
+          </div>
+        </div>
+      `}
+
+      ${logeado && $h`
+        <div class="list media-list list-strong mt-tm-ios" style="margin-top:0px;">
+          <ul>
+            <li>
+              <a href="/editar-perfil/" class="item-content" data-reload-detail="true">
+                <div class="item-media optWedding">
+                  <img class="imgUsu avatar-circle" src="${avatarUrl}" width="90" />
+                </div>
+                <div class="item-inner">
+                  <div class="item-title-row">
+                    <div class="item-title inpUsuario" style="color: #000;">${userName}</div>
+                  </div>
+                  <div class="item-subtitle inpEmailUsu" style="color: #000;">${userEmail}</div>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="list list-strong inset list-dividers-ios searchbar-hide-on-search">
+          <ul>
+            <li>
+              <a href="/editar-perfil/" class="item-link item-content" data-reload-detail="true">
+                <div class="item-media">
+                  <i class="icon material-symbols-outlined" style="color:#000;">person</i>
+                </div>
+                <div class="item-inner">
+                  <div class="item-title">Mi perfil</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="/favoritos/" class="item-link item-content" data-reload-detail="true">
+                <div class="item-media">
+                  <i class="icon material-symbols-outlined" style="color:#000;">favorite</i>
+                </div>
+                <div class="item-inner">
+                  <div class="item-title">Favoritos</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="/cambiar-pass/" class="item-link item-content" data-reload-detail="true">
+                <div class="item-media">
+                  <i class="icon material-symbols-outlined" style="color:#000;">lock</i>
+                </div>
+                <div class="item-inner">
+                  <div class="item-title">Cambiar contrasena</div>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="list list-strong inset list-dividers-ios searchbar-hide-on-search">
+          <ul>
+            <li>
+              <a href="/notificaciones/" class="item-link item-content" data-reload-detail="true">
+                <div class="item-media">
+                  <i class="icon material-symbols-outlined" style="color:#000;">notifications</i>
+                </div>
+                <div class="item-inner">
+                  <div class="item-title">Notificaciones</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="/normas/" class="item-link item-content" data-reload-detail="true">
+                <div class="item-media">
+                  <i class="icon material-symbols-outlined" style="color:#000;">rule</i>
+                </div>
+                <div class="item-inner">
+                  <div class="item-title">Normas</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="/info/" class="item-link item-content" data-reload-detail="true">
+                <div class="item-media">
+                  <i class="icon material-symbols-outlined" style="color:#000;">import_contacts</i>
+                </div>
+                <div class="item-inner">
+                  <div class="item-title">Informacion</div>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="list list-strong inset list-dividers-ios components-list searchbar-found">
+          <ul>
+            <li>
+              <a href="#" class="item-link item-content" @click=${logout}>
+                <div class="item-media">
+                  <i class="icon material-symbols-outlined" style="color:#000;">power_settings_new</i>
+                </div>
+                <div class="item-inner">
+                  <div class="item-title">Cerrar sesion</div>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="block-title">
+          <p class="version">Version ${version_app}</p>
+        </div>
+
+        <div class="list list-strong inset list-dividers-ios searchbar-hide-on-search">
+          <ul>
+            <li>
+              <a href="/terminos/" class="item-content item-link" data-reload-detail="true">
+                <div class="item-inner">
+                  <div class="item-title">Terminos</div>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
+      `}
     </div>
   </div>
 </template>
 <script>
+  import env from '../js/env.js';
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $on, $onMounted, $f7, $store }) {
-    const getPageEl = () => (typeof $el !== 'undefined' && $el && typeof $el.find === 'function' ? $el : $f7.$($el));
-    let initialized = false;
+  export default function (props, { $f7, $on, $store }) {
+    const session = utils.getSession();
+    const user = session.user || {};
+    const logeado = utils.isAuthenticated();
+    const version_app = env.version;
+    const userName = utils.escapeHtml(user.name || user.nombre || 'Paciente');
+    const userEmail = utils.escapeHtml(user.email || '');
+    const avatarUrl = utils.normalizeProfessionalImage(user.imagen || user.avatar || '');
 
-    const render = () => {
-      initialized = true;
-      const pageEl = getPageEl();
-      const container = pageEl.find('#settings-content');
+    const logout = async (event) => {
+      event.preventDefault();
 
-      if (!utils.isAuthenticated()) {
-        container.html(`
-          <div class="vm-form-card">
-            <div class="vm-section-title">Acceso paciente</div>
-            <p class="vm-muted">Desde aqui centralizamos el login, registro y gestion basica de la sesion del paciente.</p>
-            <div class="vm-actions">
-              <a href="/login/" class="button button-fill">Iniciar sesion</a>
-              <a href="/registro/" class="button button-outline">Crear cuenta</a>
-              <a href="/forgot-password/" class="button button-outline">Recuperar contrasena</a>
-            </div>
-          </div>
-        `);
-        return;
+      try {
+        await utils.logout();
+      } catch (error) {
+        // Si falla el backend igualmente cerramos sesion local.
       }
 
-      const session = utils.getSession();
-      const user = session.user || {};
-
-      container.html(`
-        <div class="vm-card">
-          <div class="vm-section-title">Sesion actual</div>
-          <div class="vm-kv"><span>Email</span><strong>${utils.escapeHtml(user.email || '')}</strong></div>
-          <div class="vm-kv"><span>Paciente ID</span><strong>${utils.escapeHtml(user.paciente_id || session.pacienteId || '')}</strong></div>
-          <div class="vm-kv"><span>User ID</span><strong>${utils.escapeHtml(user.id || '')}</strong></div>
-          <div class="vm-actions">
-            <a href="/editar-perfil/" class="button button-fill">Editar perfil</a>
-            <a href="/favoritos/" class="button button-outline">Mis favoritos</a>
-            <a href="/cambiar-pass/" class="button button-outline">Cambiar contrasena</a>
-          </div>
-        </div>
-        <div class="vm-card vm-section">
-          <div class="vm-section-title">Contenido y soporte</div>
-          <div class="vm-link-list">
-            <a href="/notificaciones/" class="vm-link-item">Notificaciones</a>
-            <a href="/terminos/" class="vm-link-item">Terminos</a>
-            <a href="/normas/" class="vm-link-item">Normas</a>
-            <a href="/info/" class="vm-link-item">Informacion</a>
-          </div>
-        </div>
-        <div class="vm-card vm-section">
-          <div class="vm-section-title">Diagnostico API</div>
-          <div class="vm-kv"><span>Base URL</span><strong>${utils.escapeHtml('https://app.vitamind.es/api')}</strong></div>
-          <div class="vm-actions">
-            <a href="#" id="diagnostics-button" class="button button-outline">Probar conexion</a>
-          </div>
-          <div id="diagnostics-output" class="vm-inline-note">Ejecuta esta prueba desde el movil para comprobar si la app llega al backend.</div>
-          <div class="vm-actions">
-            <a href="#" id="logout-button" class="button button-fill color-red">Cerrar sesion</a>
-          </div>
-        </div>
-      `);
-
-      pageEl.find('#diagnostics-button').on('click', async () => {
-        const output = pageEl.find('#diagnostics-output');
-        output.text('Ejecutando comprobaciones...');
-
-        try {
-          const diagnostics = await utils.runApiDiagnostics();
-          const lines = diagnostics.checks.map((check) => {
-            const status = check.ok ? 'OK' : check.skipped ? 'SKIP' : 'ERROR';
-            const sample = check.sample ? ` (${check.sample})` : '';
-            return `${status} - ${check.name}: ${check.message}${sample}`;
-          });
-          output.html(lines.map((line) => `<div>${utils.escapeHtml(line)}</div>`).join(''));
-        } catch (error) {
-          output.text(error.message || 'No se pudo ejecutar el diagnostico');
-        }
-      });
-
-      pageEl.find('#logout-button').on('click', async () => {
-        try {
-          await utils.logout();
-        } catch (error) {
-          // Si el token ya ha expirado, igualmente cerramos la sesion local.
-        }
-
-        utils.clearSession();
-        $store.dispatch('refreshSession');
-        render();
-        const homeView = $f7.views.get('#view-home');
-        if (homeView && homeView.router) {
-          homeView.router.navigate('/cli/');
-        }
-      });
+      utils.clearSession();
+      $store.dispatch('refreshSession');
+      const homeView = $f7.views.get('#view-home');
+      if (homeView && homeView.router) {
+        homeView.router.navigate('/cli/');
+      }
+      const settingsView = $f7.views.get('#view-settings');
+      if (settingsView && settingsView.router) {
+        settingsView.router.refreshPage();
+      }
     };
 
-    $on('pageInit', render);
-    $on('pageAfterIn', render);
-    $onMounted(() => {
-      if (!initialized) {
-        render();
-      }
+    $on('pageAfterIn', () => {
+      // Mantenemos este hook por si luego hay que refrescar datos como en la referencia.
     });
 
     return $render;
