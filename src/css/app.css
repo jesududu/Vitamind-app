@@ -221,6 +221,26 @@ body {
   color: var(--vm-secondary);
 }
 
+.calendar-header {
+  background: #f7f7f7 !important;
+}
+
+.toolbar-top {
+  background: #f7f7f7 !important;
+}
+
+.calendar-months {
+  background: #ffffff !important;
+}
+
+.calendar-week-header {
+  background: #f7f7f7 !important;
+}
+
+.calendar-footer {
+  background: #f7f7f7 !important;
+}
+
 .calendar-day {
   flex-shrink: 1;
   display: flex;
