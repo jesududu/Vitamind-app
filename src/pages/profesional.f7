@@ -119,7 +119,7 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $f7route, $f7, $f7router, $on, $onMounted, $update }) {
+  export default function (props, { $f7route, $f7, $f7router, $on, $onMounted, $update, $el }) {
     let profile = null;
     let employeeId = null;
     let isFavorite = false;
@@ -161,16 +161,24 @@
       loadSlots();
     };
 
+    const getPageEl = () => {
+      if ($el && typeof $el.find === 'function' && $el[0]) return $el[0];
+      if ($el && $el.nodeType === 1) return $el;
+      return document.querySelector('.page[data-name="profesional"].page-current') || document.querySelector('.page[data-name="profesional"]');
+    };
+
     const initCalendar = () => {
       $f7.utils.nextTick(() => {
-        const currentPage = document.querySelector('.page[data-name="profesional"].page-current') || document.querySelector('.page[data-name="profesional"]');
+        const currentPage = getPageEl();
         const calendarEl = currentPage ? currentPage.querySelector('#calendario-profesional') : null;
         if (!calendarEl) return;
 
         if (calendarProfessional) {
-          calendarProfessional.setValue([new Date(selectedDate)]);
-          return;
+          calendarProfessional.destroy();
+          calendarProfessional = null;
         }
+
+        calendarEl.innerHTML = '';
 
         calendarProfessional = $f7.calendar.create({
           containerEl: calendarEl,
@@ -238,10 +246,7 @@
       }
     };
 
-    const getCurrentPage = () => (
-      document.querySelector('.page[data-name="profesional"].page-current') ||
-      document.querySelector('.page[data-name="profesional"]')
-    );
+    const getCurrentPage = () => getPageEl();
 
     const renderScheduleHtml = (html) => {
       const currentPage = getCurrentPage();
@@ -340,6 +345,7 @@
         loadingSlots = false;
         $update();
         $f7.utils.nextTick(() => {
+          initCalendar();
           renderScheduleHtml(scheduleHtml);
         });
       }
@@ -398,6 +404,10 @@
         calendarProfessional.destroy();
         calendarProfessional = null;
       }
+    });
+    $on('pageAfterIn', () => {
+      initCalendar();
+      renderScheduleHtml(scheduleHtml);
     });
 
     return $render;
