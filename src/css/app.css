@@ -232,9 +232,6 @@ body {
   -ms-overflow-style: none;
   background: white;
   padding: 0px 15px;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
-  touch-action: pan-x;
 }
 
 .contenedor-horarios-tm::-webkit-scrollbar {
@@ -247,30 +244,26 @@ body {
   gap: 10px;
   float: left;
   min-width: 100%;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
-  touch-action: pan-x;
 }
 
 .horario {
-  display: block;
   width: 100px;
-  min-width: 100px;
   height: auto;
   background-color: #ffffff;
   border: none;
   border-radius: 8px;
-  font-size: 16px;
-  border: 1px solid #3bdea7;
-  text-align: center;
   cursor: pointer;
-  flex: 0 0 auto;
-  box-sizing: border-box;
+  font-size: 16px;
+  border: 1px solid var(--vm-primary);
+  text-align: center;
+  padding: 20px;
+  color: var(--vm-primary-dark);
 }
 
 .horario.selected,
 .horario:active {
-  background-color: #3bdea7;
+  background-color: var(--vm-primary);
+  color: #fff;
 }
 
 .horario.disabled {
