@@ -1,6 +1,12 @@
 import $ from 'dom7';
 import Framework7, { getDevice } from 'framework7/bundle';
 
+import { PushNotifications } from '@capacitor/push-notifications';
+import { StatusBar, Style } from '@capacitor/status-bar';
+import { Capacitor } from '@capacitor/core';
+import { SplashScreen } from '@capacitor/splash-screen';
+import { Network } from '@capacitor/network';
+
 import 'framework7/css/bundle';
 
 import '../css/icons.css';
@@ -37,12 +43,18 @@ function initApp() {
   });
 
   app.on('pageInit', function () {
+    updateStatusBarFromActiveView();
+
     var authToken = localStorage.getItem(utils.storageKeys.token);
     if (authToken) {
       utils.refreshCurrentUser().catch(function () {
-        // Si falla, seguimos mostrando la app con la sesion local.
+        // Mantenemos la sesion local aunque falle el refresco remoto.
       });
     }
+  });
+
+  app.on('pageAfterIn', function () {
+    updateStatusBarFromActiveView();
   });
 
   app.on('init', function () {
@@ -50,13 +62,44 @@ function initApp() {
 
     if (f7.device.capacitor) {
       capacitorApp.init(f7);
+      utils.init(f7);
+      initNetworkListener(f7);
+      checkPushNotificationPermission();
+      setupPushNotifications(f7);
+    } else {
+      utils.init(f7);
     }
-
-    utils.init(f7);
 
     if (process.env.NODE_ENV !== 'production') {
       console.log('VitaMind app inicializada con API:', env.apiUrl);
     }
+
+    document.addEventListener('deviceready', function () {
+      var authToken = localStorage.getItem(utils.storageKeys.token);
+      if (authToken) {
+        utils.refreshCurrentUser().catch(function () {
+          // No bloqueamos la app si falla.
+        });
+      } else {
+        f7.preloader.hide();
+      }
+    });
+
+    document.addEventListener('resume', function () {
+      var currentView = f7.views.current;
+      var authToken = localStorage.getItem(utils.storageKeys.token);
+
+      if (authToken && currentView && currentView.router && currentView.router.currentRoute) {
+        currentView.router.navigate(currentView.router.currentRoute.url, {
+          ignoreCache: true,
+          reloadCurrent: true,
+        });
+      }
+    });
+
+    document.addEventListener('pause', function () {
+      // Reservado para logica futura.
+    }, false);
 
     $('#btnHome').off('click.vitamind').on('click.vitamind', function () {
       var view = f7.views.get('#view-home');
@@ -100,14 +143,121 @@ function initApp() {
   });
 
   $(document).on('click', 'a[href="#"]', function (event) {
-    const hasId = this.id && this.id.length > 0;
-    const hasActionRole = this.classList.contains('link') || this.classList.contains('button');
+    var hasId = this.id && this.id.length > 0;
+    var hasActionRole = this.classList.contains('link') || this.classList.contains('button');
     if (hasActionRole || hasId) {
       event.preventDefault();
     }
   });
 
   return app;
+}
+
+function updateStatusBarFromActiveView() {
+  var activeEl = document.querySelector('.view.tab.tab-active');
+  if (!activeEl) return;
+
+  var view = activeEl.f7View;
+  if (!view || !view.router || !view.router.currentRoute) return;
+
+  var routeUrl = view.router.currentRoute.url || '';
+  var routeName = view.router.currentRoute.name || '';
+
+  if (routeUrl === '/cli/' || routeUrl === '/search/' || routeName === 'home' || routeName === 'search') {
+    setupStatusBar(routeName || routeUrl);
+  } else {
+    setupStatusBar('default');
+  }
+}
+
+async function setupStatusBar(origen) {
+  if (!Capacitor.isNativePlatform()) return;
+
+  try {
+    await StatusBar.setOverlaysWebView({ overlay: false });
+
+    var color = '#F7F7F7';
+    var style = Style.Dark;
+
+    if (origen === 'home' || origen === '/cli/' || origen === 'search' || origen === '/search/') {
+      color = '#f4934e';
+      style = Style.Light;
+    }
+
+    await StatusBar.setBackgroundColor({ color: color });
+    await StatusBar.setStyle({ style: style });
+    SplashScreen.hide();
+  } catch (error) {
+    console.error('Error configurando StatusBar:', error);
+  }
+}
+
+function handleOffline(app) {
+  console.log('Conexion perdida');
+  app.preloader.hide();
+}
+
+function handleOnline(app) {
+  console.log('Conexion restaurada');
+}
+
+function initNetworkListener(app) {
+  Network.addListener('networkStatusChange', function (status) {
+    if (!status.connected) {
+      handleOffline(app);
+    } else {
+      handleOnline(app);
+    }
+  });
+
+  Network.getStatus().then(function (status) {
+    if (!status.connected) {
+      handleOffline(app);
+    }
+  });
+}
+
+async function checkPushNotificationPermission() {
+  if (!Capacitor.isNativePlatform()) return;
+
+  try {
+    var permissionStatus = await PushNotifications.checkPermissions();
+
+    if (permissionStatus.receive !== 'granted') {
+      await PushNotifications.requestPermissions();
+    }
+  } catch (error) {
+    console.error('Error verificando permisos de notificaciones:', error);
+  }
+}
+
+async function setupPushNotifications(app) {
+  if (!Capacitor.isNativePlatform()) return;
+
+  PushNotifications.addListener('registration', function (token) {
+    localStorage.setItem('vitamind_registration_id', token.value);
+  });
+
+  PushNotifications.addListener('registrationError', function (error) {
+    console.error('Error en el registro de notificaciones:', error);
+  });
+
+  PushNotifications.addListener('pushNotificationReceived', function (notification) {
+    console.log('Notificacion recibida:', notification);
+  });
+
+  PushNotifications.addListener('pushNotificationActionPerformed', function () {
+    var view = app.views.current;
+    if (view && view.router) {
+      view.router.navigate('/notificaciones/');
+    }
+  });
+
+  try {
+    await PushNotifications.register();
+  } catch (error) {
+    console.error('Error al registrar notificaciones push:', error);
+  }
 }
 
 initApp();
