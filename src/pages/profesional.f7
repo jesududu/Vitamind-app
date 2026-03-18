@@ -15,23 +15,26 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $on, $f7route, $f7, $f7router }) {
+  export default function (props, { $el, $on, $onMounted, $f7route, $f7, $f7router }) {
     let profile = null;
     let employeeId = null;
     let isFavorite = false;
+    let initialized = false;
+
+    const getPageEl = () => (typeof $el !== 'undefined' && $el && typeof $el.find === 'function' ? $el : $f7.$($el));
 
     const getSelectedDate = () => {
-      const dateInput = $el.find('#profile-fecha');
+      const dateInput = getPageEl().find('#profile-fecha');
       return dateInput.length ? dateInput.val() : '';
     };
 
     const getSelectedServiceId = () => {
-      const select = $el.find('#profile-servicio');
+      const select = getPageEl().find('#profile-servicio');
       return select.length ? select.val() : '';
     };
 
     const syncFavoriteButton = () => {
-      const button = $el.find('#favorite-button');
+      const button = getPageEl().find('#favorite-button');
       if (!button.length) return;
       button
         .toggleClass('button-fill', isFavorite)
@@ -40,7 +43,7 @@
     };
 
     const renderSlots = async () => {
-      const container = $el.find('#profile-slots');
+      const container = getPageEl().find('#profile-slots');
       const servicioId = getSelectedServiceId();
       const fecha = getSelectedDate();
 
@@ -147,9 +150,10 @@
     };
 
     const bindProfileEvents = () => {
+      const pageEl = getPageEl();
       syncFavoriteButton();
 
-      $el.find('#favorite-button').on('click', async () => {
+      pageEl.find('#favorite-button').on('click', async () => {
         if (!employeeId) return;
         try {
           if (!utils.isAuthenticated()) {
@@ -170,9 +174,9 @@
         }
       });
 
-      $el.find('#profile-servicio').on('change', renderSlots);
-      $el.find('#profile-fecha').on('change', renderSlots);
-      $el.find('#profile-reservar-btn').on('click', () => {
+      pageEl.find('#profile-servicio').on('change', renderSlots);
+      pageEl.find('#profile-fecha').on('change', renderSlots);
+      pageEl.find('#profile-reservar-btn').on('click', () => {
         const servicioId = getSelectedServiceId();
         if (!servicioId) {
           $f7.dialog.alert('Selecciona primero un servicio.');
@@ -183,7 +187,7 @@
     };
 
     const loadProfile = async () => {
-      const container = $el.find('#profile-content');
+      const container = getPageEl().find('#profile-content');
       container.html('<div class="vm-loading">Cargando perfil profesional...</div>');
 
       try {
@@ -277,14 +281,21 @@
         if (services.length) {
           renderSlots();
         } else {
-          $el.find('#profile-slots').html('<div class="vm-empty">No hay servicios disponibles para este profesional.</div>');
+          getPageEl().find('#profile-slots').html('<div class="vm-empty">No hay servicios disponibles para este profesional.</div>');
         }
       } catch (error) {
         container.html(`<div class="vm-empty">${utils.escapeHtml(utils.getApiErrorMessage(error, 'No se pudo cargar el perfil del profesional'))}</div>`);
       }
     };
 
-    $on('pageInit', loadProfile);
+    const initPage = () => {
+      if (initialized) return;
+      initialized = true;
+      loadProfile();
+    };
+
+    $on('pageInit', initPage);
+    $onMounted(initPage);
 
     return $render;
   }
