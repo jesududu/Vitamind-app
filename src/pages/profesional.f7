@@ -99,34 +99,14 @@
               ${loadingSlots && $h`
                 <div class="vm-loading">Cargando horarios...</div>
               `}
-              ${!loadingSlots && !slotsMessage && getVisibleSlots().length ? $h`
+              ${!loadingSlots ? $h`
                 <div class="contenedor-horarios-tm">
-                  <div class="divHorarios">
-                    ${getVisibleSlots().map((slot) => $h`
-                      <a
-                        href="#"
-                        class="horario ${slot.disponible ? '' : 'disabled'} ${selectedSlotKey === `${slot.inicio}-${slot.fin}` ? 'selected' : ''}"
-                        @click=${(event) => {
-                          event.preventDefault();
-                          selectSlot(slot);
-                        }}
-                      >
-                        ${slot.inicio} - ${slot.fin}
-                      </a>
-                    `)}
-                  </div>
+                  <div class="divHorarios"></div>
                 </div>
               ` : ''}
               ${!loadingSlots && slotsMessage ? $h`
                 <div class="block noDisponibilidad">
                   <p>${slotsMessage}</p>
-                </div>
-              ` : ''}
-              ${!loadingSlots && !slotsMessage && slots.length > 6 ? $h`
-                <div class="vm-actions">
-                  <a href="#" class="button button-small button-outline" @click=${toggleMoreSlots}>
-                    ${showAllSlots ? 'Ver menos horas' : 'Ver todas las horas'}
-                  </a>
                 </div>
               ` : ''}
             </div>
@@ -147,11 +127,9 @@
     let profileError = '';
     let loadingSlots = false;
     let slotsMessage = '';
-    let slots = [];
-    let showAllSlots = false;
     let initialized = false;
     let calendarProfessional = null;
-    let selectedSlotKey = '';
+    let selectedSlot = null;
     const months = [
       'Enero',
       'Febrero',
@@ -177,17 +155,9 @@
       profile ? utils.normalizeProfessionalImage(profile.imagen || profile.imagen_url) : '/images/avatar/01.jpg'
     );
     const getServices = () => (profile && Array.isArray(profile.servicios) ? profile.servicios : []);
-    const getVisibleSlots = () => (showAllSlots ? slots : slots.slice(0, 6));
-
     const onServiceChange = (event) => {
       selectedServiceId = event.target.value;
       loadSlots();
-    };
-
-    const toggleMoreSlots = (event) => {
-      event.preventDefault();
-      showAllSlots = !showAllSlots;
-      $update();
     };
 
     const initCalendar = () => {
@@ -267,13 +237,37 @@
       }
     };
 
+    const getCurrentPage = () => (
+      document.querySelector('.page[data-name="profesional"].page-current') ||
+      document.querySelector('.page[data-name="profesional"]')
+    );
+
+    const renderScheduleHtml = (html) => {
+      const currentPage = getCurrentPage();
+      const horariosEl = currentPage ? currentPage.querySelector('.divHorarios') : null;
+      if (!horariosEl) return;
+
+      horariosEl.innerHTML = html || '';
+      const items = horariosEl.querySelectorAll('.horario');
+      items.forEach((item) => {
+        item.addEventListener('click', (event) => {
+          event.preventDefault();
+          items.forEach((node) => node.classList.remove('selected'));
+          item.classList.add('selected');
+          selectedSlot = {
+            inicio: item.dataset.horaServicio || '',
+            fin: item.dataset.horafinServicio || '',
+          };
+          selectSlot(selectedSlot);
+        });
+      });
+    };
+
     const selectSlot = (slot) => {
-      if (!slot.disponible || !profile) return;
+      if (!profile) return;
 
       const selectedService = getServices().find((item) => String(item.id) === String(selectedServiceId));
       if (!selectedService) return;
-      selectedSlotKey = `${slot.inicio}-${slot.fin}`;
-      $update();
 
       const draft = {
         token: $f7route.params.token,
@@ -298,45 +292,41 @@
       if (event) event.preventDefault();
 
       if (!selectedServiceId) {
-        slots = [];
         slotsMessage = 'Selecciona un servicio para ver los horarios.';
+        renderScheduleHtml('');
         $update();
         return;
       }
 
       if (!selectedDate) {
-        slots = [];
         slotsMessage = 'Selecciona una fecha para ver los horarios.';
+        renderScheduleHtml('');
         $update();
         return;
       }
 
       loadingSlots = true;
       slotsMessage = '';
-      slots = [];
-      showAllSlots = false;
-      selectedSlotKey = '';
+      selectedSlot = null;
       $update();
 
       try {
-        const response = await utils.getProfessionalSlots($f7route.params.token, {
+        const response = await utils.getProfessionalAvailabilityHtml({
           fecha: selectedDate,
           servicio_id: selectedServiceId,
+          empleado_id: profile.id,
+          empresa_id: profile.empresa_id || null,
+          paciente_id: utils.getSession().pacienteId,
         });
 
-        const fechas = (response && response.fechas) || [];
-        const firstDate = fechas[0] || {};
-        const firstEmployee = Object.values(firstDate.empleados || {})[0];
-        const employeeServices = (firstEmployee && firstEmployee.servicios) || [];
-        const servicio = employeeServices.find((item) => String(item.id) === String(selectedServiceId));
-        const horario = servicio && servicio.horarios && servicio.horarios.length ? servicio.horarios[0] : null;
-        slots = (horario && horario.slots) || [];
-
-        if (!slots.length) {
+        if (response && response.estado === 'DONE' && response.filas) {
+          renderScheduleHtml(response.filas);
+        } else {
+          renderScheduleHtml('');
           slotsMessage = 'No hay horarios disponibles para esta fecha.';
         }
       } catch (error) {
-        slots = [];
+        renderScheduleHtml('');
         slotsMessage = utils.getApiErrorMessage(error, 'No se pudieron cargar los horarios');
       } finally {
         loadingSlots = false;
@@ -370,7 +360,6 @@
           initCalendar();
           await loadSlots();
         } else {
-          slots = [];
           slotsMessage = 'No hay servicios disponibles para este profesional.';
           loadingProfile = false;
         }

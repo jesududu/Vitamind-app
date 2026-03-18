@@ -819,6 +819,21 @@ var tmApp = {
     });
   },
 
+  getProfessionalAvailabilityHtml: function ({ fecha, servicio_id, empleado_id, empresa_id = null, paciente_id = null }) {
+    const url = apiUrl + '/horarios-disponibles';
+    const fullUrl = url;
+    return tmApp.fetchPublicData(fullUrl, {
+      method: 'POST',
+      data: {
+        fecha,
+        servicio_id,
+        empleado_id,
+        paciente_id,
+        empresa_id,
+      },
+    });
+  },
+
   resolveProfessionalTokenByEmployeeId: async function (employeeId) {
     const cache = tmApp.getStoredObject(tmApp.storageKeys.professionalMap) || {};
     if (cache[employeeId]) {
