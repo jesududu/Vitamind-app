@@ -113,9 +113,16 @@
               ${!loadingSlots && !slotsMessage && getVisibleSlots().length ? $h`
                 <div class="vm-slots-slider">
                   ${getVisibleSlots().map((slot) => $h`
-                    <button class="button ${slot.disponible ? 'button-outline' : 'disabled'} vm-hora-item vm-hora-slide" @click=${() => selectSlot(slot)}>
-                      ${slot.inicio} - ${slot.fin}
-                    </button>
+                    <a
+                      href="#"
+                      class="chip chip-outline vm-hora-chip vm-hora-slide ${slot.disponible ? '' : 'disabled'}"
+                      @click=${(event) => {
+                        event.preventDefault();
+                        selectSlot(slot);
+                      }}
+                    >
+                      <div class="chip-label vm-hora-item">${slot.inicio} - ${slot.fin}</div>
+                    </a>
                   `)}
                 </div>
               ` : ''}
