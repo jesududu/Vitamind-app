@@ -200,6 +200,11 @@
         slotsSwiper = $f7.swiper.create(swiperEl, {
           slidesPerView: 'auto',
           spaceBetween: 10,
+          direction: 'horizontal',
+          nested: true,
+          touchStartPreventDefault: false,
+          touchMoveStopPropagation: true,
+          passiveListeners: false,
           freeMode: {
             enabled: true,
             momentum: true,

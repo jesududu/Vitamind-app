@@ -215,6 +215,11 @@ body {
   width: 100%;
   padding-bottom: 6px;
   overflow: hidden;
+  touch-action: pan-x;
+}
+
+.vm-slots-swiper .swiper-wrapper {
+  align-items: stretch;
 }
 
 .vm-hora-chip {
@@ -257,6 +262,7 @@ body {
   max-width: none;
   flex-shrink: 0;
   display: flex;
+  touch-action: pan-x;
 }
 
 .vm-favorite-btn {
