@@ -211,9 +211,10 @@ body {
 }
 
 .vm-slots-swiper {
-  display: flex;
+  display: block;
   width: 100%;
   padding-bottom: 6px;
+  overflow: hidden;
 }
 
 .vm-hora-chip {
@@ -255,6 +256,7 @@ body {
   min-width: 0;
   max-width: none;
   flex-shrink: 0;
+  display: flex;
 }
 
 .vm-favorite-btn {
