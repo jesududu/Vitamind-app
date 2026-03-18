@@ -22,10 +22,10 @@
         </div>
       </div>
 
-      <div id="view-home" class="view view-main view-init tab tab-active" data-name="home" data-url="/home/"></div>
+      <div id="view-home" class="view view-main view-init tab tab-active" data-name="home" data-url="/cli/"></div>
       <div id="view-busqueda" class="view view-init tab" data-name="search" data-url="/search/"></div>
       <div id="view-citas" class="view view-init tab" data-name="citas" data-url="/citas/"></div>
-      <div id="view-settings" class="view view-init tab" data-name="settings" data-url="/settings/"></div>
+      <div id="view-settings" class="view view-init tab" data-name="settings" data-url="/cli/settings/"></div>
     </div>
   </div>
 </template>

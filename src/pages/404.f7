@@ -5,7 +5,7 @@
         <div class="vm-section-title">Pantalla no encontrada</div>
         <p class="vm-muted">La ruta que intentas abrir todavía no está implementada en esta fase del MVP.</p>
         <div class="vm-actions">
-          <a href="/home/" class="button button-fill">Volver al inicio</a>
+          <a href="/cli/" class="button button-fill">Volver al inicio</a>
         </div>
       </div>
     </div>

@@ -518,6 +518,16 @@ var tmApp = {
     return tmApp.ajaxData(fullUrl);
   },
 
+  refreshCurrentUser: async function () {
+    const response = await tmApp.getCurrentUser();
+    const session = tmApp.getSession();
+    tmApp.saveSession({
+      token: session.token,
+      user: response && response.user ? response.user : response,
+    });
+    return tmApp.getSession();
+  },
+
   updateProfile: function (data, file = null) {
     const url = apiUrl + '/user/update';
     const fullUrl = url;

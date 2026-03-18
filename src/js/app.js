@@ -17,10 +17,10 @@ var device = getDevice();
 
 function initApp() {
   var app = new Framework7({
-    name: 'VitaMind',
+    name: 'vitamind',
     theme: 'auto',
     colors: {
-      primary: '#f4934e',
+      primary: '#202020',
     },
     el: '#app',
     component: App,
@@ -31,9 +31,18 @@ function initApp() {
       scrollIntoViewCentered: device.capacitor,
     },
     statusbar: {
-      iosOverlaysWebView: false,
+      iosOverlaysWebView: true,
       androidOverlaysWebView: false,
     },
+  });
+
+  app.on('pageInit', function () {
+    var authToken = localStorage.getItem(utils.storageKeys.token);
+    if (authToken) {
+      utils.refreshCurrentUser().catch(function () {
+        // Si falla, seguimos mostrando la app con la sesion local.
+      });
+    }
   });
 
   app.on('init', function () {
@@ -48,6 +57,46 @@ function initApp() {
     if (process.env.NODE_ENV !== 'production') {
       console.log('VitaMind app inicializada con API:', env.apiUrl);
     }
+
+    $('#btnHome').off('click.vitamind').on('click.vitamind', function () {
+      var view = f7.views.get('#view-home');
+      if (view && view.router) {
+        view.router.navigate('/cli/', {
+          ignoreCache: true,
+          reloadCurrent: true,
+        });
+      }
+    });
+
+    $('#btnBusqueda').off('click.vitamind').on('click.vitamind', function () {
+      var view = f7.views.get('#view-busqueda');
+      if (view && view.router) {
+        view.router.navigate('/search/', {
+          ignoreCache: true,
+          reloadCurrent: true,
+        });
+      }
+    });
+
+    $('#btnCitas').off('click.vitamind').on('click.vitamind', function () {
+      var view = f7.views.get('#view-citas');
+      if (view && view.router) {
+        view.router.navigate('/citas/', {
+          ignoreCache: true,
+          reloadCurrent: true,
+        });
+      }
+    });
+
+    $('#btnCuenta').off('click.vitamind').on('click.vitamind', function () {
+      var view = f7.views.get('#view-settings');
+      if (view && view.router) {
+        view.router.navigate('/cli/settings/', {
+          ignoreCache: true,
+          reloadCurrent: true,
+        });
+      }
+    });
   });
 
   $(document).on('click', 'a[href="#"]', function (event) {

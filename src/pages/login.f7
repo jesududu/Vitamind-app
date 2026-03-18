@@ -61,7 +61,7 @@
           $f7.tab.show('#view-home');
           const homeView = $f7.views.get('#view-home');
           if (homeView && homeView.router) {
-            homeView.router.navigate('/home/');
+            homeView.router.navigate('/cli/');
           }
         } catch (error) {
           $f7.dialog.alert(error.message);

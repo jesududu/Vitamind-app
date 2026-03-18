@@ -27,16 +27,28 @@ import InfoPage from '../pages/info.f7';
 import NotFoundPage from '../pages/404.f7';
 
 var routes = [
-  { path: '/', redirect: '/home/' },
   {
-    path: '/home/',
+    path: '/',
+    redirect: '/cli/',
+  },
+  {
+    path: '/cli/',
     name: 'home',
     component: HomePage,
   },
   {
-    path: '/settings/',
+    path: '/cli/settings/',
     name: 'settings',
     component: SettingsPage,
+  },
+
+  {
+    path: '/home/',
+    redirect: '/cli/',
+  },
+  {
+    path: '/settings/',
+    redirect: '/cli/settings/',
   },
 
   {
