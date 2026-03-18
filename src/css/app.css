@@ -54,7 +54,7 @@ body {
 
 .vm-home-navbar-inner {
   min-height: 118px;
-  padding-top: 10px;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 10px);
   padding-bottom: 10px;
   display: flex;
   align-items: center;
@@ -125,7 +125,7 @@ body {
 }
 
 .page[data-name="home"] .vm-page-content {
-  padding-top: 156px;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 156px);
 }
 
 .page[data-name="home"] .vm-search-card {

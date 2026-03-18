@@ -37,7 +37,7 @@ function initApp() {
       scrollIntoViewCentered: device.capacitor,
     },
     statusbar: {
-      iosOverlaysWebView: true,
+      iosOverlaysWebView: false,
       androidOverlaysWebView: false,
     },
   });
