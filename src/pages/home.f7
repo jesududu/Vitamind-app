@@ -4,7 +4,9 @@
       <div class="navbar-bg"></div>
       <div class="navbar-inner vm-home-navbar-inner">
         <div class="left"></div>
-        <div class="title vm-home-brand">VitaMind</div>
+        <div class="title vm-home-brand">
+          <img src="/home-logo.png" alt="VitaMind" class="vm-home-logo" />
+        </div>
         <div class="right">
           <a href="/notificaciones/" class="link icon-only vm-home-bell">
             <i class="icon material-icons">notifications_none</i>

@@ -45,35 +45,49 @@ body {
   left: 0;
   right: 0;
   z-index: 400;
+  --f7-bars-bg-color: var(--vm-primary);
+  --f7-navbar-bg-color: var(--vm-primary);
+  --f7-navbar-link-color: #fff;
+  --f7-navbar-text-color: #fff;
+  box-shadow: 0 16px 34px rgba(var(--vm-primary-rgb), 0.28);
 }
 
 .vm-home-navbar-inner {
-  min-height: 64px;
+  min-height: 92px;
+  padding-top: 6px;
+  padding-bottom: 6px;
 }
 
 .vm-home-brand {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  color: var(--vm-secondary);
-}
-
-.vm-home-bell {
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
+  width: 168px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(var(--vm-primary-rgb), 0.12);
-  color: var(--vm-primary-dark);
+}
+
+.vm-home-logo {
+  display: block;
+  max-width: 100%;
+  max-height: 54px;
+  object-fit: contain;
+}
+
+.vm-home-bell {
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
 }
 
 .vm-home-bell .material-icons {
-  font-size: 22px;
+  font-size: 24px;
 }
 
 .vm-hero,
@@ -97,7 +111,11 @@ body {
 }
 
 .page[data-name="home"] .vm-page-content {
-  padding-top: 88px;
+  padding-top: 126px;
+}
+
+.page[data-name="home"] .vm-search-card {
+  margin-top: 10px;
 }
 
 .vm-section-title,
