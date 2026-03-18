@@ -20,7 +20,7 @@
       try {
         $el.find('#normas-content').html('<div class="vm-loading">Cargando contenido...</div>');
         const response = await utils.getDynamicContent('cargar_informacion');
-        const contenido = response?.contenido || {};
+        const contenido = (response && response.contenido) || {};
         $el.find('#normas-content').html(`
           <div class="vm-card">
             <div class="vm-section-title">Normas y politica de uso</div>

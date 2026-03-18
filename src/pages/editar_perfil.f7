@@ -33,14 +33,15 @@
 
   export default (props, { $el, $on, $f7, $store, $render }) => {
     const fillForm = (user) => {
-      const paciente = user?.paciente || {};
-      const nombre = paciente.nombre || user?.name?.split(' ')[0] || '';
-      const apellidos = paciente.apellidos || user?.name?.split(' ').slice(1).join(' ') || '';
+      const paciente = (user && user.paciente) || {};
+      const userNameParts = ((user && user.name) || '').split(' ');
+      const nombre = paciente.nombre || userNameParts[0] || '';
+      const apellidos = paciente.apellidos || userNameParts.slice(1).join(' ') || '';
 
       $el.find('#profile-nombre').val(nombre);
       $el.find('#profile-apellidos').val(apellidos);
-      $el.find('#profile-email').val(user?.email || paciente.email || '');
-      $el.find('#profile-avatar').attr('src', user?.imagen_url || '/avatar.png');
+      $el.find('#profile-email').val((user && user.email) || paciente.email || '');
+      $el.find('#profile-avatar').attr('src', (user && user.imagen_url) || '/avatar.png');
     };
 
     const loadProfile = async () => {
@@ -72,7 +73,7 @@
               apellidos: $el.find('#profile-apellidos').val(),
               email: $el.find('#profile-email').val(),
             },
-            $el.find('#profile-image')[0]?.files?.[0] || null,
+            (($el.find('#profile-image')[0] && $el.find('#profile-image')[0].files && $el.find('#profile-image')[0].files[0]) || null),
           );
 
           const refreshedUser = await utils.getCurrentUser();
@@ -82,7 +83,7 @@
           });
           $store.dispatch('refreshSession');
           fillForm(refreshedUser);
-          $f7.dialog.alert(response?.message || 'Perfil actualizado correctamente');
+          $f7.dialog.alert((response && response.message) || 'Perfil actualizado correctamente');
         } catch (error) {
           $f7.dialog.alert(utils.getApiErrorMessage(error, 'No se pudo guardar tu perfil'));
         } finally {

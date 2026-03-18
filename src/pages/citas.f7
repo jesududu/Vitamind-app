@@ -15,19 +15,19 @@
   import utils from '../js/utils.js';
 
   export default (props, { $el, $on, $f7router, $f7, $render }) => {
-    const getPageEl = () => (typeof $el?.find === 'function' ? $el : $f7.$($el));
+    const getPageEl = () => (typeof $el !== 'undefined' && $el && typeof $el.find === 'function' ? $el : $f7.$($el));
 
     const renderSection = (title, items = []) => `
       <div class="vm-card">
         <div class="vm-section-title">${title}</div>
         ${items.length ? items.map((item) => `
           <div class="vm-service-item vm-cita-item" data-id="${utils.escapeHtml(item.id)}">
-            <div class="vm-card-title">${utils.escapeHtml(item.title || item.extendedProps?.servicio || 'Servicio')}</div>
-            <div class="vm-card-subtitle">${utils.escapeHtml(item.extendedProps?.empleado || '')}</div>
+            <div class="vm-card-title">${utils.escapeHtml(item.title || (item.extendedProps && item.extendedProps.servicio) || 'Servicio')}</div>
+            <div class="vm-card-subtitle">${utils.escapeHtml((item.extendedProps && item.extendedProps.empleado) || '')}</div>
             <div class="vm-chip-row">
               <span class="vm-chip">${utils.escapeHtml(utils.formatDate(item.start))}</span>
-              <span class="vm-chip">${utils.escapeHtml((item.start || '').split('T')[1]?.slice(0, 5) || '')}</span>
-              <span class="vm-chip">${utils.escapeHtml(item.extendedProps?.empresa || '')}</span>
+              <span class="vm-chip">${utils.escapeHtml((((item.start || '').split('T')[1]) || '').slice(0, 5))}</span>
+              <span class="vm-chip">${utils.escapeHtml((item.extendedProps && item.extendedProps.empresa) || '')}</span>
             </div>
           </div>
         `).join('') : '<div class="vm-empty">No hay citas en esta seccion.</div>'}
@@ -54,15 +54,15 @@
       try {
         const response = await utils.getMyAppointments();
         container.html(
-          renderSection('Activas', response?.activas?.data || []) +
-          renderSection('Completadas', response?.completadas?.data || []) +
-          renderSection('Canceladas', response?.canceladas?.data || [])
+          renderSection('Activas', (response && response.activas && response.activas.data) || []) +
+          renderSection('Completadas', (response && response.completadas && response.completadas.data) || []) +
+          renderSection('Canceladas', (response && response.canceladas && response.canceladas.data) || [])
         );
 
         const allAppointments = [
-          ...(response?.activas?.data || []),
-          ...(response?.completadas?.data || []),
-          ...(response?.canceladas?.data || []),
+          ...((response && response.activas && response.activas.data) || []),
+          ...((response && response.completadas && response.completadas.data) || []),
+          ...((response && response.canceladas && response.canceladas.data) || []),
         ];
 
         pageEl.find('.vm-cita-item').on('click', (event) => {

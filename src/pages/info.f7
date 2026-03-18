@@ -20,7 +20,7 @@
       try {
         $el.find('#info-content').html('<div class="vm-loading">Cargando contenido...</div>');
         const response = await utils.getConditionDetail('informacion');
-        const contenido = response?.contenido || {};
+        const contenido = (response && response.contenido) || {};
         $el.find('#info-content').html(`
           <div class="vm-card">
             <div class="vm-section-title">${utils.escapeHtml(contenido.nombre || 'Informacion')}</div>

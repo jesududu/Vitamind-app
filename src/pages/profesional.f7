@@ -16,7 +16,7 @@
   import utils from '../js/utils.js';
 
   export default (props, { $el, $on, $f7route, $f7, $render }) => {
-    const getPageEl = () => (typeof $el?.find === 'function' ? $el : $f7.$($el));
+    const getPageEl = () => (typeof $el !== 'undefined' && $el && typeof $el.find === 'function' ? $el : $f7.$($el));
     let employeeId = null;
     let isFavorite = false;
 
@@ -35,12 +35,12 @@
       try {
         const token = $f7route.params.token;
         const profile = await utils.getProfessionalProfile(token);
-        employeeId = profile?.id || null;
+        employeeId = profile && profile.id ? profile.id : null;
 
         if (utils.isAuthenticated() && employeeId) {
           try {
             const favorites = await utils.getFavorites();
-            isFavorite = (favorites?.favoritos || []).some((item) => Number(item.id) === Number(employeeId));
+            isFavorite = ((favorites && favorites.favoritos) || []).some((item) => Number(item.id) === Number(employeeId));
           } catch (error) {
             isFavorite = false;
           }

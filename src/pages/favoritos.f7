@@ -37,7 +37,7 @@
       try {
         $el.find('#favoritos-content').html('<div class="vm-loading">Cargando favoritos...</div>');
         const response = await utils.getFavorites();
-        const favoritos = response?.favoritos || [];
+        const favoritos = (response && response.favoritos) || [];
 
         if (!favoritos.length) {
           $el.find('#favoritos-content').html('<div class="vm-card"><p class="vm-empty">No tienes profesionales favoritos todavia.</p></div>');

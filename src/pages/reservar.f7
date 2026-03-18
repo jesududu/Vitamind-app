@@ -35,10 +35,14 @@
           fecha,
           servicio_id: servicioId,
         });
-        const fechas = response?.fechas || [];
-        const firstEmployee = Object.values(fechas[0]?.empleados || {})[0];
-        const servicio = firstEmployee?.servicios?.find((item) => String(item.id) === String(servicioId));
-        const slots = servicio?.horarios?.[0]?.slots || [];
+        const fechas = (response && response.fechas) || [];
+        const firstDate = fechas[0] || {};
+        const firstEmployee = Object.values(firstDate.empleados || {})[0];
+        const servicios = (firstEmployee && firstEmployee.servicios) || [];
+        const servicio = servicios.find((item) => String(item.id) === String(servicioId));
+        const horarios = (servicio && servicio.horarios) || [];
+        const firstHorario = horarios[0] || {};
+        const slots = firstHorario.slots || [];
 
         if (!slots.length) {
           slotsContainer.html('<div class="vm-empty">No hay horarios disponibles para esa seleccion.</div>');

@@ -54,7 +54,10 @@
 
   export default (props, { $el, $on, $f7, $f7router, $render }) => {
     const getPageNode = () => ($el && $el[0] ? $el[0] : $el);
-    const getNode = (selector) => getPageNode()?.querySelector(selector);
+    const getNode = (selector) => {
+      const pageNode = getPageNode();
+      return pageNode ? pageNode.querySelector(selector) : null;
+    };
 
     const renderLatest = async () => {
       const container = getNode('#latest-professionals');
@@ -96,8 +99,10 @@
     };
 
     const openSearch = () => {
-      const localidad = getNode('#home-localidad')?.value || '';
-      const query = getNode('#home-query')?.value || '';
+      const localidadInput = getNode('#home-localidad');
+      const queryInput = getNode('#home-query');
+      const localidad = localidadInput ? localidadInput.value : '';
+      const query = queryInput ? queryInput.value : '';
       const params = new URLSearchParams();
 
       if (localidad) params.set('localidad', localidad);
@@ -106,16 +111,26 @@
       const suffix = params.toString() ? `?${params.toString()}` : '';
       $f7.tab.show('#view-busqueda');
       const searchView = $f7.views.get('#view-busqueda');
-      searchView?.router?.navigate(`/search/${suffix}`);
+      if (searchView && searchView.router) {
+        searchView.router.navigate(`/search/${suffix}`);
+      }
     };
 
     $on('pageInit', () => {
       renderLatest();
-      getNode('#home-search-button')?.addEventListener('click', openSearch);
-      getNode('.ptr-content')?.addEventListener('ptr:refresh', async () => {
+      const searchButton = getNode('#home-search-button');
+      const ptrContent = getNode('.ptr-content');
+
+      if (searchButton) {
+        searchButton.addEventListener('click', openSearch);
+      }
+
+      if (ptrContent) {
+        ptrContent.addEventListener('ptr:refresh', async () => {
         await renderLatest();
         $f7.ptr.done();
-      });
+        });
+      }
     });
 
     return $render;

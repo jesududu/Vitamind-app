@@ -15,7 +15,7 @@
   import utils from '../js/utils.js';
 
   export default (props, { $el, $on, $f7, $store, $render }) => {
-    const getPageEl = () => (typeof $el?.find === 'function' ? $el : $f7.$($el));
+    const getPageEl = () => (typeof $el !== 'undefined' && $el && typeof $el.find === 'function' ? $el : $f7.$($el));
 
     const render = () => {
       const pageEl = getPageEl();
@@ -100,7 +100,10 @@
         utils.clearSession();
         $store.dispatch('refreshSession');
         render();
-        $f7.views.get('#view-home')?.router?.navigate('/home/');
+        const homeView = $f7.views.get('#view-home');
+        if (homeView && homeView.router) {
+          homeView.router.navigate('/home/');
+        }
       });
     };
 
