@@ -160,10 +160,16 @@ body {
 }
 
 .vm-profile-image {
+  display: block;
   width: 140px;
   height: 140px;
+  min-width: 140px;
+  max-width: 140px;
+  min-height: 140px;
+  max-height: 140px;
   border-radius: 50%;
   object-fit: cover;
+  overflow: hidden;
   background: linear-gradient(135deg, rgba(var(--vm-primary-rgb), 0.18), rgba(29, 42, 59, 0.12));
 }
 
@@ -205,16 +211,28 @@ body {
   overflow-x: auto;
   padding-bottom: 6px;
   scroll-snap-type: x proximity;
+  align-items: stretch;
 }
 
 .vm-hora-item {
-  min-width: 130px;
+  display: inline-flex;
+  flex: 0 0 132px;
+  width: 132px;
+  min-width: 132px;
+  max-width: 132px;
+  min-height: 42px;
   justify-content: center;
+  align-items: center;
+  white-space: nowrap;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 .vm-hora-slide {
   flex: 0 0 auto;
-  min-width: 148px;
+  width: 132px;
+  min-width: 132px;
+  max-width: 132px;
   scroll-snap-align: start;
 }
 
