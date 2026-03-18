@@ -103,12 +103,12 @@
                 <div class="vm-empty">${slotsMessage}</div>
               `}
               ${!loadingSlots && !slotsMessage && getVisibleSlots().length ? $h`
-                <div class="vm-horarios-wrap">
-                  <div class="vm-horarios-row">
+                <div class="contenedor-horarios-tm vm-horarios-wrap">
+                  <div class="divHorarios vm-horarios-row">
                     ${getVisibleSlots().map((slot) => $h`
                       <a
                         href="#"
-                        class="vm-horario ${slot.disponible ? '' : 'disabled'}"
+                        class="horario vm-horario ${slot.disponible ? '' : 'disabled'} ${selectedSlotKey === `${slot.inicio}-${slot.fin}` ? 'selected' : ''}"
                         @click=${(event) => {
                           event.preventDefault();
                           selectSlot(slot);
@@ -149,6 +149,7 @@
     let showAllSlots = false;
     let initialized = false;
     let calendarProfessional = null;
+    let selectedSlotKey = '';
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -255,6 +256,8 @@
 
       const selectedService = getServices().find((item) => String(item.id) === String(selectedServiceId));
       if (!selectedService) return;
+      selectedSlotKey = `${slot.inicio}-${slot.fin}`;
+      $update();
 
       const draft = {
         token: $f7route.params.token,
@@ -296,6 +299,7 @@
       slotsMessage = '';
       slots = [];
       showAllSlots = false;
+      selectedSlotKey = '';
       $update();
 
       try {
@@ -345,18 +349,20 @@
         }
 
         if (getServices().length) {
+          loadingProfile = false;
           $update();
           initCalendar();
           await loadSlots();
         } else {
           slots = [];
           slotsMessage = 'No hay servicios disponibles para este profesional.';
+          loadingProfile = false;
         }
       } catch (error) {
         profile = null;
         profileError = utils.getApiErrorMessage(error, 'No se pudo cargar el perfil del profesional');
-      } finally {
         loadingProfile = false;
+      } finally {
         $update();
       }
     };

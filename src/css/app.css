@@ -209,7 +209,7 @@ body {
 }
 
 .calendar-custom-toolbar {
-  background: transparent;
+  background: none;
 }
 
 .calendar-custom-toolbar .toolbar-inner {
@@ -230,43 +230,55 @@ body {
   color: #fff;
 }
 
+.contenedor-horarios-tm,
 .vm-horarios-wrap {
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: 0 2px 6px;
+  background: transparent;
+  padding: 0 0 6px;
 }
 
+.contenedor-horarios-tm::-webkit-scrollbar,
 .vm-horarios-wrap::-webkit-scrollbar {
   display: none;
 }
 
+.divHorarios,
 .vm-horarios-row {
   display: flex;
   gap: 10px;
-  min-width: max-content;
+  float: left;
+  min-width: 100%;
 }
 
+.horario,
 .vm-horario {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 96px;
-  height: 56px;
-  padding: 0 14px;
+  width: 100px;
+  min-width: 100px;
+  height: auto;
+  padding: 20px 12px;
   border: 1px solid var(--vm-primary);
-  border-radius: 12px;
+  border-radius: 8px;
   background: #fff;
   color: var(--vm-secondary);
+  font-size: 16px;
   font-weight: 600;
+  text-align: center;
+  cursor: pointer;
 }
 
+.horario.selected,
 .vm-horario.selected,
 .vm-horario:active {
   background: var(--vm-primary);
   color: #fff;
 }
 
+.horario.disabled,
 .vm-horario.disabled {
   opacity: 0.4;
   pointer-events: none;
