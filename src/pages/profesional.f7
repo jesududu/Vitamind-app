@@ -168,8 +168,8 @@
         if (!calendarEl) return;
 
         if (calendarProfessional) {
-          calendarProfessional.destroy();
-          calendarProfessional = null;
+          calendarProfessional.setValue([new Date(selectedDate)]);
+          return;
         }
 
         calendarProfessional = $f7.calendar.create({
@@ -340,7 +340,6 @@
         loadingSlots = false;
         $update();
         $f7.utils.nextTick(() => {
-          initCalendar();
           renderScheduleHtml(scheduleHtml);
         });
       }
