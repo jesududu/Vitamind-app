@@ -196,11 +196,6 @@
           selectSlot(slot);
         });
       });
-
-      setTimeout(() => {
-        const first = horariosEl.querySelector('.horario:not(.ocupada)');
-        if (first) first.click();
-      }, 20);
     };
 
     const initCalendar = () => {
