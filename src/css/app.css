@@ -39,6 +39,14 @@ body {
   padding: 18px 16px 110px;
 }
 
+.page[data-name="home"] .vm-page-content {
+  padding-top: 34px;
+}
+
+.vm-home-left-spacer {
+  width: 44px;
+}
+
 .vm-home-logo {
   display: block;
   max-width: 160px;

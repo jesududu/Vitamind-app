@@ -22,6 +22,11 @@ import utils from './utils.js';
 var device = getDevice();
 
 function initApp() {
+  document.documentElement.style.setProperty('--f7-bars-bg-color', '#f4934e');
+  document.documentElement.style.setProperty('--f7-navbar-bg-color', '#f4934e');
+  document.documentElement.style.setProperty('--f7-navbar-link-color', '#ffffff');
+  document.documentElement.style.setProperty('--f7-navbar-text-color', '#ffffff');
+
   var app = new Framework7({
     name: 'vitamind',
     theme: 'auto',

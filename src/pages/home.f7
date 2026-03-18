@@ -3,7 +3,7 @@
     <div class="navbar vm-home-navbar">
       <div class="navbar-bg"></div>
       <div class="navbar-inner">
-        <div class="left"></div>
+        <div class="left vm-home-left-spacer"></div>
         <div class="title">
           <img src="/home-logo.png" alt="VitaMind" class="vm-home-logo" />
         </div>
