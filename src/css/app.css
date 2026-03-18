@@ -204,65 +204,72 @@ body {
   min-height: 80px;
 }
 
-.vm-horas-group {
+.vm-calendar-card {
+  margin: 12px 0 0;
+}
+
+.calendar-custom-toolbar {
+  background: transparent;
+}
+
+.calendar-custom-toolbar .toolbar-inner {
+  min-height: 44px;
+}
+
+.calendar-custom-toolbar .center {
+  font-weight: 700;
+  color: var(--vm-secondary);
+}
+
+.vm-calendar-card .calendar-day-today .calendar-day-number {
+  color: var(--vm-primary);
+}
+
+.vm-calendar-card .calendar-day-selected .calendar-day-number {
+  background-color: var(--vm-primary);
+  color: #fff;
+}
+
+.vm-horarios-wrap {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 0 2px 6px;
+}
+
+.vm-horarios-wrap::-webkit-scrollbar {
+  display: none;
+}
+
+.vm-horarios-row {
   display: flex;
-  flex-wrap: wrap;
   gap: 10px;
+  min-width: max-content;
 }
 
-.vm-slots-swiper {
-  display: block;
-  width: 100%;
-  padding-bottom: 6px;
-  overflow: hidden;
-  touch-action: pan-x;
-}
-
-.vm-slots-swiper .swiper-wrapper {
-  align-items: stretch;
-}
-
-.vm-hora-chip {
+.vm-horario {
   display: inline-flex;
-  width: auto;
-  min-width: 0;
-  max-width: none;
-  margin: 0;
-  padding: 0;
-  border-color: var(--vm-primary);
-  background: rgba(var(--vm-primary-rgb), 0.08);
-}
-
-.vm-hora-chip.disabled {
-  opacity: 0.45;
-  pointer-events: none;
-}
-
-.vm-hora-chip .chip-label {
-  width: auto;
-}
-
-.vm-hora-item {
-  display: inline-flex;
-  width: auto;
-  min-width: 0;
-  max-width: none;
-  min-height: 38px;
-  justify-content: center;
   align-items: center;
-  white-space: nowrap;
-  padding: 0 10px;
-  font-size: 13px;
+  justify-content: center;
+  min-width: 96px;
+  height: 56px;
+  padding: 0 14px;
+  border: 1px solid var(--vm-primary);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--vm-secondary);
   font-weight: 600;
 }
 
-.vm-hora-slide {
-  width: auto;
-  min-width: 0;
-  max-width: none;
-  flex-shrink: 0;
-  display: flex;
-  touch-action: pan-x;
+.vm-horario.selected,
+.vm-horario:active {
+  background: var(--vm-primary);
+  color: #fff;
+}
+
+.vm-horario.disabled {
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 .vm-favorite-btn {

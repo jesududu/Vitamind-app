@@ -71,14 +71,6 @@
               <ul>
                 <li class="item-content item-input">
                   <div class="item-inner">
-                    <div class="item-title item-label">Fecha</div>
-                    <div class="item-input-wrap">
-                      <input type="date" id="profile-fecha" value="${selectedDate}" min="${today}" @change=${onDateChange} />
-                    </div>
-                  </div>
-                </li>
-                <li class="item-content item-input">
-                  <div class="item-inner">
                     <div class="item-title item-label">Servicio</div>
                     <div class="item-input-wrap">
                       <select id="profile-servicio" @change=${onServiceChange}>
@@ -96,8 +88,8 @@
               </ul>
             </div>
 
-            <div class="vm-actions">
-              <a href="#" class="button button-fill" @click=${loadSlots}>Actualizar horarios</a>
+            <div class="block block-strong inset vm-calendar-card">
+              <div id="calendario-profesional"></div>
             </div>
           </div>
 
@@ -111,21 +103,19 @@
                 <div class="vm-empty">${slotsMessage}</div>
               `}
               ${!loadingSlots && !slotsMessage && getVisibleSlots().length ? $h`
-                <div class="swiper vm-slots-swiper">
-                  <div class="swiper-wrapper">
+                <div class="vm-horarios-wrap">
+                  <div class="vm-horarios-row">
                     ${getVisibleSlots().map((slot) => $h`
-                      <div class="swiper-slide vm-hora-slide">
                       <a
                         href="#"
-                        class="chip chip-outline vm-hora-chip ${slot.disponible ? '' : 'disabled'}"
+                        class="vm-horario ${slot.disponible ? '' : 'disabled'}"
                         @click=${(event) => {
                           event.preventDefault();
                           selectSlot(slot);
                         }}
                       >
-                        <div class="chip-label vm-hora-item">${slot.inicio} - ${slot.fin}</div>
+                        ${slot.inicio}
                       </a>
-                      </div>
                     `)}
                   </div>
                 </div>
@@ -158,10 +148,11 @@
     let slots = [];
     let showAllSlots = false;
     let initialized = false;
-    let slotsSwiper = null;
+    let calendarProfessional = null;
 
-    const today = new Date().toISOString().slice(0, 10);
-    let selectedDate = today;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let selectedDate = today.toISOString().slice(0, 10);
     let selectedServiceId = '';
 
     const getProfileName = () => (profile ? (profile.nombre_completo || profile.nombre || 'Profesional') : 'Profesional');
@@ -171,46 +162,67 @@
     const getServices = () => (profile && Array.isArray(profile.servicios) ? profile.servicios : []);
     const getVisibleSlots = () => (showAllSlots ? slots : slots.slice(0, 6));
 
-    const onDateChange = (event) => {
-      selectedDate = event.target.value;
-    };
-
     const onServiceChange = (event) => {
       selectedServiceId = event.target.value;
+      loadSlots();
     };
 
     const toggleMoreSlots = (event) => {
       event.preventDefault();
       showAllSlots = !showAllSlots;
       $update();
-      initSlotsSwiper();
     };
 
-    const initSlotsSwiper = () => {
+    const initCalendar = () => {
       $f7.utils.nextTick(() => {
         const currentPage = document.querySelector('.page[data-name="profesional"].page-current') || document.querySelector('.page[data-name="profesional"]');
-        const swiperEl = currentPage ? currentPage.querySelector('.vm-slots-swiper') : null;
-        if (!swiperEl || !swiperEl.querySelector('.swiper-slide')) return;
+        const calendarEl = currentPage ? currentPage.querySelector('#calendario-profesional') : null;
+        if (!calendarEl) return;
 
-        if (slotsSwiper) {
-          slotsSwiper.destroy(true, false);
-          slotsSwiper = null;
+        if (calendarProfessional) {
+          calendarProfessional.destroy();
+          calendarProfessional = null;
         }
 
-        slotsSwiper = $f7.swiper.create(swiperEl, {
-          slidesPerView: 'auto',
-          spaceBetween: 10,
-          direction: 'horizontal',
-          nested: true,
-          touchStartPreventDefault: false,
-          touchMoveStopPropagation: true,
-          passiveListeners: false,
-          freeMode: {
-            enabled: true,
-            momentum: true,
+        calendarProfessional = $f7.calendar.create({
+          containerEl: '#calendario-profesional',
+          value: [new Date(selectedDate)],
+          minDate: today,
+          renderToolbar: function () {
+            return '<div class="toolbar calendar-custom-toolbar no-shadow">' +
+              '<div class="toolbar-inner">' +
+                '<div class="left"><a class="link icon-only"><i class="icon icon-back"></i></a></div>' +
+                '<div class="center"></div>' +
+                '<div class="right"><a class="link icon-only"><i class="icon icon-forward"></i></a></div>' +
+              '</div>' +
+            '</div>';
           },
-          resistanceRatio: 0.85,
-          watchOverflow: true,
+          on: {
+            init: function (calendar) {
+              const monthNames = calendar.params.monthNames;
+              const toolbarEl = currentPage.querySelector('.calendar-custom-toolbar');
+              if (toolbarEl) {
+                toolbarEl.querySelector('.center').textContent = monthNames[calendar.currentMonth] + ', ' + calendar.currentYear;
+                toolbarEl.querySelector('.left .link').addEventListener('click', () => calendar.prevMonth());
+                toolbarEl.querySelector('.right .link').addEventListener('click', () => calendar.nextMonth());
+              }
+            },
+            monthYearChangeStart: function (calendar) {
+              const toolbarEl = currentPage.querySelector('.calendar-custom-toolbar');
+              if (toolbarEl) {
+                toolbarEl.querySelector('.center').textContent = calendar.params.monthNames[calendar.currentMonth] + ', ' + calendar.currentYear;
+              }
+            },
+            change: function (calendar) {
+              const pickedDate = calendar.value && calendar.value[0] ? calendar.value[0] : null;
+              if (!pickedDate) return;
+              const day = (`0${pickedDate.getDate()}`).slice(-2);
+              const month = (`0${pickedDate.getMonth() + 1}`).slice(-2);
+              const year = pickedDate.getFullYear();
+              selectedDate = `${year}-${month}-${day}`;
+              loadSlots();
+            },
+          },
         });
       });
     };
@@ -309,7 +321,6 @@
       } finally {
         loadingSlots = false;
         $update();
-        initSlotsSwiper();
       }
     };
 
@@ -334,6 +345,8 @@
         }
 
         if (getServices().length) {
+          $update();
+          initCalendar();
           await loadSlots();
         } else {
           slots = [];
@@ -356,6 +369,12 @@
 
     $on('pageInit', initPage);
     $onMounted(initPage);
+    $on('pageBeforeRemove', () => {
+      if (calendarProfessional) {
+        calendarProfessional.destroy();
+        calendarProfessional = null;
+      }
+    });
 
     return $render;
   }
