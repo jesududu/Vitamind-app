@@ -53,16 +53,30 @@ body {
 }
 
 .vm-home-navbar-inner {
-  min-height: 92px;
-  padding-top: 6px;
-  padding-bottom: 6px;
+  min-height: 118px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.vm-home-nav-side {
+  width: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vm-home-nav-spacer {
+  width: 46px;
+  height: 46px;
 }
 
 .vm-home-brand {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  width: 168px;
+  width: 210px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -71,7 +85,7 @@ body {
 .vm-home-logo {
   display: block;
   max-width: 100%;
-  max-height: 54px;
+  max-height: 70px;
   object-fit: contain;
 }
 
@@ -111,11 +125,11 @@ body {
 }
 
 .page[data-name="home"] .vm-page-content {
-  padding-top: 126px;
+  padding-top: 156px;
 }
 
 .page[data-name="home"] .vm-search-card {
-  margin-top: 10px;
+  margin-top: 20px;
 }
 
 .vm-section-title,
