@@ -82,7 +82,7 @@
               </div>
             </div>
           </div>
-        `).join(''));
+        `).join('');
 
         container.querySelectorAll('img').forEach((img) => {
           img.addEventListener('error', () => {
