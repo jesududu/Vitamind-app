@@ -9,8 +9,8 @@
     </div>
     <div class="page-content vm-page-content">
       <div class="vm-form-card">
-        <div class="vm-section-title">Iniciar sesión como paciente</div>
-        <div class="list no-hairlines-md">
+        <div class="vm-section-title">Iniciar sesion como paciente</div>
+        <form class="list no-hairlines-md" @submit=${submitLogin}>
           <ul>
             <li class="item-content item-input">
               <div class="item-inner">
@@ -22,19 +22,19 @@
             </li>
             <li class="item-content item-input">
               <div class="item-inner">
-                <div class="item-title item-label">Contraseña</div>
+                <div class="item-title item-label">Contrasena</div>
                 <div class="item-input-wrap">
-                  <input type="password" id="login-password" placeholder="••••••••" />
+                  <input type="password" id="login-password" placeholder="********" />
                 </div>
               </div>
             </li>
           </ul>
+        </form>
+        <div class="vm-actions">
+          <a href="#" class="button button-fill" @click=${submitLogin}>Entrar</a>
         </div>
         <div class="vm-actions">
-          <a href="#" id="login-submit" class="button button-fill">Entrar</a>
-        </div>
-        <div class="vm-actions">
-          <a href="/forgot-password/" class="button button-outline">He olvidado mi contraseña</a>
+          <a href="/forgot-password/" class="button button-outline">He olvidado mi contrasena</a>
           <a href="/registro/" class="button button-outline">Crear cuenta</a>
         </div>
       </div>
@@ -44,32 +44,51 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $on, $f7, $store }) {
-    const getPageEl = () => (typeof $el !== 'undefined' && $el && typeof $el.find === 'function' ? $el : $f7.$($el));
+  export default function (props, { $el, $f7, $store }) {
+    const getPageEl = () => {
+      if ($el && $el[0]) return $f7.$($el[0]);
+      if ($el && typeof $el.find === 'function') return $el;
+      return $f7.$($el);
+    };
 
-    $on('pageInit', () => {
+    const submitLogin = async (event) => {
+      if (event) event.preventDefault();
+
       const pageEl = getPageEl();
-      pageEl.find('#login-submit').on('click', async () => {
-        try {
-          $f7.preloader.show();
-          await utils.login({
-            email: pageEl.find('#login-email').val(),
-            password: pageEl.find('#login-password').val(),
-            remember: true,
+      const email = pageEl.find('#login-email').val();
+      const password = pageEl.find('#login-password').val();
+
+      if (!email || !password) {
+        $f7.dialog.alert('Introduce email y contrasena.');
+        return;
+      }
+
+      try {
+        $f7.preloader.show();
+        await utils.login({
+          email,
+          password,
+          remember: true,
+        });
+        $store.dispatch('refreshSession');
+        const homeView = $f7.views.get('#view-home');
+        if (homeView && homeView.router) {
+          homeView.router.navigate('/cli/', {
+            reloadCurrent: true,
+            ignoreCache: true,
           });
-          $store.dispatch('refreshSession');
-          $f7.tab.show('#view-home');
-          const homeView = $f7.views.get('#view-home');
-          if (homeView && homeView.router) {
-            homeView.router.navigate('/cli/');
-          }
-        } catch (error) {
-          $f7.dialog.alert(error.message);
-        } finally {
-          $f7.preloader.hide();
         }
-      });
-    });
+        const settingsView = $f7.views.get('#view-settings');
+        if (settingsView && settingsView.router) {
+          settingsView.router.refreshPage();
+        }
+        $f7.tab.show('#view-home');
+      } catch (error) {
+        $f7.dialog.alert(utils.getApiErrorMessage(error, 'No se pudo iniciar sesion'));
+      } finally {
+        $f7.preloader.hide();
+      }
+    };
 
     return $render;
   }
