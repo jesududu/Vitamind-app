@@ -39,6 +39,43 @@ body {
   padding: 18px 16px 110px;
 }
 
+.vm-home-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 400;
+}
+
+.vm-home-navbar-inner {
+  min-height: 64px;
+}
+
+.vm-home-brand {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--vm-secondary);
+}
+
+.vm-home-bell {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--vm-primary-rgb), 0.12);
+  color: var(--vm-primary-dark);
+}
+
+.vm-home-bell .material-icons {
+  font-size: 22px;
+}
+
 .vm-hero,
 .vm-card,
 .vm-form-card,
@@ -49,17 +86,6 @@ body {
   box-shadow: 0 14px 34px rgba(29, 42, 59, 0.08);
 }
 
-.vm-hero {
-  padding: 20px;
-  background: linear-gradient(145deg, #243040 0%, #334861 100%);
-  color: #fff;
-}
-
-.vm-hero p {
-  margin-bottom: 0;
-  color: rgba(255, 255, 255, 0.78);
-}
-
 .vm-search-card,
 .vm-form-card,
 .vm-card {
@@ -68,6 +94,10 @@ body {
 
 .vm-section {
   margin-top: 18px;
+}
+
+.page[data-name="home"] .vm-page-content {
+  padding-top: 88px;
 }
 
 .vm-section-title,

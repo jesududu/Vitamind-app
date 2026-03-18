@@ -1,18 +1,19 @@
 <template>
   <div class="page" data-name="home">
-    <div class="navbar">
+    <div class="navbar vm-home-navbar">
       <div class="navbar-bg"></div>
-      <div class="navbar-inner">
-        <div class="title">VitaMind</div>
+      <div class="navbar-inner vm-home-navbar-inner">
+        <div class="left"></div>
+        <div class="title vm-home-brand">VitaMind</div>
+        <div class="right">
+          <a href="/notificaciones/" class="link icon-only vm-home-bell">
+            <i class="icon material-icons">notifications_none</i>
+          </a>
+        </div>
       </div>
     </div>
     <div class="page-content vm-page-content ptr-content" data-ptr-distance="70">
       <div class="ptr-preloader"><div class="preloader"></div><div class="ptr-arrow"></div></div>
-
-      <section class="vm-hero">
-        <h1>Encuentra el profesional adecuado</h1>
-        <p>Base movil para pacientes conectada al backend real de VitaMind.</p>
-      </section>
 
       <section class="vm-section vm-search-card">
         <div class="list no-hairlines-md">
