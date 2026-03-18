@@ -130,6 +130,7 @@
     let initialized = false;
     let calendarProfessional = null;
     let selectedSlot = null;
+    let scheduleHtml = '';
     const months = [
       'Enero',
       'Febrero',
@@ -293,14 +294,14 @@
 
       if (!selectedServiceId) {
         slotsMessage = 'Selecciona un servicio para ver los horarios.';
-        renderScheduleHtml('');
+        scheduleHtml = '';
         $update();
         return;
       }
 
       if (!selectedDate) {
         slotsMessage = 'Selecciona una fecha para ver los horarios.';
-        renderScheduleHtml('');
+        scheduleHtml = '';
         $update();
         return;
       }
@@ -308,6 +309,7 @@
       loadingSlots = true;
       slotsMessage = '';
       selectedSlot = null;
+      scheduleHtml = '';
       $update();
 
       try {
@@ -326,17 +328,21 @@
         const filas = utils.buildHorarioRowsHtml(slots);
 
         if (filas) {
-          renderScheduleHtml(filas);
+          scheduleHtml = filas;
         } else {
-          renderScheduleHtml('');
+          scheduleHtml = '';
           slotsMessage = 'No hay horarios disponibles para esta fecha.';
         }
       } catch (error) {
-        renderScheduleHtml('');
+        scheduleHtml = '';
         slotsMessage = utils.getApiErrorMessage(error, 'No se pudieron cargar los horarios');
       } finally {
         loadingSlots = false;
         $update();
+        $f7.utils.nextTick(() => {
+          initCalendar();
+          renderScheduleHtml(scheduleHtml);
+        });
       }
     };
 
@@ -363,7 +369,9 @@
         if (getServices().length) {
           loadingProfile = false;
           $update();
-          initCalendar();
+          $f7.utils.nextTick(() => {
+            initCalendar();
+          });
           await loadSlots();
         } else {
           slotsMessage = 'No hay servicios disponibles para este profesional.';
