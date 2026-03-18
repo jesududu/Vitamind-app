@@ -41,13 +41,10 @@
             </div>
 
             <div class="vm-actions">
-              ${utils.isAuthenticated() && employeeId ? $h`
-                <a href="#" class="button ${isFavorite ? 'button-fill' : 'button-outline'} button-small" @click=${toggleFavorite}>
-                  ${isFavorite ? 'Eliminar de favoritos' : 'Anadir a favoritos'}
-                </a>
-              ` : $h`
-                <a href="/login/" class="button button-outline button-small">Inicia sesion para guardar</a>
-              `}
+              <a href="#" class="button ${isFavorite ? 'button-fill' : 'button-outline'} button-small vm-favorite-btn" @click=${toggleFavorite}>
+                <i class="icon material-icons">${isFavorite ? 'favorite' : 'favorite_border'}</i>
+                <span>${isFavorite ? 'En favoritos' : 'Anadir a favoritos'}</span>
+              </a>
             </div>
 
             <div class="vm-section-title">Servicios</div>
@@ -102,7 +99,9 @@
             <div class="vm-actions">
               <a href="#" class="button button-fill" @click=${loadSlots}>Actualizar horarios</a>
             </div>
+          </div>
 
+          <div class="vm-card vm-profile-booking">
             <div class="vm-section-title">Horarios</div>
             <div class="vm-profile-slots">
               ${loadingSlots && $h`
@@ -112,9 +111,9 @@
                 <div class="vm-empty">${slotsMessage}</div>
               `}
               ${!loadingSlots && !slotsMessage && getVisibleSlots().length ? $h`
-                <div class="vm-horas-group">
+                <div class="vm-slots-slider">
                   ${getVisibleSlots().map((slot) => $h`
-                    <button class="button ${slot.disponible ? 'button-outline' : 'disabled'} vm-hora-item" @click=${() => selectSlot(slot)}>
+                    <button class="button ${slot.disponible ? 'button-outline' : 'disabled'} vm-hora-item vm-hora-slide" @click=${() => selectSlot(slot)}>
                       ${slot.inicio} - ${slot.fin}
                     </button>
                   `)}
@@ -123,7 +122,7 @@
               ${!loadingSlots && !slotsMessage && slots.length > 6 ? $h`
                 <div class="vm-actions">
                   <a href="#" class="button button-small button-outline" @click=${toggleMoreSlots}>
-                    ${showAllSlots ? 'Mostrar menos horas' : 'Mostrar mas horas'}
+                    ${showAllSlots ? 'Ver menos horas' : 'Ver todas las horas'}
                   </a>
                 </div>
               ` : ''}
@@ -179,6 +178,11 @@
       if (!employeeId) return;
 
       try {
+        if (!utils.isAuthenticated()) {
+          $f7.dialog.alert('Debes iniciar sesion para guardar favoritos.');
+          return;
+        }
+
         if (isFavorite) {
           await utils.removeFavorite(employeeId);
           isFavorite = false;

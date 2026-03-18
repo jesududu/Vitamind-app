@@ -199,9 +199,29 @@ body {
   gap: 10px;
 }
 
+.vm-slots-slider {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scroll-snap-type: x proximity;
+}
+
 .vm-hora-item {
   min-width: 130px;
   justify-content: center;
+}
+
+.vm-hora-slide {
+  flex: 0 0 auto;
+  min-width: 148px;
+  scroll-snap-align: start;
+}
+
+.vm-favorite-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 @media (min-width: 768px) {
