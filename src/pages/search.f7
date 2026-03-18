@@ -45,8 +45,9 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $on, $f7route, $f7router, $f7 }) {
+  export default function (props, { $el, $on, $onMounted, $f7route, $f7router, $f7 }) {
     const getPageNode = () => ($el && $el[0] ? $el[0] : $el);
+    let initialized = false;
     const getNode = (selector) => {
       const pageNode = getPageNode();
       return pageNode ? pageNode.querySelector(selector) : null;
@@ -138,7 +139,9 @@
       }
     };
 
-    $on('pageInit', () => {
+    const initPage = () => {
+      if (initialized) return;
+      initialized = true;
       const query = $f7route.query || {};
       const localidadInput = getNode('#search-localidad');
       const queryInput = getNode('#search-query');
@@ -151,7 +154,10 @@
       if (query.localidad || query.query) {
         renderResults();
       }
-    });
+    };
+
+    $on('pageInit', initPage);
+    $onMounted(initPage);
 
     return $render;
   }

@@ -14,8 +14,9 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $on, $f7router, $f7 }) {
+  export default function (props, { $el, $on, $onMounted, $f7router, $f7 }) {
     const getPageEl = () => (typeof $el !== 'undefined' && $el && typeof $el.find === 'function' ? $el : $f7.$($el));
+    let initialized = false;
 
     const renderSection = (title, items = []) => `
       <div class="vm-card">
@@ -35,6 +36,8 @@
     `;
 
     const loadAppointments = async () => {
+      if (initialized) return;
+      initialized = true;
       const pageEl = getPageEl();
       const container = pageEl.find('#citas-content');
 
@@ -77,6 +80,7 @@
     };
 
     $on('pageInit', loadAppointments);
+    $onMounted(loadAppointments);
 
     return $render;
   }

@@ -52,8 +52,9 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $on, $f7, $f7router }) {
+  export default function (props, { $el, $on, $onMounted, $f7, $f7router }) {
     const getPageNode = () => ($el && $el[0] ? $el[0] : $el);
+    let initialized = false;
     const getNode = (selector) => {
       const pageNode = getPageNode();
       return pageNode ? pageNode.querySelector(selector) : null;
@@ -116,7 +117,9 @@
       }
     };
 
-    $on('pageInit', () => {
+    const initPage = () => {
+      if (initialized) return;
+      initialized = true;
       renderLatest();
       const searchButton = getNode('#home-search-button');
       const ptrContent = getNode('.ptr-content');
@@ -127,11 +130,14 @@
 
       if (ptrContent) {
         ptrContent.addEventListener('ptr:refresh', async () => {
-        await renderLatest();
-        $f7.ptr.done();
+          await renderLatest();
+          $f7.ptr.done();
         });
       }
-    });
+    };
+
+    $on('pageInit', initPage);
+    $onMounted(initPage);
 
     return $render;
   }

@@ -7,17 +7,24 @@
       </div>
     </div>
     <div class="page-content vm-page-content">
-      <div id="settings-content"></div>
+      <div id="settings-content">
+        <div class="vm-form-card">
+          <div class="vm-section-title">Cargando cuenta</div>
+          <p class="vm-muted">Preparando la informacion del paciente...</p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $on, $f7, $store }) {
+  export default function (props, { $el, $on, $onMounted, $f7, $store }) {
     const getPageEl = () => (typeof $el !== 'undefined' && $el && typeof $el.find === 'function' ? $el : $f7.$($el));
+    let initialized = false;
 
     const render = () => {
+      initialized = true;
       const pageEl = getPageEl();
       const container = pageEl.find('#settings-content');
 
@@ -109,6 +116,11 @@
 
     $on('pageInit', render);
     $on('pageAfterIn', render);
+    $onMounted(() => {
+      if (!initialized) {
+        render();
+      }
+    });
 
     return $render;
   }
