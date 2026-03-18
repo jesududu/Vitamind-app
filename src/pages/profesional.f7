@@ -111,20 +111,28 @@
                 <div class="vm-empty">${slotsMessage}</div>
               `}
               ${!loadingSlots && !slotsMessage && getVisibleSlots().length ? $h`
-                <div class="vm-slots-slider">
+                <swiper-container
+                  class="vm-slots-swiper"
+                  slides-per-view="auto"
+                  space-between="10"
+                  free-mode="true"
+                  mousewheel-force-to-axis="true"
+                >
                   ${getVisibleSlots().map((slot) => $h`
-                    <a
-                      href="#"
-                      class="chip chip-outline vm-hora-chip vm-hora-slide ${slot.disponible ? '' : 'disabled'}"
-                      @click=${(event) => {
-                        event.preventDefault();
-                        selectSlot(slot);
-                      }}
-                    >
-                      <div class="chip-label vm-hora-item">${slot.inicio} - ${slot.fin}</div>
-                    </a>
+                    <swiper-slide class="vm-hora-slide">
+                      <a
+                        href="#"
+                        class="chip chip-outline vm-hora-chip ${slot.disponible ? '' : 'disabled'}"
+                        @click=${(event) => {
+                          event.preventDefault();
+                          selectSlot(slot);
+                        }}
+                      >
+                        <div class="chip-label vm-hora-item">${slot.inicio} - ${slot.fin}</div>
+                      </a>
+                    </swiper-slide>
                   `)}
-                </div>
+                </swiper-container>
               ` : ''}
               ${!loadingSlots && !slotsMessage && slots.length > 6 ? $h`
                 <div class="vm-actions">

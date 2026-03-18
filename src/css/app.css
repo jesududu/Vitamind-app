@@ -210,26 +210,19 @@ body {
   gap: 10px;
 }
 
-.vm-slots-slider {
+.vm-slots-swiper {
   display: flex;
-  gap: 10px;
-  overflow-x: auto;
+  width: 100%;
   padding-bottom: 6px;
-  scroll-snap-type: x proximity;
-  align-items: center;
 }
 
 .vm-hora-chip {
   display: inline-flex;
-  flex: 0 0 auto;
-  width: auto;
-  min-width: 0;
-  max-width: none;
+  width: 100%;
   margin: 0;
   padding: 0;
   border-color: var(--vm-primary);
   background: rgba(var(--vm-primary-rgb), 0.08);
-  scroll-snap-align: start;
 }
 
 .vm-hora-chip.disabled {
@@ -256,8 +249,9 @@ body {
 }
 
 .vm-hora-slide {
-  flex: 0 0 auto;
-  scroll-snap-align: start;
+  width: 118px;
+  min-width: 118px;
+  max-width: 118px;
 }
 
 .vm-favorite-btn {
