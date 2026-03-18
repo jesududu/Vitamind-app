@@ -54,7 +54,7 @@ body {
 
 .vm-home-navbar-inner {
   min-height: 118px;
-  padding-top: calc(env(safe-area-inset-top, 0px) + 10px);
+  padding-top: calc(env(safe-area-inset-top, 0px) + 18px);
   padding-bottom: 10px;
   display: flex;
   align-items: center;
@@ -87,6 +87,7 @@ body {
   max-width: 100%;
   max-height: 70px;
   object-fit: contain;
+  border-radius: 18px;
 }
 
 .vm-home-bell {
@@ -125,7 +126,7 @@ body {
 }
 
 .page[data-name="home"] .vm-page-content {
-  padding-top: calc(env(safe-area-inset-top, 0px) + 156px);
+  padding-top: calc(env(safe-area-inset-top, 0px) + 168px);
 }
 
 .page[data-name="home"] .vm-search-card {
