@@ -7,7 +7,7 @@
       </div>
     </div>
     <div class="page-content vm-page-content">
-      ${!logeado && $h`
+      ${!isLoggedIn() && $h`
         <div class="block">
           <h1 style="font-size: 50px; margin-bottom: 0px; margin-top: 0px;">Hola</h1>
           <p>Bienvenido a VitaMind. Desde aqui puedes acceder a tu cuenta de paciente.</p>
@@ -29,19 +29,19 @@
         </div>
       `}
 
-      ${logeado && $h`
+      ${isLoggedIn() && $h`
         <div class="list media-list list-strong mt-tm-ios" style="margin-top:0px;">
           <ul>
             <li>
               <a href="/editar-perfil/" class="item-content" data-reload-detail="true">
                 <div class="item-media optWedding">
-                  <img class="imgUsu avatar-circle" src="${avatarUrl}" width="90" />
+                  <img class="imgUsu avatar-circle" src="${getAvatarUrl()}" width="90" />
                 </div>
                 <div class="item-inner">
                   <div class="item-title-row">
-                    <div class="item-title inpUsuario" style="color: #000;">${userName}</div>
+                    <div class="item-title inpUsuario" style="color: #000;">${getUserName()}</div>
                   </div>
-                  <div class="item-subtitle inpEmailUsu" style="color: #000;">${userEmail}</div>
+                  <div class="item-subtitle inpEmailUsu" style="color: #000;">${getUserEmail()}</div>
                 </div>
               </a>
             </li>
@@ -156,14 +156,15 @@
   import env from '../js/env.js';
   import utils from '../js/utils.js';
 
-  export default function (props, { $f7, $on, $store }) {
-    const session = utils.getSession();
-    const user = session.user || {};
-    const logeado = utils.isAuthenticated();
+  export default function (props, { $f7, $on, $store, $update }) {
     const version_app = env.version;
-    const userName = utils.escapeHtml(user.name || user.nombre || 'Paciente');
-    const userEmail = utils.escapeHtml(user.email || '');
-    const avatarUrl = utils.normalizeProfessionalImage(user.imagen || user.avatar || '');
+
+    const getSession = () => $store.state.session || utils.getSession();
+    const isLoggedIn = () => Boolean(getSession().token);
+    const getUser = () => getSession().user || {};
+    const getUserName = () => utils.escapeHtml(getUser().name || getUser().nombre || 'Paciente');
+    const getUserEmail = () => utils.escapeHtml(getUser().email || '');
+    const getAvatarUrl = () => utils.normalizeProfessionalImage(getUser().imagen || getUser().avatar || '');
 
     const logout = async (event) => {
       event.preventDefault();
@@ -176,18 +177,25 @@
 
       utils.clearSession();
       $store.dispatch('refreshSession');
+      $update();
+
       const homeView = $f7.views.get('#view-home');
       if (homeView && homeView.router) {
-        homeView.router.navigate('/cli/');
-      }
-      const settingsView = $f7.views.get('#view-settings');
-      if (settingsView && settingsView.router) {
-        settingsView.router.refreshPage();
+        homeView.router.navigate('/cli/', {
+          reloadCurrent: true,
+          ignoreCache: true,
+        });
       }
     };
 
+    $on('pageInit', () => {
+      $store.dispatch('refreshSession');
+      $update();
+    });
+
     $on('pageAfterIn', () => {
-      // Mantenemos este hook por si luego hay que refrescar datos como en la referencia.
+      $store.dispatch('refreshSession');
+      $update();
     });
 
     return $render;
