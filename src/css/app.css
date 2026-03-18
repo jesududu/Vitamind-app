@@ -218,7 +218,9 @@ body {
 
 .vm-hora-chip {
   display: inline-flex;
-  width: 100%;
+  width: auto;
+  min-width: 0;
+  max-width: none;
   margin: 0;
   padding: 0;
   border-color: var(--vm-primary);
@@ -236,9 +238,9 @@ body {
 
 .vm-hora-item {
   display: inline-flex;
-  width: 118px;
-  min-width: 118px;
-  max-width: 118px;
+  width: auto;
+  min-width: 0;
+  max-width: none;
   min-height: 38px;
   justify-content: center;
   align-items: center;
@@ -249,9 +251,10 @@ body {
 }
 
 .vm-hora-slide {
-  width: 118px;
-  min-width: 118px;
-  max-width: 118px;
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  flex-shrink: 0;
 }
 
 .vm-favorite-btn {
