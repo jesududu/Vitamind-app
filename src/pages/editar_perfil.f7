@@ -31,7 +31,7 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $on, $f7, $store, $render }) {
+  export default function (props, { $el, $on, $f7, $store }) {
     const fillForm = (user) => {
       const paciente = (user && user.paciente) || {};
       const userNameParts = ((user && user.name) || '').split(' ');

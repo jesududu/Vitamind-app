@@ -52,7 +52,7 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $on, $f7, $f7router, $render }) {
+  export default function (props, { $el, $on, $f7, $f7router }) {
     const getPageNode = () => ($el && $el[0] ? $el[0] : $el);
     const getNode = (selector) => {
       const pageNode = getPageNode();

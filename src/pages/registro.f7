@@ -30,7 +30,7 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $on, $f7, $store, $render }) {
+  export default function (props, { $el, $on, $f7, $store }) {
     const getPageEl = () => (typeof $el !== 'undefined' && $el && typeof $el.find === 'function' ? $el : $f7.$($el));
 
     $on('pageInit', () => {

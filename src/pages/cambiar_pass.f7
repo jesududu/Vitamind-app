@@ -27,7 +27,7 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $on, $f7, $render }) {
+  export default function (props, { $el, $on, $f7 }) {
     $on('pageInit', () => {
       $el.find('#change-pass-submit').on('click', async () => {
         try {
