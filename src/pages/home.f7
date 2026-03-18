@@ -2,15 +2,13 @@
   <div class="page" data-name="home">
     <div class="navbar vm-home-navbar">
       <div class="navbar-bg"></div>
-      <div class="navbar-inner vm-home-navbar-inner">
-        <div class="left vm-home-nav-side">
-          <div class="vm-home-nav-spacer"></div>
-        </div>
-        <div class="title vm-home-brand">
+      <div class="navbar-inner">
+        <div class="left"></div>
+        <div class="title">
           <img src="/home-logo.png" alt="VitaMind" class="vm-home-logo" />
         </div>
-        <div class="right vm-home-nav-side">
-          <a href="/notificaciones/" class="link icon-only vm-home-bell">
+        <div class="right">
+          <a href="/notificaciones/" class="link icon-only">
             <i class="icon material-icons">notifications_none</i>
           </a>
         </div>

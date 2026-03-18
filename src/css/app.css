@@ -39,37 +39,12 @@ body {
   padding: 18px 16px 110px;
 }
 
-.vm-home-navbar-inner {
-  position: relative;
-}
-
-.vm-home-nav-side {
-  position: absolute;
-  right: 16px;
-  top: calc(env(safe-area-inset-top, 0px) + 8px);
-  z-index: 2;
-}
-
-.vm-home-nav-spacer {
-  display: none;
-}
-
-.vm-home-brand {
-  position: absolute;
-  left: 50%;
-  top: calc(env(safe-area-inset-top, 0px) + 8px);
-  transform: translateX(-50%);
-  display: flex;
-  justify-content: center;
-  z-index: 2;
-}
-
 .vm-home-logo {
   display: block;
-  max-width: 180px;
-  max-height: 64px;
+  max-width: 160px;
+  max-height: 42px;
   object-fit: contain;
-  border-radius: 18px;
+  border-radius: 14px;
 }
 
 .vm-hero,
