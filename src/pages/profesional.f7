@@ -15,26 +15,180 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $on, $f7route, $f7 }) {
-    const getPageEl = () => (typeof $el !== 'undefined' && $el && typeof $el.find === 'function' ? $el : $f7.$($el));
+  export default function (props, { $el, $on, $f7route, $f7, $f7router }) {
+    let profile = null;
     let employeeId = null;
     let isFavorite = false;
 
+    const getSelectedDate = () => {
+      const dateInput = $el.find('#profile-fecha');
+      return dateInput.length ? dateInput.val() : '';
+    };
+
+    const getSelectedServiceId = () => {
+      const select = $el.find('#profile-servicio');
+      return select.length ? select.val() : '';
+    };
+
     const syncFavoriteButton = () => {
-      const pageEl = getPageEl();
-      const button = pageEl.find('#favorite-button');
+      const button = $el.find('#favorite-button');
       if (!button.length) return;
-      button.text(isFavorite ? 'Quitar favorito' : 'Anadir favorito');
+      button
+        .toggleClass('button-fill', isFavorite)
+        .toggleClass('button-outline', !isFavorite)
+        .text(isFavorite ? 'Eliminar de favoritos' : 'Anadir a favoritos');
+    };
+
+    const renderSlots = async () => {
+      const container = $el.find('#profile-slots');
+      const servicioId = getSelectedServiceId();
+      const fecha = getSelectedDate();
+
+      if (!container.length) return;
+
+      if (!servicioId) {
+        container.html('<div class="vm-empty">Selecciona un servicio para ver los horarios.</div>');
+        return;
+      }
+
+      if (!fecha) {
+        container.html('<div class="vm-empty">Selecciona una fecha para ver los horarios.</div>');
+        return;
+      }
+
+      container.html('<div class="vm-loading">Cargando horarios...</div>');
+
+      try {
+        const response = await utils.getProfessionalSlots($f7route.params.token, {
+          fecha,
+          servicio_id: servicioId,
+        });
+
+        const fechas = (response && response.fechas) || [];
+        const firstDate = fechas[0] || {};
+        const firstEmployee = Object.values(firstDate.empleados || {})[0];
+        const servicios = (firstEmployee && firstEmployee.servicios) || [];
+        const servicio = servicios.find((item) => String(item.id) === String(servicioId));
+        const horario = servicio && servicio.horarios && servicio.horarios.length ? servicio.horarios[0] : null;
+        const slots = (horario && horario.slots) || [];
+
+        if (!slots.length) {
+          container.html('<div class="vm-empty">No hay horarios disponibles para esta fecha.</div>');
+          return;
+        }
+
+        const visibleSlots = slots.slice(0, 6);
+        let html = `<div class="vm-horas-group">${visibleSlots.map((slot) => `
+          <button class="button ${slot.disponible ? 'button-outline' : 'disabled'} vm-hora-item"
+                  data-inicio="${utils.escapeHtml(slot.inicio)}"
+                  data-fin="${utils.escapeHtml(slot.fin)}"
+                  data-disponible="${slot.disponible}">
+            ${utils.escapeHtml(slot.inicio)} - ${utils.escapeHtml(slot.fin)}
+          </button>
+        `).join('')}</div>`;
+
+        if (slots.length > 6) {
+          html += `<div class="vm-actions"><a href="#" id="show-more-slots" class="button button-small button-outline">Mostrar mas horas</a></div>`;
+        }
+
+        container.html(html);
+
+        const bindSlotButtons = (slotsToRender) => {
+          container.find('.vm-hora-item').each((index, element) => {
+            element.addEventListener('click', () => {
+              if (String(element.dataset.disponible) !== 'true') return;
+
+              const selectedService = (profile.servicios || []).find((item) => String(item.id) === String(servicioId));
+              if (!selectedService) return;
+
+              const draft = {
+                token: $f7route.params.token,
+                empleado_id: profile.id,
+                empresa_id: profile.empresa_id,
+                paciente_id: utils.getSession().pacienteId,
+                servicio_id: selectedService.id,
+                servicio_titulo: selectedService.titulo,
+                profesional: profile.nombre_completo || profile.nombre || 'Profesional',
+                fecha,
+                hora_inicio: element.dataset.inicio.length === 5 ? `${element.dataset.inicio}:00` : element.dataset.inicio,
+                hora_fin: element.dataset.fin.length === 5 ? `${element.dataset.fin}:00` : element.dataset.fin,
+                nota: '',
+                consulta_online: Boolean(selectedService.consulta_online),
+              };
+
+              utils.setStoredObject(utils.storageKeys.appointmentDraft, draft);
+              $f7router.navigate('/confirmar-reserva/');
+            });
+          });
+
+          container.find('#show-more-slots').on('click', (event) => {
+            event.preventDefault();
+            const expanded = container.attr('data-expanded') === 'true';
+            const nextSlots = expanded ? slotsToRender.slice(0, 6) : slotsToRender;
+
+            container.attr('data-expanded', expanded ? 'false' : 'true');
+            container.find('.vm-horas-group').html(nextSlots.map((slot) => `
+              <button class="button ${slot.disponible ? 'button-outline' : 'disabled'} vm-hora-item"
+                      data-inicio="${utils.escapeHtml(slot.inicio)}"
+                      data-fin="${utils.escapeHtml(slot.fin)}"
+                      data-disponible="${slot.disponible}">
+                ${utils.escapeHtml(slot.inicio)} - ${utils.escapeHtml(slot.fin)}
+              </button>
+            `).join(''));
+            container.find('#show-more-slots').text(expanded ? 'Mostrar mas horas' : 'Mostrar menos horas');
+            bindSlotButtons(slotsToRender);
+          });
+        };
+
+        bindSlotButtons(slots);
+      } catch (error) {
+        container.html(`<div class="vm-empty">${utils.escapeHtml(utils.getApiErrorMessage(error, 'No se pudieron cargar los horarios'))}</div>`);
+      }
+    };
+
+    const bindProfileEvents = () => {
+      syncFavoriteButton();
+
+      $el.find('#favorite-button').on('click', async () => {
+        if (!employeeId) return;
+        try {
+          if (!utils.isAuthenticated()) {
+            $f7.dialog.alert('Debes iniciar sesion para gestionar favoritos.');
+            return;
+          }
+
+          if (isFavorite) {
+            await utils.removeFavorite(employeeId);
+            isFavorite = false;
+          } else {
+            await utils.addFavorite(employeeId);
+            isFavorite = true;
+          }
+          syncFavoriteButton();
+        } catch (error) {
+          $f7.dialog.alert(utils.getApiErrorMessage(error));
+        }
+      });
+
+      $el.find('#profile-servicio').on('change', renderSlots);
+      $el.find('#profile-fecha').on('change', renderSlots);
+      $el.find('#profile-reservar-btn').on('click', () => {
+        const servicioId = getSelectedServiceId();
+        if (!servicioId) {
+          $f7.dialog.alert('Selecciona primero un servicio.');
+          return;
+        }
+        renderSlots();
+      });
     };
 
     const loadProfile = async () => {
-      const pageEl = getPageEl();
-      const container = pageEl.find('#profile-content');
+      const container = $el.find('#profile-content');
       container.html('<div class="vm-loading">Cargando perfil profesional...</div>');
 
       try {
         const token = $f7route.params.token;
-        const profile = await utils.getProfessionalProfile(token);
+        profile = await utils.getProfessionalProfile(token);
         employeeId = profile && profile.id ? profile.id : null;
 
         if (utils.isAuthenticated() && employeeId) {
@@ -46,63 +200,87 @@
           }
         }
 
+        const profileImage = profile.imagen || '/images/avatar/01.jpg';
+        const services = profile.servicios || [];
+        const initialServiceId = services.length ? services[0].id : '';
+        const today = new Date().toISOString().slice(0, 10);
+
         container.html(`
-          <div class="vm-card">
-            <div class="vm-detail-header">
-              <img class="vm-avatar vm-avatar--lg" src="${utils.escapeHtml(profile.imagen)}" alt="${utils.escapeHtml(profile.nombre_completo)}" />
-              <div>
-                <div class="vm-card-title">${utils.escapeHtml(profile.nombre_completo)}</div>
-                <div class="vm-card-subtitle">${utils.escapeHtml(profile.localidad || '')}</div>
-                <div class="vm-chip-row">
-                  ${profile.telefono ? `<span class="vm-chip">${utils.escapeHtml(profile.telefono)}</span>` : ''}
-                  ${profile.numero_colegiado ? `<span class="vm-chip">${utils.escapeHtml(profile.numero_colegiado)}</span>` : ''}
-                </div>
+          <div class="vm-profile-layout">
+            <div class="vm-card vm-profile-main">
+              <div class="vm-profile-image-wrap">
+                <img class="vm-profile-image" src="${utils.escapeHtml(profileImage)}" alt="${utils.escapeHtml(profile.nombre_completo || profile.nombre || 'Profesional')}" />
+              </div>
+              <div class="vm-card-title">${utils.escapeHtml(profile.nombre_completo || profile.nombre || 'Profesional')}</div>
+              <div class="vm-card-subtitle">${utils.escapeHtml(profile.localidad || 'Localidad no disponible')}</div>
+              <div class="vm-profile-meta">
+                <div class="vm-profile-meta-item"><strong>Direccion</strong><span>${utils.escapeHtml(profile.direccion || 'No disponible')}</span></div>
+                <div class="vm-profile-meta-item"><strong>Telefono</strong><span>${utils.escapeHtml(profile.telefono || 'No disponible')}</span></div>
+                <div class="vm-profile-meta-item"><strong>Colegiado</strong><span>${utils.escapeHtml(profile.numero_colegiado || profile.cp || 'No disponible')}</span></div>
+              </div>
+              <div class="vm-actions">
+                <a href="#" id="favorite-button" class="button button-outline button-small"></a>
+              </div>
+              <div class="vm-section-title">Servicios</div>
+              <div class="vm-service-list">
+                ${services.length ? services.map((servicio) => `
+                  <div class="vm-service-item">
+                    <div class="vm-card-title">${utils.escapeHtml(servicio.titulo)}</div>
+                    <div class="vm-card-subtitle">${servicio.consulta_online ? 'Consulta online disponible' : 'Consulta presencial'}</div>
+                    ${servicio.precio ? `<div class="vm-chip-row"><span class="vm-chip">${utils.escapeHtml(utils.formatPrice(servicio.precio))}</span></div>` : ''}
+                  </div>
+                `).join('') : '<div class="vm-empty">No hay servicios disponibles.</div>'}
               </div>
             </div>
-            <div class="vm-actions">
-              ${utils.isAuthenticated() ? '<a href="#" id="favorite-button" class="button button-outline button-small"></a>' : '<a href="/login/" class="button button-outline button-small">Inicia sesion para guardar</a>'}
-              <a href="/reservar/${encodeURIComponent(token)}/" class="button button-fill button-small">Reservar</a>
-            </div>
-          </div>
 
-          <div class="vm-card">
-            <div class="vm-section-title">Contacto</div>
-            <div class="vm-kv"><span>Direccion</span><strong>${utils.escapeHtml(profile.direccion || 'Sin direccion')}</strong></div>
-            <div class="vm-kv"><span>Localidad</span><strong>${utils.escapeHtml(profile.localidad || 'Sin localidad')}</strong></div>
-            <div class="vm-kv"><span>Pais</span><strong>${utils.escapeHtml(profile.pais || 'Sin pais')}</strong></div>
-          </div>
-
-          <div class="vm-card">
-            <div class="vm-section-title">Servicios</div>
-            <div class="vm-service-list">
-              ${(profile.servicios || []).length ? profile.servicios.map((servicio) => `
-                <div class="vm-service-item">
-                  <div class="vm-card-title">${utils.escapeHtml(servicio.titulo)}</div>
-                  <div class="vm-card-subtitle">${servicio.consulta_online ? 'Consulta online disponible' : 'Consulta presencial'}</div>
-                </div>
-              `).join('') : '<div class="vm-empty">Este profesional no tiene servicios cargados todavia.</div>'}
+            <div class="vm-card vm-profile-booking">
+              <div class="vm-section-title">Reservar cita</div>
+              <div class="list no-hairlines-md">
+                <ul>
+                  <li class="item-content item-input">
+                    <div class="item-inner">
+                      <div class="item-title item-label">Fecha</div>
+                      <div class="item-input-wrap">
+                        <input type="date" id="profile-fecha" value="${today}" min="${today}" />
+                      </div>
+                    </div>
+                  </li>
+                  <li class="item-content item-input">
+                    <div class="item-inner">
+                      <div class="item-title item-label">Servicio</div>
+                      <div class="item-input-wrap">
+                        <select id="profile-servicio">
+                          ${services.length ? services.map((servicio) => `<option value="${utils.escapeHtml(servicio.id)}" ${String(servicio.id) === String(initialServiceId) ? 'selected' : ''}>${utils.escapeHtml(servicio.titulo)}</option>`).join('') : '<option value="">No hay servicios</option>'}
+                        </select>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+              <div class="vm-actions">
+                <a href="#" id="profile-reservar-btn" class="button button-fill">Actualizar horarios</a>
+              </div>
+              <div class="vm-section-title">Horarios</div>
+              <div id="profile-slots" class="vm-profile-slots">
+                <div class="vm-loading">Cargando horarios...</div>
+              </div>
             </div>
           </div>
         `);
 
-        syncFavoriteButton();
-        pageEl.find('#favorite-button').on('click', async () => {
-          try {
-            if (!employeeId) return;
-            if (isFavorite) {
-              await utils.removeFavorite(employeeId);
-              isFavorite = false;
-            } else {
-              await utils.addFavorite(employeeId);
-              isFavorite = true;
-            }
-            syncFavoriteButton();
-          } catch (error) {
-            $f7.dialog.alert(error.message);
-          }
+        const profileImg = container.find('.vm-profile-image');
+        profileImg.on('error', () => {
+          profileImg.attr('src', '/images/avatar/01.jpg');
         });
+
+        bindProfileEvents();
+        if (services.length) {
+          renderSlots();
+        } else {
+          $el.find('#profile-slots').html('<div class="vm-empty">No hay servicios disponibles para este profesional.</div>');
+        }
       } catch (error) {
-        container.html(`<div class="vm-empty">${utils.escapeHtml(error.message)}</div>`);
+        container.html(`<div class="vm-empty">${utils.escapeHtml(utils.getApiErrorMessage(error, 'No se pudo cargar el perfil del profesional'))}</div>`);
       }
     };
 

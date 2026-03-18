@@ -148,6 +148,69 @@ body {
   align-items: center;
 }
 
+.vm-profile-layout {
+  display: grid;
+  gap: 16px;
+}
+
+.vm-profile-image-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.vm-profile-image {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: linear-gradient(135deg, rgba(var(--vm-primary-rgb), 0.18), rgba(29, 42, 59, 0.12));
+}
+
+.vm-profile-meta {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+  margin-bottom: 16px;
+}
+
+.vm-profile-meta-item {
+  display: grid;
+  gap: 4px;
+}
+
+.vm-profile-meta-item strong {
+  color: var(--vm-secondary);
+  font-size: 13px;
+}
+
+.vm-profile-meta-item span {
+  color: var(--vm-text-muted);
+  font-size: 14px;
+}
+
+.vm-profile-slots {
+  min-height: 80px;
+}
+
+.vm-horas-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.vm-hora-item {
+  min-width: 130px;
+  justify-content: center;
+}
+
+@media (min-width: 768px) {
+  .vm-profile-layout {
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    align-items: start;
+  }
+}
+
 .vm-chip-row,
 .vm-actions {
   display: flex;
