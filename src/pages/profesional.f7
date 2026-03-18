@@ -92,18 +92,16 @@
               <div id="calendario-profesional"></div>
             </div>
           </div>
+        </div>
 
-          <div class="vm-card vm-profile-booking">
-            <div class="vm-section-title">Horarios</div>
-            <div class="contenedor-horarios-tm" style="background: none;">
-              <div class="divHorarios"></div>
-            </div>
+        <div class="block-title" style="margin: 20px 10px 0px 10px;">Horarios</div>
+        <div class="contenedor-horarios-tm" style="background: none;">
+          <div class="divHorarios"></div>
+        </div>
 
-            <div class="block noDisponibilidad" style="background: none; display: none;">
-              <p style="text-align: center; font-size: 19px; font-weight: bold; margin-bottom: 0px;">No hay disponibilidad</p>
-              <p style="text-align: center; margin-top: 0px;">Selecciona otra fecha</p>
-            </div>
-          </div>
+        <div class="block noDisponibilidad" style="background: none; display: none;">
+          <p style="text-align: center; font-size: 19px; font-weight: bold; margin-bottom: 0px;">No hay disponibilidad</p>
+          <p style="text-align: center; margin-top: 0px;">Selecciona otra fecha</p>
         </div>
       `}
     </div>

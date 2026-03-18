@@ -151,6 +151,7 @@ body {
 .vm-profile-layout {
   display: grid;
   gap: 16px;
+  margin-bottom: 12px;
 }
 
 .vm-profile-image-wrap {
