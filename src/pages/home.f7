@@ -11,7 +11,7 @@
 
       <section class="vm-hero">
         <h1>Encuentra el profesional adecuado</h1>
-        <p>Base móvil para pacientes conectada al backend real de VitaMind.</p>
+        <p>Base movil para pacientes conectada al backend real de VitaMind.</p>
       </section>
 
       <section class="vm-section vm-search-card">
@@ -21,7 +21,7 @@
               <div class="item-inner">
                 <div class="item-title item-label">Localidad</div>
                 <div class="item-input-wrap">
-                  <input type="text" id="home-localidad" placeholder="Madrid, Córdoba..." />
+                  <input type="text" id="home-localidad" placeholder="Madrid, Cordoba..." />
                 </div>
               </div>
             </li>
@@ -29,21 +29,43 @@
               <div class="item-inner">
                 <div class="item-title item-label">Profesional o servicio</div>
                 <div class="item-input-wrap">
-                  <input type="text" id="home-query" placeholder="Psicología, ansiedad, terapia..." />
+                  <input type="text" id="home-query" placeholder="Psicologia, ansiedad, terapia..." />
                 </div>
               </div>
             </li>
           </ul>
         </div>
         <div class="vm-actions">
-          <a href="#" id="home-search-button" class="button button-fill">Buscar</a>
+          <a href="#" class="button button-fill" @click=${openSearch}>Buscar</a>
         </div>
       </section>
 
       <section class="vm-section">
-        <div class="vm-section-title">Últimos profesionales</div>
-        <div id="latest-professionals" class="vm-list">
-          <div class="vm-loading">Cargando profesionales...</div>
+        <div class="vm-section-title">Ultimos profesionales</div>
+        <div class="vm-list">
+          ${loadingLatest && $h`
+            <div class="vm-loading">Cargando profesionales...</div>
+          `}
+          ${!loadingLatest && latestError && $h`
+            <div class="vm-empty">${latestError}</div>
+          `}
+          ${!loadingLatest && !latestError && !latestProfessionals.length && $h`
+            <div class="vm-empty">No hay profesionales disponibles.</div>
+          `}
+          ${!loadingLatest && !latestError && latestProfessionals.map((item) => $h`
+            <div class="vm-card">
+              <div class="vm-professional">
+                <img src="${item.imagen}" alt="${item.nombre}" />
+                <div>
+                  <div class="vm-card-title">${item.nombre}</div>
+                  <div class="vm-card-subtitle">${item.direccion || 'Perfil profesional publicado recientemente'}</div>
+                  <div class="vm-actions">
+                    <a href="/profesional/${encodeURIComponent(item.token)}/" class="button button-fill button-small">Ver perfil</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `)}
         </div>
       </section>
     </div>
@@ -52,58 +74,34 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $on, $onMounted, $f7, $f7router }) {
-    const getPageNode = () => ($el && $el[0] ? $el[0] : $el);
+  export default function (props, { $el, $f7, $on, $onMounted, $update }) {
+    let latestProfessionals = [];
+    let loadingLatest = true;
+    let latestError = '';
     let initialized = false;
-    const getNode = (selector) => {
-      const pageNode = getPageNode();
-      return pageNode ? pageNode.querySelector(selector) : null;
-    };
 
-    const renderLatest = async () => {
-      const container = getNode('#latest-professionals');
-      if (!container) return;
-      container.innerHTML = '<div class="vm-loading">Cargando profesionales...</div>';
+    const loadLatestProfessionals = async () => {
+      loadingLatest = true;
+      latestError = '';
+      $update();
 
       try {
-        const items = await utils.getHomeProfessionals();
-
-        if (!items.length) {
-          container.innerHTML = '<div class="vm-empty">No hay profesionales disponibles.</div>';
-          return;
-        }
-
-        container.innerHTML = items.map((item) => `
-          <div class="vm-card">
-            <div class="vm-professional">
-              <img src="${utils.escapeHtml(item.imagen)}" alt="${utils.escapeHtml(item.nombre)}" />
-              <div>
-                <div class="vm-card-title">${utils.escapeHtml(item.nombre)}</div>
-                <div class="vm-card-subtitle">${utils.escapeHtml(item.direccion || 'Perfil profesional publicado recientemente')}</div>
-                <div class="vm-actions">
-                  <a href="/profesional/${encodeURIComponent(item.token)}/" class="button button-fill button-small">Ver perfil</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        `).join('');
-
-        container.querySelectorAll('img').forEach((img) => {
-          img.addEventListener('error', () => {
-            img.src = '/images/avatar/01.jpg';
-          }, { once: true });
-        });
+        latestProfessionals = await utils.getHomeProfessionals();
       } catch (error) {
-        const message = utils.getApiErrorMessage(error, 'No se pudieron cargar los profesionales');
-        container.innerHTML = `<div class="vm-empty">${utils.escapeHtml(message)}</div>`;
+        latestProfessionals = [];
+        latestError = utils.getApiErrorMessage(error, 'No se pudieron cargar los profesionales');
+      } finally {
+        loadingLatest = false;
+        $update();
       }
     };
 
     const openSearch = () => {
-      const localidadInput = getNode('#home-localidad');
-      const queryInput = getNode('#home-query');
-      const localidad = localidadInput ? localidadInput.value : '';
-      const query = queryInput ? queryInput.value : '';
+      const pageEl = $el;
+      const localidadInput = pageEl.find('#home-localidad');
+      const queryInput = pageEl.find('#home-query');
+      const localidad = localidadInput.length ? localidadInput.val() : '';
+      const query = queryInput.length ? queryInput.val() : '';
       const params = new URLSearchParams();
 
       if (localidad) params.set('localidad', localidad);
@@ -113,31 +111,25 @@
       $f7.tab.show('#view-busqueda');
       const searchView = $f7.views.get('#view-busqueda');
       if (searchView && searchView.router) {
-        searchView.router.navigate(`/search/${suffix}`);
+        searchView.router.navigate(`/search/${suffix}`, {
+          ignoreCache: true,
+          reloadCurrent: true,
+        });
       }
     };
 
     const initPage = () => {
       if (initialized) return;
       initialized = true;
-      renderLatest();
-      const searchButton = getNode('#home-search-button');
-      const ptrContent = getNode('.ptr-content');
-
-      if (searchButton) {
-        searchButton.addEventListener('click', openSearch);
-      }
-
-      if (ptrContent) {
-        ptrContent.addEventListener('ptr:refresh', async () => {
-          await renderLatest();
-          $f7.ptr.done();
-        });
-      }
+      loadLatestProfessionals();
     };
 
     $on('pageInit', initPage);
     $onMounted(initPage);
+    $on('ptrRefresh', async () => {
+      await loadLatestProfessionals();
+      $f7.ptr.done();
+    });
 
     return $render;
   }

@@ -14,7 +14,7 @@
               <div class="item-inner">
                 <div class="item-title item-label">Localidad</div>
                 <div class="item-input-wrap">
-                  <input type="text" id="search-localidad" placeholder="Ciudad o provincia" />
+                  <input type="text" id="search-localidad" placeholder="Ciudad o provincia" value="${searchLocalidad}" />
                 </div>
               </div>
             </li>
@@ -22,21 +22,48 @@
               <div class="item-inner">
                 <div class="item-title item-label">Profesional o servicio</div>
                 <div class="item-input-wrap">
-                  <input type="text" id="search-query" placeholder="Nombre o especialidad" />
+                  <input type="text" id="search-query" placeholder="Nombre o especialidad" value="${searchQuery}" />
                 </div>
               </div>
             </li>
           </ul>
         </div>
         <div class="vm-actions">
-          <a href="#" class="button button-fill" id="search-submit">Buscar disponibilidad</a>
+          <a href="#" class="button button-fill" @click=${loadResults}>Buscar disponibilidad</a>
         </div>
       </section>
 
       <section class="vm-section">
         <div class="vm-section-title">Resultados</div>
-        <div id="search-results" class="vm-list">
-          <div class="vm-empty">Introduce una localidad válida o un nombre de profesional para comenzar.</div>
+        <div class="vm-list">
+          ${searchLoading && $h`
+            <div class="vm-loading">Consultando horarios disponibles...</div>
+          `}
+          ${!searchLoading && searchMessage && $h`
+            <div class="vm-empty">${searchMessage}</div>
+          `}
+          ${!searchLoading && !searchMessage && searchResults.map((item) => {
+            const servicio = item.servicios && item.servicios.length ? item.servicios[0] : null;
+            return $h`
+              <div class="vm-card">
+                <div class="vm-professional">
+                  <img src="${item.foto || '/images/avatar/01.jpg'}" alt="${item.nombre_completo}" />
+                  <div>
+                    <div class="vm-card-title">${item.nombre_completo}</div>
+                    <div class="vm-card-subtitle">${item.empresa_nombre || item.direccion || ''}</div>
+                    <div class="vm-chip-row">
+                      ${servicio ? $h`<span class="vm-chip">${servicio.titulo}</span>` : ''}
+                      ${servicio && servicio.precio ? $h`<span class="vm-chip">${utils.formatPrice(servicio.precio)}</span>` : ''}
+                      ${item.distancia ? $h`<span class="vm-chip">${item.distancia} km</span>` : ''}
+                    </div>
+                    <div class="vm-actions">
+                      <a href="#" class="button button-fill button-small" @click=${() => openProfessional(item.id)}>Abrir perfil</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          })}
         </div>
       </section>
     </div>
@@ -45,97 +72,80 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $on, $onMounted, $f7route, $f7router, $f7 }) {
-    const getPageNode = () => ($el && $el[0] ? $el[0] : $el);
+  export default function (props, { $el, $f7, $f7route, $f7router, $on, $onMounted, $update }) {
+    let searchLocalidad = '';
+    let searchQuery = '';
+    let searchLoading = false;
+    let searchMessage = 'Introduce una localidad valida o un nombre de profesional para comenzar.';
+    let searchResults = [];
     let initialized = false;
-    const getNode = (selector) => {
-      const pageNode = getPageNode();
-      return pageNode ? pageNode.querySelector(selector) : null;
+
+    const syncInputs = () => {
+      const localidadInput = $el.find('#search-localidad');
+      const queryInput = $el.find('#search-query');
+      searchLocalidad = localidadInput.length ? localidadInput.val() : searchLocalidad;
+      searchQuery = queryInput.length ? queryInput.val() : searchQuery;
     };
 
-    const renderResults = async () => {
-      const container = getNode('#search-results');
-      if (!container) return;
-      const localidadInput = getNode('#search-localidad');
-      const queryInput = getNode('#search-query');
-      const localidad = localidadInput ? localidadInput.value : '';
-      const query = queryInput ? queryInput.value : '';
+    const loadResults = async () => {
+      syncInputs();
 
-      if (!localidad && !query) {
-        container.innerHTML = '<div class="vm-empty">Selecciona una localidad o escribe el nombre de un profesional.</div>';
+      if (!searchLocalidad && !searchQuery) {
+        searchResults = [];
+        searchLoading = false;
+        searchMessage = 'Selecciona una localidad o escribe el nombre de un profesional.';
+        $update();
         return;
       }
 
-      container.innerHTML = '<div class="vm-loading">Consultando horarios disponibles...</div>';
+      searchLoading = true;
+      searchMessage = '';
+      searchResults = [];
+      $update();
 
       try {
-        const response = await utils.searchProfessionals({ localidad, query });
+        const response = await utils.searchProfessionals({
+          localidad: searchLocalidad,
+          query: searchQuery,
+        });
         const fechas = (response && response.fechas) || [];
         const profesionales = new Map();
 
         fechas.forEach((fechaItem) => {
           Object.values(fechaItem.empleados || {}).forEach((empleado) => {
             if (!profesionales.has(empleado.id)) {
-              profesionales.set(empleado.id, { ...empleado, primeraFecha: fechaItem.fecha });
+              profesionales.set(empleado.id, Object.assign({}, empleado, {
+                primeraFecha: fechaItem.fecha,
+              }));
             }
           });
         });
 
-        const items = [...profesionales.values()];
-        if (!items.length) {
-          container.innerHTML = '<div class="vm-empty">No hemos encontrado disponibilidad con esos filtros.</div>';
-          return;
+        searchResults = Array.from(profesionales.values());
+        if (!searchResults.length) {
+          searchMessage = 'No hemos encontrado disponibilidad con esos filtros.';
         }
-
-        container.innerHTML = items.map((item) => {
-          const servicio = item.servicios && item.servicios.length ? item.servicios[0] : null;
-          return `
-            <div class="vm-card">
-              <div class="vm-professional">
-                <img src="${utils.escapeHtml(item.foto)}" alt="${utils.escapeHtml(item.nombre_completo)}" />
-                <div>
-                  <div class="vm-card-title">${utils.escapeHtml(item.nombre_completo)}</div>
-                  <div class="vm-card-subtitle">${utils.escapeHtml(item.empresa_nombre || item.direccion || '')}</div>
-                  <div class="vm-chip-row">
-                    ${servicio ? `<span class="vm-chip">${utils.escapeHtml(servicio.titulo)}</span>` : ''}
-                    ${servicio && servicio.precio ? `<span class="vm-chip">${utils.escapeHtml(utils.formatPrice(servicio.precio))}</span>` : ''}
-                    ${item.distancia ? `<span class="vm-chip">${utils.escapeHtml(item.distancia)} km</span>` : ''}
-                  </div>
-                  <div class="vm-actions">
-                    <a href="#" class="button button-fill button-small vm-open-profile" data-empleado-id="${utils.escapeHtml(item.id)}">Abrir perfil</a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          `;
-        }).join('');
-
-        container.querySelectorAll('img').forEach((img) => {
-          img.addEventListener('error', () => {
-            img.src = '/images/avatar/01.jpg';
-          }, { once: true });
-        });
-
-        container.querySelectorAll('.vm-open-profile').forEach((button) => {
-          button.addEventListener('click', async (event) => {
-          const empleadoId = event.currentTarget.dataset.empleadoId;
-          try {
-            $f7.preloader.show();
-            const token = await utils.resolveProfessionalTokenByEmployeeId(empleadoId);
-            if (!token) {
-              throw new Error('No se pudo localizar el token del profesional.');
-            }
-            $f7router.navigate(`/profesional/${encodeURIComponent(token)}/`);
-          } catch (error) {
-            $f7.dialog.alert(error.message);
-          } finally {
-            $f7.preloader.hide();
-          }
-        });
-        });
       } catch (error) {
-        const message = utils.getApiErrorMessage(error, 'No se pudieron cargar los resultados');
-        container.innerHTML = `<div class="vm-empty">${utils.escapeHtml(message)}</div>`;
+        searchResults = [];
+        searchMessage = utils.getApiErrorMessage(error, 'No se pudieron cargar los resultados');
+      } finally {
+        searchLoading = false;
+        $update();
+      }
+    };
+
+    const openProfessional = async (empleadoId) => {
+      try {
+        $f7.preloader.show();
+        const token = await utils.resolveProfessionalTokenByEmployeeId(empleadoId);
+        if (!token) {
+          throw new Error('No se pudo localizar el token del profesional.');
+        }
+        $f7router.navigate(`/profesional/${encodeURIComponent(token)}/`);
+      } catch (error) {
+        $f7.dialog.alert(error.message);
+      } finally {
+        $f7.preloader.hide();
       }
     };
 
@@ -143,16 +153,12 @@
       if (initialized) return;
       initialized = true;
       const query = $f7route.query || {};
-      const localidadInput = getNode('#search-localidad');
-      const queryInput = getNode('#search-query');
-      const submitButton = getNode('#search-submit');
-
-      if (query.localidad && localidadInput) localidadInput.value = query.localidad;
-      if (query.query && queryInput) queryInput.value = query.query;
-      if (submitButton) submitButton.addEventListener('click', renderResults);
-
-      if (query.localidad || query.query) {
-        renderResults();
+      searchLocalidad = query.localidad || '';
+      searchQuery = query.query || '';
+      if (searchLocalidad || searchQuery) {
+        loadResults();
+      } else {
+        $update();
       }
     };
 
