@@ -88,27 +88,20 @@
               </ul>
             </div>
 
-            <div class="block block-strong inset">
+            <div class="block block-strong inset" style="margin-top: 10px; margin-bottom: 10px;">
               <div id="calendario-profesional"></div>
             </div>
           </div>
 
           <div class="vm-card vm-profile-booking">
             <div class="vm-section-title">Horarios</div>
-            <div class="vm-profile-slots">
-              ${loadingSlots && $h`
-                <div class="vm-loading">Cargando horarios...</div>
-              `}
-              ${!loadingSlots ? $h`
-                <div class="contenedor-horarios-tm">
-                  <div class="divHorarios"></div>
-                </div>
-              ` : ''}
-              ${!loadingSlots && slotsMessage ? $h`
-                <div class="block noDisponibilidad">
-                  <p>${slotsMessage}</p>
-                </div>
-              ` : ''}
+            <div class="contenedor-horarios-tm" style="background: none;">
+              <div class="divHorarios"></div>
+            </div>
+
+            <div class="block noDisponibilidad" style="background: none; display: none;">
+              <p style="text-align: center; font-size: 19px; font-weight: bold; margin-bottom: 0px;">No hay disponibilidad</p>
+              <p style="text-align: center; margin-top: 0px;">Selecciona otra fecha</p>
             </div>
           </div>
         </div>
@@ -125,12 +118,12 @@
     let isFavorite = false;
     let loadingProfile = true;
     let profileError = '';
-    let loadingSlots = false;
-    let slotsMessage = '';
     let initialized = false;
     let calendarProfessional = null;
-    let selectedSlot = null;
-    let scheduleHtml = '';
+    let selectedDate = null;
+    let selectedServiceId = '';
+    let lastCalendarDate = null;
+
     const months = [
       'Enero',
       'Febrero',
@@ -146,80 +139,139 @@
       'Diciembre',
     ];
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    let selectedDate = today.toISOString().slice(0, 10);
-    let selectedServiceId = '';
+    const getPageEl = () => {
+      if ($el && $el[0]) return $el[0];
+      if ($el && $el.nodeType === 1) return $el;
+      return document.querySelector('.page[data-name="profesional"].page-current') || document.querySelector('.page[data-name="profesional"]');
+    };
 
     const getProfileName = () => (profile ? (profile.nombre_completo || profile.nombre || 'Profesional') : 'Profesional');
     const getProfileImage = () => (
       profile ? utils.normalizeProfessionalImage(profile.imagen || profile.imagen_url) : '/images/avatar/01.jpg'
     );
     const getServices = () => (profile && Array.isArray(profile.servicios) ? profile.servicios : []);
-    const onServiceChange = (event) => {
-      selectedServiceId = event.target.value;
-      loadSlots();
+
+    const showAvailabilityMessage = (messageTop = 'No hay disponibilidad', messageBottom = 'Selecciona otra fecha') => {
+      const pageEl = getPageEl();
+      if (!pageEl) return;
+      const noDisponibilidadEl = pageEl.querySelector('.noDisponibilidad');
+      const horariosEl = pageEl.querySelector('.divHorarios');
+      if (horariosEl) horariosEl.innerHTML = '';
+      if (noDisponibilidadEl) {
+        noDisponibilidadEl.style.display = 'block';
+        const paragraphs = noDisponibilidadEl.querySelectorAll('p');
+        if (paragraphs[0]) paragraphs[0].textContent = messageTop;
+        if (paragraphs[1]) paragraphs[1].textContent = messageBottom;
+      }
     };
 
-    const getPageEl = () => {
-      if ($el && typeof $el.find === 'function' && $el[0]) return $el[0];
-      if ($el && $el.nodeType === 1) return $el;
-      return document.querySelector('.page[data-name="profesional"].page-current') || document.querySelector('.page[data-name="profesional"]');
+    const hideAvailabilityMessage = () => {
+      const pageEl = getPageEl();
+      if (!pageEl) return;
+      const noDisponibilidadEl = pageEl.querySelector('.noDisponibilidad');
+      if (noDisponibilidadEl) noDisponibilidadEl.style.display = 'none';
+    };
+
+    const renderScheduleHtml = (html) => {
+      const pageEl = getPageEl();
+      if (!pageEl) return;
+
+      const horariosEl = pageEl.querySelector('.divHorarios');
+      if (!horariosEl) return;
+
+      horariosEl.innerHTML = html || '';
+      hideAvailabilityMessage();
+
+      const items = horariosEl.querySelectorAll('.horario');
+      items.forEach((item) => {
+        item.addEventListener('click', (event) => {
+          event.preventDefault();
+          items.forEach((node) => node.classList.remove('selected'));
+          item.classList.add('selected');
+
+          const slot = {
+            inicio: item.dataset.horaServicio || '',
+            fin: item.dataset.horafinServicio || '',
+          };
+          selectSlot(slot);
+        });
+      });
+
+      setTimeout(() => {
+        const first = horariosEl.querySelector('.horario:not(.ocupada)');
+        if (first) first.click();
+      }, 20);
     };
 
     const initCalendar = () => {
-      $f7.utils.nextTick(() => {
-        const currentPage = getPageEl();
-        const calendarEl = currentPage ? currentPage.querySelector('#calendario-profesional') : null;
-        if (!calendarEl) return;
+      const pageEl = getPageEl();
+      if (!pageEl) return;
 
-        if (calendarProfessional) {
-          calendarProfessional.destroy();
-          calendarProfessional = null;
-        }
+      const calendarEl = pageEl.querySelector('#calendario-profesional');
+      if (!calendarEl) return;
 
-        calendarEl.innerHTML = '';
+      if (calendarProfessional) {
+        calendarProfessional.destroy();
+        calendarProfessional = null;
+      }
 
-        calendarProfessional = $f7.calendar.create({
-          containerEl: calendarEl,
-          monthNames: months,
-          value: [new Date(selectedDate)],
-          minDate: today,
-          renderToolbar: function () {
-            return '<div class="toolbar calendar-custom-toolbar no-shadow">' +
-              '<div class="toolbar-inner">' +
-                '<div class="left"><a class="link icon-only"><i class="icon icon-back"></i></a></div>' +
-                '<div class="center"></div>' +
-                '<div class="right"><a class="link icon-only"><i class="icon icon-forward"></i></a></div>' +
-              '</div>' +
-            '</div>';
+      calendarEl.innerHTML = '';
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const initialDate = selectedDate ? new Date(selectedDate) : new Date();
+
+      calendarProfessional = $f7.calendar.create({
+        containerEl: calendarEl,
+        monthNames: months,
+        value: [initialDate],
+        minDate: today,
+        renderToolbar: function () {
+          return '<div class="toolbar calendar-custom-toolbar no-shadow" style="background:none;">' +
+            '<div class="toolbar-inner">' +
+              '<div class="left"><a class="link icon-only"><i class="icon icon-back"></i></a></div>' +
+              '<div class="center"></div>' +
+              '<div class="right"><a class="link icon-only"><i class="icon icon-forward"></i></a></div>' +
+            '</div>' +
+          '</div>';
+        },
+        on: {
+          init: function (calendar) {
+            const toolbarEl = pageEl.querySelector('.calendar-custom-toolbar');
+            if (toolbarEl) {
+              toolbarEl.querySelector('.center').textContent = `${months[calendar.currentMonth]} ${calendar.currentYear}`;
+              toolbarEl.querySelector('.left .link').addEventListener('click', () => calendar.prevMonth());
+              toolbarEl.querySelector('.right .link').addEventListener('click', () => calendar.nextMonth());
+            }
+
+            const date = calendar.value && calendar.value[0] ? calendar.value[0] : new Date();
+            const day = (`0${date.getDate()}`).slice(-2);
+            const month = (`0${date.getMonth() + 1}`).slice(-2);
+            const year = date.getFullYear();
+            selectedDate = `${year}-${month}-${day}`;
+            lastCalendarDate = selectedDate;
           },
-          on: {
-            init: function (calendar) {
-              const toolbarEl = currentPage.querySelector('.calendar-custom-toolbar');
-              if (toolbarEl) {
-                toolbarEl.querySelector('.center').textContent = `${months[calendar.currentMonth]} ${calendar.currentYear}`;
-                toolbarEl.querySelector('.left .link').addEventListener('click', () => calendar.prevMonth());
-                toolbarEl.querySelector('.right .link').addEventListener('click', () => calendar.nextMonth());
-              }
-            },
-            monthYearChangeStart: function (calendar) {
-              const toolbarEl = currentPage.querySelector('.calendar-custom-toolbar');
-              if (toolbarEl) {
-                toolbarEl.querySelector('.center').textContent = `${months[calendar.currentMonth]} ${calendar.currentYear}`;
-              }
-            },
-            change: function (calendar) {
-              const pickedDate = calendar.value && calendar.value[0] ? calendar.value[0] : null;
-              if (!pickedDate) return;
-              const day = (`0${pickedDate.getDate()}`).slice(-2);
-              const month = (`0${pickedDate.getMonth() + 1}`).slice(-2);
-              const year = pickedDate.getFullYear();
-              selectedDate = `${year}-${month}-${day}`;
-              loadSlots();
-            },
+          monthYearChangeStart: function (calendar) {
+            const toolbarEl = pageEl.querySelector('.calendar-custom-toolbar');
+            if (toolbarEl) {
+              toolbarEl.querySelector('.center').textContent = `${months[calendar.currentMonth]} ${calendar.currentYear}`;
+            }
           },
-        });
+          change: function (calendar) {
+            const date = calendar.value && calendar.value[0] ? calendar.value[0] : null;
+            if (!date) return;
+
+            const day = (`0${date.getDate()}`).slice(-2);
+            const month = (`0${date.getMonth() + 1}`).slice(-2);
+            const year = date.getFullYear();
+            const formatted = `${year}-${month}-${day}`;
+
+            if (formatted === lastCalendarDate) return;
+            lastCalendarDate = formatted;
+            selectedDate = formatted;
+            loadSlots();
+          },
+        },
       });
     };
 
@@ -244,29 +296,6 @@
       } catch (error) {
         $f7.dialog.alert(utils.getApiErrorMessage(error));
       }
-    };
-
-    const getCurrentPage = () => getPageEl();
-
-    const renderScheduleHtml = (html) => {
-      const currentPage = getCurrentPage();
-      const horariosEl = currentPage ? currentPage.querySelector('.divHorarios') : null;
-      if (!horariosEl) return;
-
-      horariosEl.innerHTML = html || '';
-      const items = horariosEl.querySelectorAll('.horario');
-      items.forEach((item) => {
-        item.addEventListener('click', (event) => {
-          event.preventDefault();
-          items.forEach((node) => node.classList.remove('selected'));
-          item.classList.add('selected');
-          selectedSlot = {
-            inicio: item.dataset.horaServicio || '',
-            fin: item.dataset.horafinServicio || '',
-          };
-          selectSlot(selectedSlot);
-        });
-      });
     };
 
     const selectSlot = (slot) => {
@@ -294,28 +323,16 @@
       $f7router.navigate('/confirmar-reserva/');
     };
 
-    const loadSlots = async (event) => {
-      if (event) event.preventDefault();
-
+    const loadSlots = async () => {
       if (!selectedServiceId) {
-        slotsMessage = 'Selecciona un servicio para ver los horarios.';
-        scheduleHtml = '';
-        $update();
+        showAvailabilityMessage('Selecciona un servicio', 'Para ver los horarios');
         return;
       }
 
       if (!selectedDate) {
-        slotsMessage = 'Selecciona una fecha para ver los horarios.';
-        scheduleHtml = '';
-        $update();
+        showAvailabilityMessage('Selecciona una fecha', 'Para ver los horarios');
         return;
       }
-
-      loadingSlots = true;
-      slotsMessage = '';
-      selectedSlot = null;
-      scheduleHtml = '';
-      $update();
 
       try {
         const response = await utils.getProfessionalSlots($f7route.params.token, {
@@ -333,21 +350,12 @@
         const filas = utils.buildHorarioRowsHtml(slots);
 
         if (filas) {
-          scheduleHtml = filas;
+          renderScheduleHtml(filas);
         } else {
-          scheduleHtml = '';
-          slotsMessage = 'No hay horarios disponibles para esta fecha.';
+          showAvailabilityMessage('No hay disponibilidad', 'Selecciona otra fecha');
         }
       } catch (error) {
-        scheduleHtml = '';
-        slotsMessage = utils.getApiErrorMessage(error, 'No se pudieron cargar los horarios');
-      } finally {
-        loadingSlots = false;
-        $update();
-        $f7.utils.nextTick(() => {
-          initCalendar();
-          renderScheduleHtml(scheduleHtml);
-        });
+        showAvailabilityMessage('Error cargando horarios', utils.getApiErrorMessage(error));
       }
     };
 
@@ -371,24 +379,28 @@
           }
         }
 
-        if (getServices().length) {
-          loadingProfile = false;
-          $update();
-          $f7.utils.nextTick(() => {
-            initCalendar();
-          });
-          await loadSlots();
-        } else {
-          slotsMessage = 'No hay servicios disponibles para este profesional.';
-          loadingProfile = false;
-        }
+        loadingProfile = false;
+        $update();
+
+        $f7.utils.nextTick(async () => {
+          initCalendar();
+          if (getServices().length) {
+            await loadSlots();
+          } else {
+            showAvailabilityMessage('No hay servicios disponibles', 'Para este profesional');
+          }
+        });
       } catch (error) {
         profile = null;
-        profileError = utils.getApiErrorMessage(error, 'No se pudo cargar el perfil del profesional');
         loadingProfile = false;
-      } finally {
+        profileError = utils.getApiErrorMessage(error, 'No se pudo cargar el perfil del profesional');
         $update();
       }
+    };
+
+    const onServiceChange = (event) => {
+      selectedServiceId = event.target.value;
+      loadSlots();
     };
 
     const initPage = () => {
@@ -399,15 +411,18 @@
 
     $on('pageInit', initPage);
     $onMounted(initPage);
+    $on('pageAfterIn', () => {
+      if (!profile) return;
+      $f7.utils.nextTick(() => {
+        initCalendar();
+        loadSlots();
+      });
+    });
     $on('pageBeforeRemove', () => {
       if (calendarProfessional) {
         calendarProfessional.destroy();
         calendarProfessional = null;
       }
-    });
-    $on('pageAfterIn', () => {
-      initCalendar();
-      renderScheduleHtml(scheduleHtml);
     });
 
     return $render;
