@@ -27,15 +27,15 @@
 
             <div class="vm-profile-meta">
               <div class="vm-profile-meta-item">
-                <strong>Direccion</strong>
+                <strong><i class="icon material-icons">location_on</i> Direccion</strong>
                 <span>${profile.direccion || 'No disponible'}</span>
               </div>
               <div class="vm-profile-meta-item">
-                <strong>Telefono</strong>
+                <strong><i class="icon material-icons">call</i> Telefono</strong>
                 <span>${profile.telefono || 'No disponible'}</span>
               </div>
               <div class="vm-profile-meta-item">
-                <strong>Colegiado</strong>
+                <strong><i class="icon material-icons">badge</i> Colegiado</strong>
                 <span>${profile.numero_colegiado || profile.cp || 'No disponible'}</span>
               </div>
             </div>
