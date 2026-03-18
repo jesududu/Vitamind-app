@@ -53,21 +53,23 @@
   import utils from '../js/utils.js';
 
   export default (props, { $el, $on, $f7, $f7router }) => {
-    const pageEl = $f7.$($el);
+    const pageNode = $el && $el[0] ? $el[0] : $el;
+    const getNode = (selector) => pageNode?.querySelector(selector);
 
     const renderLatest = async () => {
-      const container = pageEl.find('#latest-professionals');
-      container.html('<div class="vm-loading">Cargando profesionales...</div>');
+      const container = getNode('#latest-professionals');
+      if (!container) return;
+      container.innerHTML = '<div class="vm-loading">Cargando profesionales...</div>';
 
       try {
         const items = await utils.getHomeProfessionals();
 
         if (!items.length) {
-          container.html('<div class="vm-empty">No hay profesionales disponibles.</div>');
+          container.innerHTML = '<div class="vm-empty">No hay profesionales disponibles.</div>';
           return;
         }
 
-        container.html(items.map((item) => `
+        container.innerHTML = items.map((item) => `
           <div class="vm-card">
             <div class="vm-professional">
               <img src="${utils.escapeHtml(item.imagen)}" alt="${utils.escapeHtml(item.nombre)}" />
@@ -81,15 +83,21 @@
             </div>
           </div>
         `).join(''));
+
+        container.querySelectorAll('img').forEach((img) => {
+          img.addEventListener('error', () => {
+            img.src = '/images/avatar/01.jpg';
+          }, { once: true });
+        });
       } catch (error) {
         const message = utils.getApiErrorMessage(error, 'No se pudieron cargar los profesionales');
-        container.html(`<div class="vm-empty">${utils.escapeHtml(message)}</div>`);
+        container.innerHTML = `<div class="vm-empty">${utils.escapeHtml(message)}</div>`;
       }
     };
 
     const openSearch = () => {
-      const localidad = pageEl.find('#home-localidad').val();
-      const query = pageEl.find('#home-query').val();
+      const localidad = getNode('#home-localidad')?.value || '';
+      const query = getNode('#home-query')?.value || '';
       const params = new URLSearchParams();
 
       if (localidad) params.set('localidad', localidad);
@@ -101,8 +109,8 @@
 
     $on('pageInit', () => {
       renderLatest();
-      pageEl.find('#home-search-button').on('click', openSearch);
-      pageEl.find('.ptr-content').on('ptr:refresh', async () => {
+      getNode('#home-search-button')?.addEventListener('click', openSearch);
+      getNode('.ptr-content')?.addEventListener('ptr:refresh', async () => {
         await renderLatest();
         $f7.ptr.done();
       });
