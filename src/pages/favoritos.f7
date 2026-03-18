@@ -15,7 +15,7 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default (props, { $el, $on, $f7 }) => {
+  export default (props, { $el, $on, $f7, $render }) => {
     const renderLoggedOut = () => {
       $el.find('#favoritos-content').html(`
         <div class="vm-form-card">

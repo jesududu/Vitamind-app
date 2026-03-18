@@ -15,18 +15,20 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default (props, { $el, $on, $f7route, $f7 }) => {
-    const pageEl = $f7.$($el);
+  export default (props, { $el, $on, $f7route, $f7, $render }) => {
+    const getPageEl = () => (typeof $el?.find === 'function' ? $el : $f7.$($el));
     let employeeId = null;
     let isFavorite = false;
 
     const syncFavoriteButton = () => {
+      const pageEl = getPageEl();
       const button = pageEl.find('#favorite-button');
       if (!button.length) return;
       button.text(isFavorite ? 'Quitar favorito' : 'Anadir favorito');
     };
 
     const loadProfile = async () => {
+      const pageEl = getPageEl();
       const container = pageEl.find('#profile-content');
       container.html('<div class="vm-loading">Cargando perfil profesional...</div>');
 

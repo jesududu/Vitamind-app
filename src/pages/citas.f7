@@ -14,7 +14,9 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default (props, { $el, $on, $f7router }) => {
+  export default (props, { $el, $on, $f7router, $f7, $render }) => {
+    const getPageEl = () => (typeof $el?.find === 'function' ? $el : $f7.$($el));
+
     const renderSection = (title, items = []) => `
       <div class="vm-card">
         <div class="vm-section-title">${title}</div>
@@ -33,7 +35,8 @@
     `;
 
     const loadAppointments = async () => {
-      const container = $el.find('#citas-content');
+      const pageEl = getPageEl();
+      const container = pageEl.find('#citas-content');
 
       if (!utils.isAuthenticated()) {
         container.html(`
@@ -62,7 +65,7 @@
           ...(response?.canceladas?.data || []),
         ];
 
-        $el.find('.vm-cita-item').on('click', (event) => {
+        pageEl.find('.vm-cita-item').on('click', (event) => {
           const cita = allAppointments.find((item) => String(item.id) === String(event.currentTarget.dataset.id));
           if (!cita) return;
           utils.setStoredObject(utils.storageKeys.appointmentSelected, cita);

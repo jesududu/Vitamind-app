@@ -52,9 +52,9 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default (props, { $el, $on, $f7, $f7router }) => {
-    const pageNode = $el && $el[0] ? $el[0] : $el;
-    const getNode = (selector) => pageNode?.querySelector(selector);
+  export default (props, { $el, $on, $f7, $f7router, $render }) => {
+    const getPageNode = () => ($el && $el[0] ? $el[0] : $el);
+    const getNode = (selector) => getPageNode()?.querySelector(selector);
 
     const renderLatest = async () => {
       const container = getNode('#latest-professionals');
@@ -104,7 +104,9 @@
       if (query) params.set('query', query);
 
       const suffix = params.toString() ? `?${params.toString()}` : '';
-      $f7router.navigate(`/search/${suffix}`);
+      $f7.tab.show('#view-busqueda');
+      const searchView = $f7.views.get('#view-busqueda');
+      searchView?.router?.navigate(`/search/${suffix}`);
     };
 
     $on('pageInit', () => {

@@ -14,10 +14,11 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default (props, { $el, $on, $f7, $store }) => {
-    const pageEl = $f7.$($el);
+  export default (props, { $el, $on, $f7, $store, $render }) => {
+    const getPageEl = () => (typeof $el?.find === 'function' ? $el : $f7.$($el));
 
     const render = () => {
+      const pageEl = getPageEl();
       const container = pageEl.find('#settings-content');
 
       if (!utils.isAuthenticated()) {
@@ -99,7 +100,7 @@
         utils.clearSession();
         $store.dispatch('refreshSession');
         render();
-        $f7.views.main.router.navigate('/home/');
+        $f7.views.get('#view-home')?.router?.navigate('/home/');
       });
     };
 

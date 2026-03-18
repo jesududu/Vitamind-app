@@ -44,10 +44,11 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default (props, { $el, $on, $f7, $store }) => {
-    const pageEl = $f7.$($el);
+  export default (props, { $el, $on, $f7, $store, $render }) => {
+    const getPageEl = () => (typeof $el?.find === 'function' ? $el : $f7.$($el));
 
     $on('pageInit', () => {
+      const pageEl = getPageEl();
       pageEl.find('#login-submit').on('click', async () => {
         try {
           $f7.preloader.show();
@@ -57,7 +58,8 @@
             remember: true,
           });
           $store.dispatch('refreshSession');
-          $f7.views.main.router.navigate('/home/');
+          $f7.tab.show('#view-home');
+          $f7.views.get('#view-home')?.router?.navigate('/home/');
         } catch (error) {
           $f7.dialog.alert(error.message);
         } finally {

@@ -22,7 +22,7 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default (props, { $el, $on }) => {
+  export default (props, { $el, $on, $render }) => {
     $on('pageInit', () => {
       $el.find('#notifications-check').on('click', async () => {
         try {

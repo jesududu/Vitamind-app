@@ -15,7 +15,7 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default (props, { $el, $on, $f7, $f7router }) => {
+  export default (props, { $el, $on, $f7, $f7router, $render }) => {
     const render = () => {
       const draft = utils.getStoredObject(utils.storageKeys.appointmentDraft);
       const container = $el.find('#confirmar-content');

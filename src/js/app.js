@@ -48,46 +48,32 @@ function initApp() {
     if (process.env.NODE_ENV !== 'production') {
       console.log('VitaMind app inicializada con API:', env.apiUrl);
     }
-  });
 
-  app.on('pageInit', function () {
     $('#btnHome').off('click.vitamind').on('click.vitamind', function () {
       const view = app.views.get('#view-home');
-      if (view?.router?.currentRoute?.url) {
-        view.router.navigate(view.router.currentRoute.url, {
-          ignoreCache: true,
-          reloadCurrent: true,
-        });
+      if (view?.router && !view.router.currentRoute?.url) {
+        view.router.navigate('/home/');
       }
     });
 
     $('#btnBusqueda').off('click.vitamind').on('click.vitamind', function () {
       const view = app.views.get('#view-busqueda');
-      if (view?.router?.currentRoute?.url) {
-        view.router.navigate(view.router.currentRoute.url, {
-          ignoreCache: true,
-          reloadCurrent: true,
-        });
+      if (view?.router && !view.router.currentRoute?.url) {
+        view.router.navigate('/search/');
       }
     });
 
     $('#btnCitas').off('click.vitamind').on('click.vitamind', function () {
       const view = app.views.get('#view-citas');
-      if (view?.router) {
-        view.router.navigate('/citas/', {
-          ignoreCache: true,
-          reloadCurrent: true,
-        });
+      if (view?.router && !view.router.currentRoute?.url) {
+        view.router.navigate('/citas/');
       }
     });
 
     $('#btnCuenta').off('click.vitamind').on('click.vitamind', function () {
       const view = app.views.get('#view-settings');
-      if (view?.router?.currentRoute?.url) {
-        view.router.navigate(view.router.currentRoute.url, {
-          ignoreCache: true,
-          reloadCurrent: true,
-        });
+      if (view?.router && !view.router.currentRoute?.url) {
+        view.router.navigate('/settings/');
       }
     });
   });

@@ -15,7 +15,7 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default (props, { $el, $on }) => {
+  export default (props, { $el, $on, $render }) => {
     const load = async () => {
       try {
         $el.find('#terminos-content').html('<div class="vm-loading">Cargando contenido...</div>');

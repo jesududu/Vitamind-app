@@ -45,20 +45,22 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default (props, { $el, $on, $f7route, $f7router, $f7 }) => {
-    const pageEl = $f7.$($el);
+  export default (props, { $el, $on, $f7route, $f7router, $f7, $render }) => {
+    const getPageNode = () => ($el && $el[0] ? $el[0] : $el);
+    const getNode = (selector) => getPageNode()?.querySelector(selector);
 
     const renderResults = async () => {
-      const container = pageEl.find('#search-results');
-      const localidad = pageEl.find('#search-localidad').val();
-      const query = pageEl.find('#search-query').val();
+      const container = getNode('#search-results');
+      if (!container) return;
+      const localidad = getNode('#search-localidad')?.value || '';
+      const query = getNode('#search-query')?.value || '';
 
       if (!localidad && !query) {
-        container.html('<div class="vm-empty">Selecciona una localidad o escribe el nombre de un profesional.</div>');
+        container.innerHTML = '<div class="vm-empty">Selecciona una localidad o escribe el nombre de un profesional.</div>';
         return;
       }
 
-      container.html('<div class="vm-loading">Consultando horarios disponibles...</div>');
+      container.innerHTML = '<div class="vm-loading">Consultando horarios disponibles...</div>';
 
       try {
         const response = await utils.searchProfessionals({ localidad, query });
@@ -75,11 +77,11 @@
 
         const items = [...profesionales.values()];
         if (!items.length) {
-          container.html('<div class="vm-empty">No hemos encontrado disponibilidad con esos filtros.</div>');
+          container.innerHTML = '<div class="vm-empty">No hemos encontrado disponibilidad con esos filtros.</div>';
           return;
         }
 
-        container.html(items.map((item) => {
+        container.innerHTML = items.map((item) => {
           const servicio = item.servicios?.[0];
           return `
             <div class="vm-card">
@@ -100,9 +102,16 @@
               </div>
             </div>
           `;
-        }).join(''));
+        }).join('');
 
-        pageEl.find('.vm-open-profile').on('click', async (event) => {
+        container.querySelectorAll('img').forEach((img) => {
+          img.addEventListener('error', () => {
+            img.src = '/images/avatar/01.jpg';
+          }, { once: true });
+        });
+
+        container.querySelectorAll('.vm-open-profile').forEach((button) => {
+          button.addEventListener('click', async (event) => {
           const empleadoId = event.currentTarget.dataset.empleadoId;
           try {
             $f7.preloader.show();
@@ -117,16 +126,18 @@
             $f7.preloader.hide();
           }
         });
+        });
       } catch (error) {
-        container.html(`<div class="vm-empty">${utils.escapeHtml(error.message)}</div>`);
+        const message = utils.getApiErrorMessage(error, 'No se pudieron cargar los resultados');
+        container.innerHTML = `<div class="vm-empty">${utils.escapeHtml(message)}</div>`;
       }
     };
 
     $on('pageInit', () => {
       const query = $f7route.query || {};
-      if (query.localidad) pageEl.find('#search-localidad').val(query.localidad);
-      if (query.query) pageEl.find('#search-query').val(query.query);
-      pageEl.find('#search-submit').on('click', renderResults);
+      if (query.localidad && getNode('#search-localidad')) getNode('#search-localidad').value = query.localidad;
+      if (query.query && getNode('#search-query')) getNode('#search-query').value = query.query;
+      getNode('#search-submit')?.addEventListener('click', renderResults);
 
       if (query.localidad || query.query) {
         renderResults();
