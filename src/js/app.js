@@ -60,14 +60,16 @@ function initApp() {
   app.on('init', function () {
     var f7 = this;
 
+    utils.init(f7);
+
     if (f7.device.capacitor) {
-      capacitorApp.init(f7);
-      utils.init(f7);
-      initNetworkListener(f7);
-      checkPushNotificationPermission();
-      setupPushNotifications(f7);
-    } else {
-      utils.init(f7);
+      try {
+        capacitorApp.init(f7);
+      } catch (error) {
+        console.error('Error inicializando capacitorApp:', error);
+      }
+
+      safeInitNativeFeatures(f7);
     }
 
     if (process.env.NODE_ENV !== 'production') {
@@ -170,6 +172,33 @@ function updateStatusBarFromActiveView() {
   }
 }
 
+function safeInitNativeFeatures(f7) {
+  safeRun(function () {
+    initNetworkListener(f7);
+  }, 'network');
+
+  safeRun(function () {
+    checkPushNotificationPermission();
+  }, 'push-permissions');
+
+  // Desactivamos el registro push automatico hasta estabilizar la app.
+  // La estructura del app.js sigue la de Buktiem, pero evitamos el punto
+  // nativo que ahora mismo puede cerrar la aplicacion en ciertos Android.
+}
+
+function safeRun(fn, label) {
+  try {
+    var result = fn();
+    if (result && typeof result.catch === 'function') {
+      result.catch(function (error) {
+        console.error('Error en ' + label + ':', error);
+      });
+    }
+  } catch (error) {
+    console.error('Error en ' + label + ':', error);
+  }
+}
+
 async function setupStatusBar(origen) {
   if (!Capacitor.isNativePlatform()) return;
 
@@ -221,6 +250,10 @@ async function checkPushNotificationPermission() {
   if (!Capacitor.isNativePlatform()) return;
 
   try {
+    if (!PushNotifications || typeof PushNotifications.checkPermissions !== 'function') {
+      return;
+    }
+
     var permissionStatus = await PushNotifications.checkPermissions();
 
     if (permissionStatus.receive !== 'granted') {
