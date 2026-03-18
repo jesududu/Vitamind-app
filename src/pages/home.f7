@@ -73,7 +73,7 @@
               <img src="${utils.escapeHtml(item.imagen)}" alt="${utils.escapeHtml(item.nombre)}" />
               <div>
                 <div class="vm-card-title">${utils.escapeHtml(item.nombre)}</div>
-                <div class="vm-card-subtitle">Perfil profesional publicado recientemente</div>
+                <div class="vm-card-subtitle">${utils.escapeHtml(item.direccion || 'Perfil profesional publicado recientemente')}</div>
                 <div class="vm-actions">
                   <a href="/profesional/${encodeURIComponent(item.token)}/" class="button button-fill button-small">Ver perfil</a>
                 </div>

@@ -645,6 +645,32 @@ var tmApp = {
     return tmApp.fetchPublicData(fullUrl);
   },
 
+  normalizeProfessionalImage: function (image) {
+    if (!image || typeof image !== 'string') {
+      return '/images/avatar/01.jpg';
+    }
+
+    if (image.startsWith('http')) {
+      return image;
+    }
+
+    if (image.startsWith('/')) {
+      return image;
+    }
+
+    return `${appUrl}${image.replace(/^\/+/, '')}`;
+  },
+
+  normalizeHomeProfessional: function (professional = {}) {
+    return {
+      id: professional.id || null,
+      token: professional.token || professional.id || null,
+      nombre: professional.nombre || professional.nombre_completo || 'Profesional',
+      direccion: professional.direccion || professional.empresa_nombre || '',
+      imagen: tmApp.normalizeProfessionalImage(professional.imagen || professional.imagen_url),
+    };
+  },
+
   getHomeProfessionals: async function () {
     let latestError = null;
 
@@ -658,7 +684,9 @@ var tmApp = {
         responseKeys: response ? Object.keys(response) : [],
       });
       if (items.length) {
-        return items;
+        return items
+          .map((item) => tmApp.normalizeHomeProfessional(item))
+          .filter((item) => item.token);
       }
     } catch (error) {
       latestError = error;
@@ -692,12 +720,10 @@ var tmApp = {
       const profiles = await Promise.allSettled(
         tokens.slice(0, 6).map(async (token) => {
           const profile = await tmApp.getProfessionalProfile(token);
-          return {
-            id: profile?.id,
-            nombre: profile?.nombre_completo || profile?.nombre || 'Profesional',
-            imagen: profile?.imagen || '/avatar.png',
+          return tmApp.normalizeHomeProfessional({
+            ...profile,
             token,
-          };
+          });
         }),
       );
 
