@@ -40,11 +40,28 @@ body {
 }
 
 .page[data-name="home"] .vm-page-content {
-  padding-top: 34px;
+  padding-top: 56px;
+}
+
+.vm-home-navbar {
+  --f7-navbar-bg-color: var(--vm-home-navbar-bg, var(--vm-primary));
+  --f7-bars-bg-color: var(--vm-home-navbar-bg, var(--vm-primary));
+  --f7-navbar-link-color: var(--vm-home-navbar-text, #fff);
+  --f7-navbar-text-color: var(--vm-home-navbar-text, #fff);
 }
 
 .vm-home-left-spacer {
   width: 44px;
+}
+
+.vm-home-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 160px;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
 }
 
 .vm-home-logo {

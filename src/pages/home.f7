@@ -4,7 +4,7 @@
       <div class="navbar-bg"></div>
       <div class="navbar-inner">
         <div class="left vm-home-left-spacer"></div>
-        <div class="title">
+        <div class="title vm-home-title">
           <img src="/home-logo.png" alt="VitaMind" class="vm-home-logo" />
         </div>
         <div class="right">
