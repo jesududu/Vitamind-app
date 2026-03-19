@@ -880,6 +880,38 @@ var tmApp = {
     });
   },
 
+  getCurrentLocation: function (options = {}) {
+    const {
+      enableHighAccuracy = true,
+      timeout = 8000,
+      maximumAge = 120000,
+    } = options;
+
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error('Geolocalizacion no disponible en este dispositivo.'));
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          reject(new Error(error && error.message ? error.message : 'No se pudo obtener tu ubicacion.'));
+        },
+        {
+          enableHighAccuracy,
+          timeout,
+          maximumAge,
+        },
+      );
+    });
+  },
+
   searchProfessionals: function (filters = {}) {
     const url = apiUrl + '/horarios-por-localidad';
     const fullUrl = url;

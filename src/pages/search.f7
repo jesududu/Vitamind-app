@@ -42,6 +42,9 @@
           ${!searchLoading && searchMessage && $h`
             <div class="vm-empty">${searchMessage}</div>
           `}
+          ${!searchLoading && locationWarning && $h`
+            <div class="vm-muted">${locationWarning}</div>
+          `}
           ${!searchLoading && !searchMessage && searchResults.map((item) => {
             const servicio = item.servicios && item.servicios.length ? item.servicios[0] : null;
             return $h`
@@ -53,7 +56,6 @@
                     <div class="vm-card-subtitle">${item.empresa_nombre || item.direccion || ''}</div>
                     <div class="vm-chip-row">
                       ${servicio ? $h`<span class="vm-chip">${servicio.titulo}</span>` : ''}
-                      ${servicio && servicio.precio ? $h`<span class="vm-chip">${utils.formatPrice(servicio.precio)}</span>` : ''}
                       ${item.distancia ? $h`<span class="vm-chip">${item.distancia} km</span>` : ''}
                     </div>
                     <div class="vm-actions">
@@ -79,6 +81,7 @@
     let searchMessage = 'Introduce una localidad valida o un nombre de profesional para comenzar.';
     let searchResults = [];
     let initialized = false;
+    let locationWarning = '';
 
     const getPageNode = () => {
       if ($el && $el[0]) return $el[0];
@@ -141,13 +144,27 @@
 
       searchLoading = true;
       searchMessage = '';
+      locationWarning = '';
       searchResults = [];
       $update();
 
       try {
+        let locationFilters = {};
+
+        try {
+          const location = await utils.getCurrentLocation();
+          locationFilters = {
+            lat: location.lat,
+            lng: location.lng,
+          };
+        } catch (locationError) {
+          locationWarning = 'No se ha podido usar tu ubicacion real. La distancia puede no mostrarse correctamente.';
+        }
+
         const response = await utils.searchProfessionals({
           localidad: searchLocalidad,
           query: searchQuery,
+          ...locationFilters,
         });
         searchResults = mapSearchResults(response);
         if (!searchResults.length) {
