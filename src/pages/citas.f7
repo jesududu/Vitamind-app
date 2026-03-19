@@ -31,7 +31,7 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $f7router, $on, $onMounted }) {
+  export default function (props, { $el, $f7, $on, $onMounted }) {
     let logeado = false;
 
     if (utils.isAuthenticated()) {
@@ -94,7 +94,14 @@
       const loginBtn = pageNode.querySelector('#btnLogin');
       if (loginBtn) {
         loginBtn.addEventListener('click', () => {
-          $f7router.navigate('/login/');
+          const settingsView = $f7.views.get('#view-settings');
+          if (settingsView && settingsView.router) {
+            $f7.tab.show('#view-settings');
+            settingsView.router.navigate('/login/', {
+              ignoreCache: true,
+              reloadCurrent: true,
+            });
+          }
         });
       }
 
@@ -105,7 +112,12 @@
           const cita = items.find((item) => String(item.id) === String(id));
           if (!cita) return;
           utils.setStoredObject(utils.storageKeys.appointmentSelected, cita);
-          $f7router.navigate(`/cita-detalle/${encodeURIComponent(cita.id)}/`);
+          const citasView = $f7.views.get('#view-citas');
+          if (citasView && citasView.router) {
+            citasView.router.navigate(`/cita-detalle/${encodeURIComponent(cita.id)}/`, {
+              ignoreCache: true,
+            });
+          }
         });
       });
     };

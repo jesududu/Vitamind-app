@@ -16,17 +16,28 @@
   import utils from '../js/utils.js';
 
   export default function (props, { $el, $on, $f7route, $f7, $f7router }) {
+    const getPageNode = () => {
+      if ($el && $el[0]) return $el[0];
+      if ($el && $el.nodeType === 1) return $el;
+      return document.querySelector('.page[data-name="cita-detalle"].page-current') || document.querySelector('.page[data-name="cita-detalle"]');
+    };
+
     const render = () => {
       const cita = utils.getStoredObject(utils.storageKeys.appointmentSelected);
-      const container = $el.find('#detalle-content');
+      const pageNode = getPageNode();
+      const container = pageNode ? pageNode.querySelector('#detalle-content') : null;
+
+      if (!container) {
+        return;
+      }
 
       if (!cita || String(cita.id) !== String($f7route.params.id)) {
-        container.html('<div class="vm-form-card"><div class="vm-section-title">No se ha encontrado la cita seleccionada</div></div>');
+        container.innerHTML = '<div class="vm-form-card"><div class="vm-section-title">No se ha encontrado la cita seleccionada</div></div>';
         return;
       }
 
       const props = cita.extendedProps || {};
-      container.html(`
+      container.innerHTML = `
         <div class="vm-card">
           <div class="vm-section-title">${utils.escapeHtml(cita.title || props.servicio || 'Cita')}</div>
           <div class="vm-kv"><span>Inicio</span><strong>${utils.escapeHtml(utils.formatDateTime(cita.start))}</strong></div>
@@ -39,23 +50,34 @@
           <div class="vm-kv"><span>Nota</span><strong>${utils.escapeHtml(props.nota || 'Sin nota')}</strong></div>
           ${cita.estado === 'activa' ? '<div class="vm-actions"><a href="#" id="cancelar-cita-btn" class="button button-fill color-red">Cancelar cita</a></div>' : ''}
         </div>
-      `);
+      `;
 
-      $el.find('#cancelar-cita-btn').on('click', async () => {
-        try {
-          $f7.preloader.show();
-          const response = await utils.cancelAppointment(cita.id);
-          $f7.dialog.alert(response.message || 'Cita cancelada');
-          $f7router.navigate('/citas/');
-        } catch (error) {
-          $f7.dialog.alert(error.message);
-        } finally {
-          $f7.preloader.hide();
-        }
-      });
+      const cancelButton = pageNode.querySelector('#cancelar-cita-btn');
+      if (cancelButton) {
+        cancelButton.addEventListener('click', async (event) => {
+          event.preventDefault();
+          try {
+            $f7.preloader.show();
+            const response = await utils.cancelAppointment(cita.id);
+            $f7.dialog.alert(response.message || 'Cita cancelada');
+            const citasView = $f7.views.get('#view-citas');
+            if (citasView && citasView.router) {
+              citasView.router.back('/citas/', {
+                force: true,
+                ignoreCache: true,
+              });
+            }
+          } catch (error) {
+            $f7.dialog.alert(utils.getApiErrorMessage(error, 'No se pudo cancelar la cita'));
+          } finally {
+            $f7.preloader.hide();
+          }
+        });
+      }
     };
 
     $on('pageInit', render);
+    $on('pageAfterIn', render);
 
     return $render;
   }
