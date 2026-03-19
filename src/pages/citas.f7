@@ -1,55 +1,72 @@
 <template>
-  <div class="page" data-name="citas">
-    <div class="navbar">
-      <div class="navbar-bg"></div>
-      <div class="navbar-inner">
-        <div class="title">Mis citas</div>
-      </div>
-    </div>
-
-    <div class="page-content vm-page-content">
-      <div id="citas-content" class="vm-loading">Cargando citas...</div>
+<div class="page" data-name="citas">
+  <div class="navbar">
+    <div class="navbar-bg"></div>
+    <div class="navbar-inner sliding">
+      <div class="title">Citas</div>
     </div>
   </div>
+  <div class="page-content vm-page-content">
+    ${!logeado && $h`
+      <div class='block'>
+        <p style='text-align: center;color: #bfbfbf;'>
+          <i class='icon material-symbols-outlined icon-large'>event_busy</i>
+        </p>
+        <p style='padding: 0px 50px;text-align: center;'>Inicia sesion para ver tus citas.</p>
+      </div>
+
+      <div class="block">
+        <button id="btnLogin" class="col button button-large button-outline" style='text-transform:none;'>Iniciar sesion</button>
+      </div>
+    `}
+
+    ${logeado && $h`
+      <div class="list media-list inset list-strong list-dividers-ios">
+        <ul class="reservas_ul"></ul>
+      </div>
+    `}
+  </div>
+</div>
 </template>
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $f7, $f7router, $on, $onMounted }) {
+  export default function (props, { $el, $f7router, $on, $onMounted }) {
+    let logeado = false;
+
+    if (utils.isAuthenticated()) {
+      logeado = true;
+    }
+
     const getPageNode = () => {
       if ($el && $el[0]) return $el[0];
       if ($el && $el.nodeType === 1) return $el;
       return document.querySelector('.page[data-name="citas"].page-current') || document.querySelector('.page[data-name="citas"]');
     };
 
-    const renderEmptySection = (title) => {
-      return `
-        <div class="block">
-          <div class="vm-card">
-            <div class="vm-section-title">${utils.escapeHtml(title)}</div>
-            <div class="vm-empty">No hay citas en esta seccion.</div>
-          </div>
-        </div>
-      `;
-    };
-
-    const getAppointmentTime = (item) => {
-      const start = ((item.start || '').split('T')[1] || '').slice(0, 5);
-      const end = ((item.end || '').split('T')[1] || '').slice(0, 5);
-      if (start && end) return `${start} - ${end}`;
-      return start || end || '';
-    };
-
-    const renderSection = (title, items, status) => {
-      if (!items || !items.length) {
-        return renderEmptySection(title);
-      }
-
-      const rows = items.map((item) => {
-        const props = item.extendedProps || {};
+    const renderReservations = (items) => {
+      if (!items.length) {
         return `
           <li>
-            <a href="#" class="item-link item-content vm-cita-link" data-id="${utils.escapeHtml(item.id)}">
+            <div class="item-content">
+              <div class="item-inner">
+                <div class="item-title">No tienes citas registradas.</div>
+              </div>
+            </div>
+          </li>
+        `;
+      }
+
+      return items.map((item) => {
+        const props = item.extendedProps || {};
+        const startTime = ((item.start || '').split('T')[1] || '').slice(0, 5);
+        const endTime = ((item.end || '').split('T')[1] || '').slice(0, 5);
+        const timeText = startTime && endTime ? `${startTime} - ${endTime}` : (startTime || '');
+        const statusText = item.estado === 'activa' ? 'Proxima' : (item.estado === 'completada' ? 'Completada' : 'Cancelada');
+
+        return `
+          <li>
+            <a href="#" class="item-link item-content reserva-item" data-id="${utils.escapeHtml(item.id)}">
               <div class="item-inner">
                 <div class="item-title-row">
                   <div class="item-title">${utils.escapeHtml(item.title || props.servicio || 'Cita')}</div>
@@ -58,8 +75,8 @@
                 <div class="item-text">
                   <div class="vm-chip-row">
                     <span class="vm-chip">${utils.escapeHtml(utils.formatDate(item.start))}</span>
-                    <span class="vm-chip">${utils.escapeHtml(getAppointmentTime(item))}</span>
-                    <span class="vm-chip">${utils.escapeHtml(status)}</span>
+                    <span class="vm-chip">${utils.escapeHtml(timeText)}</span>
+                    <span class="vm-chip">${utils.escapeHtml(statusText)}</span>
                   </div>
                   ${props.empresa ? `<div class="vm-muted" style="margin-top:8px;">${utils.escapeHtml(props.empresa)}</div>` : ''}
                 </div>
@@ -68,100 +85,76 @@
           </li>
         `;
       }).join('');
-
-      return `
-        <div class="list media-list inset list-strong list-dividers-ios">
-          <ul>
-            <li>
-              <div class="item-content item-title">
-                <div class="item-inner">
-                  <div class="item-title-row">
-                    <div class="item-title">${utils.escapeHtml(title)}</div>
-                  </div>
-                </div>
-              </div>
-            </li>
-            ${rows}
-          </ul>
-        </div>
-      `;
     };
 
-    const renderLoggedOut = (container) => {
-      container.innerHTML = `
-        <div class="block">
-          <p style="text-align:center;color:#bfbfbf;">
-            <i class="icon material-symbols-outlined icon-large">event_busy</i>
-          </p>
-          <p style="padding:0 40px;text-align:center;" class="vm-muted">
-            Inicia sesion para ver y gestionar tus citas.
-          </p>
-        </div>
-        <div class="block">
-          <a href="/login/" class="button button-large button-outline" style="text-transform:none;">Iniciar sesion</a>
-        </div>
-      `;
-    };
-
-    const bindAppointmentLinks = (items) => {
+    const bindEvents = (items) => {
       const pageNode = getPageNode();
       if (!pageNode) return;
 
-      pageNode.querySelectorAll('.vm-cita-link').forEach((link) => {
-        link.addEventListener('click', (event) => {
+      const loginBtn = pageNode.querySelector('#btnLogin');
+      if (loginBtn) {
+        loginBtn.addEventListener('click', () => {
+          $f7router.navigate('/login/');
+        });
+      }
+
+      pageNode.querySelectorAll('.reserva-item').forEach((element) => {
+        element.addEventListener('click', (event) => {
           event.preventDefault();
-          const appointmentId = event.currentTarget.getAttribute('data-id');
-          const appointment = items.find((item) => String(item.id) === String(appointmentId));
-          if (!appointment) return;
-          utils.setStoredObject(utils.storageKeys.appointmentSelected, appointment);
-          $f7router.navigate(`/cita-detalle/${encodeURIComponent(appointment.id)}/`);
+          const id = event.currentTarget.getAttribute('data-id');
+          const cita = items.find((item) => String(item.id) === String(id));
+          if (!cita) return;
+          utils.setStoredObject(utils.storageKeys.appointmentSelected, cita);
+          $f7router.navigate(`/cita-detalle/${encodeURIComponent(cita.id)}/`);
         });
       });
     };
 
-    const loadAppointments = async () => {
-      const pageNode = getPageNode();
-      const container = pageNode ? pageNode.querySelector('#citas-content') : null;
-      if (!container) return;
-
-      if (!utils.isAuthenticated()) {
-        renderLoggedOut(container);
+    const loadCitas = async () => {
+      if (!logeado) {
+        bindEvents([]);
         return;
       }
 
-      container.innerHTML = '<div class="vm-loading">Cargando citas...</div>';
+      const pageNode = getPageNode();
+      const list = pageNode ? pageNode.querySelector('.reservas_ul') : null;
+      if (!list) return;
+
+      list.innerHTML = `
+        <li>
+          <div class="item-content">
+            <div class="item-inner">
+              <div class="item-title">Cargando citas...</div>
+            </div>
+          </div>
+        </li>
+      `;
 
       try {
         const response = await utils.getMyAppointments();
         const activas = response && response.activas && Array.isArray(response.activas.data) ? response.activas.data : [];
         const completadas = response && response.completadas && Array.isArray(response.completadas.data) ? response.completadas.data : [];
         const canceladas = response && response.canceladas && Array.isArray(response.canceladas.data) ? response.canceladas.data : [];
-        const allItems = activas.concat(completadas, canceladas);
+        const items = activas.concat(completadas, canceladas);
 
-        container.innerHTML = `
-          <div class="block block-strong inset vm-citas-summary">
-            <div class="vm-section-title">Resumen</div>
-            <div class="vm-chip-row">
-              <span class="vm-chip">Activas: ${utils.escapeHtml((response && response.activas && response.activas.total) || activas.length)}</span>
-              <span class="vm-chip">Completadas: ${utils.escapeHtml((response && response.completadas && response.completadas.total) || completadas.length)}</span>
-              <span class="vm-chip">Canceladas: ${utils.escapeHtml((response && response.canceladas && response.canceladas.total) || canceladas.length)}</span>
-            </div>
-          </div>
-          ${!allItems.length ? '<div class="block"><div class="vm-empty">Todavia no tienes citas registradas.</div></div>' : ''}
-          ${renderSection('Proximas', activas, 'Proxima')}
-          ${renderSection('Completadas', completadas, 'Completada')}
-          ${renderSection('Canceladas', canceladas, 'Cancelada')}
-        `;
-
-        bindAppointmentLinks(allItems);
+        list.innerHTML = renderReservations(items);
+        bindEvents(items);
       } catch (error) {
-        container.innerHTML = `<div class="vm-empty">${utils.escapeHtml(utils.getApiErrorMessage(error, 'No se pudieron cargar tus citas'))}</div>`;
+        list.innerHTML = `
+          <li>
+            <div class="item-content">
+              <div class="item-inner">
+                <div class="item-title">${utils.escapeHtml(utils.getApiErrorMessage(error, 'No se pudieron cargar tus citas'))}</div>
+              </div>
+            </div>
+          </li>
+        `;
       }
     };
 
-    $on('pageInit', loadAppointments);
-    $on('pageAfterIn', loadAppointments);
-    $onMounted(loadAppointments);
+    $on('pageInit', loadCitas);
+    $on('pageAfterIn', loadCitas);
+    $onMounted(loadCitas);
 
     return $render;
   }
