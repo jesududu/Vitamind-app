@@ -1,39 +1,48 @@
 <template>
   <div class="page" data-name="normas">
     <div class="navbar">
-      <div class="navbar-bg"></div>
-      <div class="navbar-inner">
-        <div class="left"><a href="#" class="link back"><i class="icon icon-back"></i></a></div>
+      <div class="navbar-inner sliding">
+        <div class="navbar-bg"></div>
+        <div class="left">
+          <a href="#" class="link back">
+            <i class="icon icon-back"></i>
+          </a>
+        </div>
         <div class="title">Normas</div>
       </div>
     </div>
-    <div class="page-content vm-page-content">
-      <div id="normas-content"></div>
+    <div class="page-content">
+      <div class="block tmNormas"></div>
     </div>
   </div>
 </template>
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $on }) {
-    const load = async () => {
-      try {
-        $el.find('#normas-content').html('<div class="vm-loading">Cargando contenido...</div>');
-        const response = await utils.getDynamicContent('cargar_informacion');
-        const contenido = (response && response.contenido) || {};
-        $el.find('#normas-content').html(`
-          <div class="vm-card">
-            <div class="vm-section-title">Normas y politica de uso</div>
-            <div class="vm-richtext">${contenido.descripcion || '<p class="vm-empty">No hay contenido disponible.</p>'}</div>
-            <p class="vm-inline-note">El backend actual no expone un tipo especifico para normas, asi que usamos el contenido informativo disponible hasta completar esa parte.</p>
-          </div>
-        `);
-      } catch (error) {
-        $el.find('#normas-content').html(`<div class="vm-card"><p class="vm-empty">${utils.escapeHtml(utils.getApiErrorMessage(error, 'No se pudo cargar el contenido'))}</p></div>`);
+  export default function (props, { $on }) {
+    const getPageEl = () => document.querySelector('.page[data-name="normas"].page-current') || document.querySelector('.page[data-name="normas"]');
+
+    const renderHtml = (html) => {
+      const pageEl = getPageEl();
+      const target = pageEl ? pageEl.querySelector('.tmNormas') : null;
+      if (target) {
+        target.innerHTML = html;
       }
     };
 
-    $on('pageInit', load);
+    const load = async () => {
+      try {
+        renderHtml('<div class="vm-loading">Cargando normas de VitaMind...</div>');
+        const response = await utils.getDynamicContent('cargar_normas');
+        const contenido = response && response.contenido ? response.contenido : {};
+        renderHtml(contenido.descripcion || '<p class="vm-empty">No hay contenido disponible.</p>');
+      } catch (error) {
+        renderHtml(`<p class="vm-empty">${utils.escapeHtml(utils.getApiErrorMessage(error, 'No se pudo cargar el contenido'))}</p>`);
+      }
+    };
+
+    $on('pageAfterIn', load);
+
     return $render;
   }
 </script>
