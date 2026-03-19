@@ -15,7 +15,7 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $on, $f7route, $f7, $f7router }) {
+  export default function (props, { $el, $on, $f7route, $f7, $render }) {
     const getPageNode = () => {
       if ($el && $el[0]) return $el[0];
       if ($el && $el.nodeType === 1) return $el;
@@ -27,9 +27,7 @@
       const pageNode = getPageNode();
       const container = pageNode ? pageNode.querySelector('#detalle-content') : null;
 
-      if (!container) {
-        return;
-      }
+      if (!container) return;
 
       if (!cita || String(cita.id) !== String($f7route.params.id)) {
         container.innerHTML = '<div class="vm-form-card"><div class="vm-section-title">No se ha encontrado la cita seleccionada</div></div>';
@@ -37,16 +35,17 @@
       }
 
       const props = cita.extendedProps || {};
+      const centerName = props.empresa || props.centro || 'No especificado';
+
       container.innerHTML = `
         <div class="vm-card">
           <div class="vm-section-title">${utils.escapeHtml(cita.title || props.servicio || 'Cita')}</div>
           <div class="vm-kv"><span>Inicio</span><strong>${utils.escapeHtml(utils.formatDateTime(cita.start))}</strong></div>
           <div class="vm-kv"><span>Fin</span><strong>${utils.escapeHtml(utils.formatDateTime(cita.end))}</strong></div>
           <div class="vm-kv"><span>Profesional</span><strong>${utils.escapeHtml(props.empleado || '')}</strong></div>
-          <div class="vm-kv"><span>Empresa</span><strong>${utils.escapeHtml(props.empresa || '')}</strong></div>
-          <div class="vm-kv"><span>Dirección</span><strong>${utils.escapeHtml(props.direccion || '')}</strong></div>
+          <div class="vm-kv"><span>Centro</span><strong>${utils.escapeHtml(centerName)}</strong></div>
+          <div class="vm-kv"><span>Direccion</span><strong>${utils.escapeHtml(props.direccion || '')}</strong></div>
           <div class="vm-kv"><span>Modalidad</span><strong>${utils.escapeHtml(props.modalidad || '')}</strong></div>
-          <div class="vm-kv"><span>Estado</span><strong>${utils.escapeHtml(cita.estado || '')}</strong></div>
           <div class="vm-kv"><span>Nota</span><strong>${utils.escapeHtml(props.nota || 'Sin nota')}</strong></div>
           ${cita.estado === 'activa' ? '<div class="vm-actions"><a href="#" id="cancelar-cita-btn" class="button button-fill color-red">Cancelar cita</a></div>' : ''}
         </div>

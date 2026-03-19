@@ -21,7 +21,7 @@
     `}
 
     ${logeado && $h`
-      <div class="list media-list inset list-strong list-dividers-ios">
+      <div class="list media-list inset list-strong list-dividers-ios vm-reservas-list">
         <ul class="reservas_ul"></ul>
       </div>
     `}
@@ -66,7 +66,7 @@
 
         return `
           <li>
-            <a href="#" class="item-link item-content reserva-item" data-id="${utils.escapeHtml(item.id)}">
+            <a href="#" class="item-link item-content reserva-item vm-reserva-item" data-id="${utils.escapeHtml(item.id)}">
               <div class="item-inner">
                 <div class="item-title-row">
                   <div class="item-title">${utils.escapeHtml(item.title || props.servicio || 'Cita')}</div>

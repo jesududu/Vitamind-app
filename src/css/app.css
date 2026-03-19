@@ -502,6 +502,35 @@ body {
   border-bottom: 0;
 }
 
+.vm-reservas-list {
+  margin-top: 10px;
+}
+
+.vm-reservas-list ul {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vm-reservas-list li {
+  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.vm-reserva-item .item-inner {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.vm-reserva-item .item-subtitle {
+  margin-top: 4px;
+}
+
+.vm-reserva-item .item-text {
+  margin-top: 8px;
+}
+
 .vm-loading,
 .vm-empty {
   padding: 18px;
