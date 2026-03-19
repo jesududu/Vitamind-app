@@ -2,21 +2,85 @@
   <div class="page" data-name="notificacion">
     <div class="navbar">
       <div class="navbar-bg"></div>
-      <div class="navbar-inner">
-        <div class="left"><a href="#" class="link back"><i class="icon icon-back"></i></a></div>
-        <div class="title">Detalle notificacion</div>
+      <div class="navbar-inner sliding">
+        <div class="left">
+          <a href="#" class="link back">
+            <i class="icon icon-back"></i>
+          </a>
+        </div>
+        <div class="title"></div>
+        <div class="right">
+          <a href="#" class="link icon-only deleteNot" @click=${handleDelete}>
+            <i class="icon material-icons">delete</i>
+          </a>
+        </div>
       </div>
     </div>
     <div class="page-content vm-page-content">
-      <div class="vm-card">
-        <div class="vm-section-title">Pendiente de backend</div>
-        <p class="vm-muted">El detalle individual de notificacion quedara operativo cuando exista el endpoint de detalle de notificaciones.</p>
-      </div>
+      <div class="block-title block-title-large tituloNotificacion"></div>
+      <div class="block-title block-title centroNotificacion"></div>
+      <div class="block block-strong inset tmNotificacion"></div>
     </div>
   </div>
 </template>
 <script>
-  export default () => {
+  import utils from '../js/utils.js';
+
+  export default function (props, { $f7, $on }) {
+    const notificationId = props.id;
+    let currentTitle = 'Notificacion';
+
+    const getPageEl = () => document.querySelector('.page[data-name="notificacion"]');
+
+    const renderNotification = (item) => {
+      const pageEl = getPageEl();
+      if (!pageEl) return;
+
+      const titleEl = pageEl.querySelector('.tituloNotificacion');
+      const centerEl = pageEl.querySelector('.centroNotificacion');
+      const bodyEl = pageEl.querySelector('.tmNotificacion');
+      const navbarTitle = pageEl.querySelector('.navbar .title');
+
+      currentTitle = item.titulo || item.title || 'Notificacion';
+      const center = item.subtitulo || item.centro || item.empresa || item.fecha || '';
+      const body = item.mensaje || item.descripcion || item.body || 'Sin contenido disponible.';
+
+      if (navbarTitle) navbarTitle.textContent = currentTitle;
+      if (titleEl) titleEl.textContent = currentTitle;
+      if (centerEl) centerEl.textContent = center;
+      if (bodyEl) bodyEl.innerHTML = utils.escapeHtml(body).replace(/\n/g, '<br>');
+    };
+
+    const renderError = (message) => {
+      renderNotification({
+        title: 'Notificacion',
+        body: message,
+      });
+    };
+
+    const loadNotification = async () => {
+      try {
+        const response = await utils.getNotificationDetail(notificationId);
+        const item = response && response.data ? response.data : response;
+        renderNotification(item || {});
+      } catch (error) {
+        renderError(utils.getApiErrorMessage(error, 'No se pudo cargar la notificacion'));
+      }
+    };
+
+    const handleDelete = async (event) => {
+      event.preventDefault();
+      try {
+        await utils.deleteNotification(notificationId);
+        $f7.views.current.router.back();
+      } catch (error) {
+        $f7.dialog.alert(utils.getApiErrorMessage(error, 'No se pudo eliminar la notificacion'));
+      }
+    };
+
+    $on('pageInit', loadNotification);
+    $on('pageAfterIn', loadNotification);
+
     return $render;
-  };
+  }
 </script>

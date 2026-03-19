@@ -612,3 +612,13 @@ body {
   justify-content: center;
   margin-bottom: 12px;
 }
+
+.vm-notificaciones-list {
+  margin-top: 20px;
+  margin-bottom: 50px;
+}
+
+.vm-notificaciones-empty {
+  margin-top: 20px;
+  margin-bottom: 50px;
+}

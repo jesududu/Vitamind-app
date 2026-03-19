@@ -2,19 +2,58 @@
   <div class="page" data-name="notificaciones">
     <div class="navbar">
       <div class="navbar-bg"></div>
-      <div class="navbar-inner">
-        <div class="left"><a href="#" class="link back"><i class="icon icon-back"></i></a></div>
+      <div class="navbar-inner sliding">
+        <div class="left">
+          <a href="#" class="link back">
+            <i class="icon icon-back"></i>
+          </a>
+        </div>
         <div class="title">Notificaciones</div>
+        <div class="right">
+          <a class="link icon-only searchbar-enable" data-searchbar=".searchbar-notificaciones">
+            <i class="icon material-icons">search</i>
+          </a>
+          <a href="#" class="link icon-only deleteAllNot" @click=${handleDeleteAll}>
+            <i class="icon material-icons">delete</i>
+          </a>
+        </div>
+        <form
+          data-search-container=".search-list"
+          data-search-in=".item-title"
+          class="searchbar searchbar-expandable searchbar-notificaciones searchbar-init"
+        >
+          <div class="searchbar-inner">
+            <div class="searchbar-input-wrap">
+              <input type="search" placeholder="Buscar" />
+              <i class="searchbar-icon"></i>
+              <span class="input-clear-button"></span>
+            </div>
+            <span class="searchbar-disable-button">Cancelar</span>
+          </div>
+        </form>
       </div>
     </div>
-    <div class="page-content vm-page-content">
-      <div class="vm-card">
-        <div class="vm-section-title">Centro de notificaciones</div>
-        <p class="vm-muted">La app ya tiene la pantalla preparada siguiendo el plan Buktiem, pero la API movil de notificaciones aun no esta publicada en routes/api.php.</p>
-        <div class="vm-actions">
-          <a href="#" id="notifications-check" class="button button-fill">Comprobar endpoint</a>
-        </div>
-        <div id="notifications-status" class="vm-inline-note"></div>
+
+    <div class="page-content ptr-content vm-page-content" data-ptr-mousewheel="true" @ptr:refresh=${handleRefresh}>
+      <div class="ptr-preloader">
+        <div class="preloader"></div>
+        <div class="ptr-arrow"></div>
+      </div>
+
+      <div class="searchbar-backdrop"></div>
+
+      <div class="list media-list list-strong inset list-dividers-ios searchbar-not-found vm-notificaciones-list">
+        <ul>
+          <li style="padding: 10px;">Sin resultados</li>
+        </ul>
+      </div>
+
+      <div class="list media-list list-strong inset list-dividers-ios search-list searchbar-found vm-notificaciones-list">
+        <ul id="lista_notificaciones"></ul>
+      </div>
+
+      <div class="list media-list div_sin_notificaciones vm-notificaciones-empty" style="display:none;">
+        <ul id="lista_sin_notificaciones"></ul>
       </div>
     </div>
   </div>
@@ -22,16 +61,123 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $on }) {
-    $on('pageInit', () => {
-      $el.find('#notifications-check').on('click', async () => {
-        try {
-          await utils.getNotifications();
-        } catch (error) {
-          $el.find('#notifications-status').text(utils.getApiErrorMessage(error, 'Endpoint no disponible'));
-        }
-      });
-    });
+  export default function (props, { $f7, $on }) {
+    const getPageEl = () => document.querySelector('.page[data-name="notificaciones"]');
+
+    const getNotificationsListEl = () => {
+      const pageEl = getPageEl();
+      return pageEl ? pageEl.querySelector('#lista_notificaciones') : null;
+    };
+
+    const getEmptyListEl = () => {
+      const pageEl = getPageEl();
+      return pageEl ? pageEl.querySelector('#lista_sin_notificaciones') : null;
+    };
+
+    const getEmptyWrapEl = () => {
+      const pageEl = getPageEl();
+      return pageEl ? pageEl.querySelector('.div_sin_notificaciones') : null;
+    };
+
+    const getSearchListWrapEl = () => {
+      const pageEl = getPageEl();
+      return pageEl ? pageEl.querySelector('.search-list') : null;
+    };
+
+    const normalizeItems = (response) => {
+      if (!response) return [];
+      if (Array.isArray(response)) return response;
+      if (Array.isArray(response.data)) return response.data;
+      if (Array.isArray(response.notificaciones)) return response.notificaciones;
+      if (Array.isArray(response.notifications)) return response.notifications;
+      return [];
+    };
+
+    const renderEmptyState = (message) => {
+      const listEl = getNotificationsListEl();
+      const emptyEl = getEmptyListEl();
+      const emptyWrapEl = getEmptyWrapEl();
+      const searchWrapEl = getSearchListWrapEl();
+
+      if (listEl) listEl.innerHTML = '';
+      if (searchWrapEl) searchWrapEl.style.display = 'none';
+      if (emptyWrapEl) emptyWrapEl.style.display = 'block';
+      if (emptyEl) {
+        emptyEl.innerHTML = `
+          <li>
+            <div class="item-content">
+              <div class="item-inner">
+                <div class="item-title">${utils.escapeHtml(message)}</div>
+              </div>
+            </div>
+          </li>
+        `;
+      }
+    };
+
+    const renderNotifications = (items) => {
+      const listEl = getNotificationsListEl();
+      const emptyWrapEl = getEmptyWrapEl();
+      const searchWrapEl = getSearchListWrapEl();
+
+      if (!listEl) return;
+
+      if (!items.length) {
+        renderEmptyState('No tienes notificaciones.');
+        return;
+      }
+
+      if (emptyWrapEl) emptyWrapEl.style.display = 'none';
+      if (searchWrapEl) searchWrapEl.style.display = 'block';
+
+      listEl.innerHTML = items.map((item, index) => {
+        const id = item.id || item.notificacion_id || index + 1;
+        const title = item.titulo || item.title || 'Notificacion';
+        const subtitle = item.subtitulo || item.centro || item.empresa || item.fecha || '';
+        const body = item.mensaje || item.descripcion || item.body || '';
+
+        return `
+          <li>
+            <a href="/notificacion/${encodeURIComponent(id)}/" class="item-link item-content">
+              <div class="item-inner">
+                <div class="item-title-row">
+                  <div class="item-title">${utils.escapeHtml(title)}</div>
+                </div>
+                ${subtitle ? `<div class="item-subtitle">${utils.escapeHtml(subtitle)}</div>` : ''}
+                ${body ? `<div class="item-text">${utils.escapeHtml(body)}</div>` : ''}
+              </div>
+            </a>
+          </li>
+        `;
+      }).join('');
+    };
+
+    const loadNotifications = async () => {
+      try {
+        const response = await utils.getNotifications();
+        renderNotifications(normalizeItems(response));
+      } catch (error) {
+        renderEmptyState(utils.getApiErrorMessage(error, 'No se pudieron cargar las notificaciones'));
+      }
+    };
+
+    const handleRefresh = async (_, done) => {
+      await loadNotifications();
+      done();
+    };
+
+    const handleDeleteAll = async (event) => {
+      event.preventDefault();
+      try {
+        await utils.deleteNotification('all');
+        await loadNotifications();
+      } catch (error) {
+        $f7.dialog.alert(utils.getApiErrorMessage(error, 'No se pudieron eliminar las notificaciones'));
+      }
+    };
+
+    $on('pageInit', loadNotifications);
+    $on('pageAfterIn', loadNotifications);
 
     return $render;
   }
