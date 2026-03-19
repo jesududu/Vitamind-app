@@ -339,12 +339,22 @@
           servicio_id: selectedServiceId,
         });
 
+        if (response && response.success === false) {
+          showAvailabilityMessage('No hay disponibilidad', response.message || 'Selecciona otra fecha');
+          return;
+        }
+
         const fechas = (response && response.fechas) || [];
         const firstDate = fechas[0] || {};
         const firstEmployee = Object.values(firstDate.empleados || {})[0];
         const employeeServices = (firstEmployee && firstEmployee.servicios) || [];
-        const servicio = employeeServices.find((item) => String(item.id) === String(selectedServiceId));
-        const horario = servicio && servicio.horarios && servicio.horarios.length ? servicio.horarios[0] : null;
+        const servicio = employeeServices.find((item) => String(item.id) === String(selectedServiceId))
+          || employeeServices[0]
+          || null;
+        const horariosServicio = servicio && Array.isArray(servicio.horarios) ? servicio.horarios : [];
+        const horario = horariosServicio.find((item) => String(item.fecha) === String(selectedDate))
+          || horariosServicio[0]
+          || null;
         const slots = (horario && horario.slots) || [];
         const filas = utils.buildHorarioRowsHtml(slots);
 
