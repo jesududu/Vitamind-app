@@ -1,68 +1,84 @@
 <template>
-<div class="page" data-name="citas">
-  <div class="navbar">
-    <div class="navbar-bg"></div>
-    <div class="navbar-inner sliding">
-      <div class="title">Citas</div>
+  <div class="page" data-name="citas">
+    <div class="navbar">
+      <div class="navbar-bg"></div>
+      <div class="navbar-inner sliding">
+        <div class="title">Citas</div>
+      </div>
+    </div>
+    <div class="page-content vm-page-content">
+      <div id="citas-content"></div>
     </div>
   </div>
-  <div class="page-content vm-page-content">
-    ${!logeado && $h`
-      <div class='block'>
-        <p style='text-align: center;color: #bfbfbf;'>
-          <i class='icon material-symbols-outlined icon-large'>event_busy</i>
-        </p>
-        <p style='padding: 0px 50px;text-align: center;'>Inicia sesion para ver tus citas.</p>
-      </div>
-
-      <div class="block">
-        <button id="btnLogin" class="col button button-large button-outline" style='text-transform:none;'>Iniciar sesion</button>
-      </div>
-    `}
-
-    ${logeado && $h`
-      <div class="list media-list inset list-strong list-dividers-ios vm-reservas-list">
-        <ul class="reservas_ul"></ul>
-      </div>
-    `}
-  </div>
-</div>
 </template>
 <script>
   import utils from '../js/utils.js';
 
   export default function (props, { $el, $f7, $on, $onMounted }) {
-    let logeado = false;
-
-    if (utils.isAuthenticated()) {
-      logeado = true;
-    }
-
     const getPageNode = () => {
       if ($el && $el[0]) return $el[0];
       if ($el && $el.nodeType === 1) return $el;
       return document.querySelector('.page[data-name="citas"].page-current') || document.querySelector('.page[data-name="citas"]');
     };
 
+    const getContainer = () => {
+      const pageNode = getPageNode();
+      return pageNode ? pageNode.querySelector('#citas-content') : null;
+    };
+
+    const renderLoggedOut = () => {
+      const container = getContainer();
+      if (!container) return;
+
+      container.innerHTML = `
+        <div class="block">
+          <p style="text-align:center;color:#bfbfbf;">
+            <i class="icon material-symbols-outlined icon-large">event_busy</i>
+          </p>
+          <p style="padding:0 50px;text-align:center;">Inicia sesion para ver tus citas.</p>
+        </div>
+        <div class="block">
+          <button id="btnLogin" class="col button button-large button-outline" style="text-transform:none;">Iniciar sesion</button>
+        </div>
+      `;
+
+      const loginBtn = container.querySelector('#btnLogin');
+      if (loginBtn) {
+        loginBtn.addEventListener('click', () => {
+          const settingsView = $f7.views.get('#view-settings');
+          if (settingsView && settingsView.router) {
+            $f7.tab.show('#view-settings');
+            settingsView.router.navigate('/login/', {
+              ignoreCache: true,
+              reloadCurrent: true,
+            });
+          }
+        });
+      }
+    };
+
     const renderReservations = (items) => {
       if (!items.length) {
         return `
-          <li>
-            <div class="item-content">
-              <div class="item-inner">
-                <div class="item-title">No tienes citas registradas.</div>
-              </div>
-            </div>
-          </li>
+          <div class="list media-list inset list-strong list-dividers-ios vm-reservas-list">
+            <ul class="reservas_ul">
+              <li>
+                <div class="item-content">
+                  <div class="item-inner">
+                    <div class="item-title">No tienes citas registradas.</div>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
         `;
       }
 
-      return items.map((item) => {
+      const rows = items.map((item) => {
         const props = item.extendedProps || {};
         const startTime = ((item.start || '').split('T')[1] || '').slice(0, 5);
         const endTime = ((item.end || '').split('T')[1] || '').slice(0, 5);
         const timeText = startTime && endTime ? `${startTime} - ${endTime}` : (startTime || '');
-        const statusText = item.estado === 'activa' ? 'Proxima' : (item.estado === 'completada' ? 'Completada' : 'Cancelada');
 
         return `
           <li>
@@ -76,7 +92,6 @@
                   <div class="vm-chip-row">
                     <span class="vm-chip">${utils.escapeHtml(utils.formatDate(item.start))}</span>
                     <span class="vm-chip">${utils.escapeHtml(timeText)}</span>
-                    <span class="vm-chip">${utils.escapeHtml(statusText)}</span>
                   </div>
                   ${props.empresa ? `<div class="vm-muted" style="margin-top:8px;">${utils.escapeHtml(props.empresa)}</div>` : ''}
                 </div>
@@ -85,27 +100,19 @@
           </li>
         `;
       }).join('');
+
+      return `
+        <div class="list media-list inset list-strong list-dividers-ios vm-reservas-list">
+          <ul class="reservas_ul">${rows}</ul>
+        </div>
+      `;
     };
 
-    const bindEvents = (items) => {
-      const pageNode = getPageNode();
-      if (!pageNode) return;
+    const bindReservationLinks = (items) => {
+      const container = getContainer();
+      if (!container) return;
 
-      const loginBtn = pageNode.querySelector('#btnLogin');
-      if (loginBtn) {
-        loginBtn.addEventListener('click', () => {
-          const settingsView = $f7.views.get('#view-settings');
-          if (settingsView && settingsView.router) {
-            $f7.tab.show('#view-settings');
-            settingsView.router.navigate('/login/', {
-              ignoreCache: true,
-              reloadCurrent: true,
-            });
-          }
-        });
-      }
-
-      pageNode.querySelectorAll('.reserva-item').forEach((element) => {
+      container.querySelectorAll('.reserva-item').forEach((element) => {
         element.addEventListener('click', (event) => {
           event.preventDefault();
           const id = event.currentTarget.getAttribute('data-id');
@@ -123,23 +130,26 @@
     };
 
     const loadCitas = async () => {
-      if (!logeado) {
-        bindEvents([]);
+      if (!utils.isAuthenticated()) {
+        renderLoggedOut();
         return;
       }
 
-      const pageNode = getPageNode();
-      const list = pageNode ? pageNode.querySelector('.reservas_ul') : null;
-      if (!list) return;
+      const container = getContainer();
+      if (!container) return;
 
-      list.innerHTML = `
-        <li>
-          <div class="item-content">
-            <div class="item-inner">
-              <div class="item-title">Cargando citas...</div>
-            </div>
-          </div>
-        </li>
+      container.innerHTML = `
+        <div class="list media-list inset list-strong list-dividers-ios vm-reservas-list">
+          <ul class="reservas_ul">
+            <li>
+              <div class="item-content">
+                <div class="item-inner">
+                  <div class="item-title">Cargando citas...</div>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
       `;
 
       try {
@@ -149,17 +159,21 @@
         const canceladas = response && response.canceladas && Array.isArray(response.canceladas.data) ? response.canceladas.data : [];
         const items = activas.concat(completadas, canceladas);
 
-        list.innerHTML = renderReservations(items);
-        bindEvents(items);
+        container.innerHTML = renderReservations(items);
+        bindReservationLinks(items);
       } catch (error) {
-        list.innerHTML = `
-          <li>
-            <div class="item-content">
-              <div class="item-inner">
-                <div class="item-title">${utils.escapeHtml(utils.getApiErrorMessage(error, 'No se pudieron cargar tus citas'))}</div>
-              </div>
-            </div>
-          </li>
+        container.innerHTML = `
+          <div class="list media-list inset list-strong list-dividers-ios vm-reservas-list">
+            <ul class="reservas_ul">
+              <li>
+                <div class="item-content">
+                  <div class="item-inner">
+                    <div class="item-title">${utils.escapeHtml(utils.getApiErrorMessage(error, 'No se pudieron cargar tus citas'))}</div>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
         `;
       }
     };

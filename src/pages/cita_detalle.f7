@@ -15,7 +15,7 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $on, $f7route, $f7, $render }) {
+  export default function (props, { $el, $on, $f7route, $f7 }) {
     const getPageNode = () => {
       if ($el && $el[0]) return $el[0];
       if ($el && $el.nodeType === 1) return $el;
@@ -23,9 +23,9 @@
     };
 
     const render = () => {
-      const cita = utils.getStoredObject(utils.storageKeys.appointmentSelected);
       const pageNode = getPageNode();
       const container = pageNode ? pageNode.querySelector('#detalle-content') : null;
+      const cita = utils.getStoredObject(utils.storageKeys.appointmentSelected);
 
       if (!container) return;
 
