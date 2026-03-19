@@ -8,7 +8,87 @@
     </div>
 
     <div class="page-content vm-page-content">
-      ${!utils.isAuthenticated() && $h`
+      <div id="citas-content" class="vm-loading">Cargando citas...</div>
+    </div>
+  </div>
+</template>
+<script>
+  import utils from '../js/utils.js';
+
+  export default function (props, { $el, $f7, $f7router, $on, $onMounted, $render }) {
+    const getPageNode = () => {
+      if ($el && $el[0]) return $el[0];
+      if ($el && $el.nodeType === 1) return $el;
+      return document.querySelector('.page[data-name="citas"].page-current') || document.querySelector('.page[data-name="citas"]');
+    };
+
+    const renderEmptySection = (title) => {
+      return `
+        <div class="block">
+          <div class="vm-card">
+            <div class="vm-section-title">${utils.escapeHtml(title)}</div>
+            <div class="vm-empty">No hay citas en esta seccion.</div>
+          </div>
+        </div>
+      `;
+    };
+
+    const getAppointmentTime = (item) => {
+      const start = ((item.start || '').split('T')[1] || '').slice(0, 5);
+      const end = ((item.end || '').split('T')[1] || '').slice(0, 5);
+      if (start && end) return `${start} - ${end}`;
+      return start || end || '';
+    };
+
+    const renderSection = (title, items, status) => {
+      if (!items || !items.length) {
+        return renderEmptySection(title);
+      }
+
+      const rows = items.map((item) => {
+        const props = item.extendedProps || {};
+        return `
+          <li>
+            <a href="#" class="item-link item-content vm-cita-link" data-id="${utils.escapeHtml(item.id)}">
+              <div class="item-inner">
+                <div class="item-title-row">
+                  <div class="item-title">${utils.escapeHtml(item.title || props.servicio || 'Cita')}</div>
+                </div>
+                <div class="item-subtitle">${utils.escapeHtml(props.empleado || '')}</div>
+                <div class="item-text">
+                  <div class="vm-chip-row">
+                    <span class="vm-chip">${utils.escapeHtml(utils.formatDate(item.start))}</span>
+                    <span class="vm-chip">${utils.escapeHtml(getAppointmentTime(item))}</span>
+                    <span class="vm-chip">${utils.escapeHtml(status)}</span>
+                  </div>
+                  ${props.empresa ? `<div class="vm-muted" style="margin-top:8px;">${utils.escapeHtml(props.empresa)}</div>` : ''}
+                </div>
+              </div>
+            </a>
+          </li>
+        `;
+      }).join('');
+
+      return `
+        <div class="list media-list inset list-strong list-dividers-ios">
+          <ul>
+            <li>
+              <div class="item-content item-title">
+                <div class="item-inner">
+                  <div class="item-title-row">
+                    <div class="item-title">${utils.escapeHtml(title)}</div>
+                  </div>
+                </div>
+              </div>
+            </li>
+            ${rows}
+          </ul>
+        </div>
+      `;
+    };
+
+    const renderLoggedOut = (container) => {
+      container.innerHTML = `
         <div class="block">
           <p style="text-align:center;color:#bfbfbf;">
             <i class="icon material-symbols-outlined icon-large">event_busy</i>
@@ -17,175 +97,71 @@
             Inicia sesion para ver y gestionar tus citas.
           </p>
         </div>
-
         <div class="block">
           <a href="/login/" class="button button-large button-outline" style="text-transform:none;">Iniciar sesion</a>
-        </div>
-      `}
-
-      ${utils.isAuthenticated() && $h`
-        <div class="block block-strong inset vm-citas-summary">
-          <div class="vm-section-title">Resumen</div>
-          <div class="vm-chip-row">
-            <span class="vm-chip">Activas: ${counts.activas}</span>
-            <span class="vm-chip">Completadas: ${counts.completadas}</span>
-            <span class="vm-chip">Canceladas: ${counts.canceladas}</span>
-          </div>
-        </div>
-
-        ${loading && $h`
-          <div class="vm-loading">Cargando citas...</div>
-        `}
-
-        ${!loading && errorMessage && $h`
-          <div class="block">
-            <div class="vm-empty">${errorMessage}</div>
-          </div>
-        `}
-
-        ${!loading && !errorMessage && !hasAppointments() && $h`
-          <div class="block">
-            <div class="vm-empty">Todavia no tienes citas registradas.</div>
-          </div>
-        `}
-
-        ${!loading && !errorMessage && renderSection('Proximas', appointments.activas, 'activa')}
-        ${!loading && !errorMessage && renderSection('Completadas', appointments.completadas, 'completada')}
-        ${!loading && !errorMessage && renderSection('Canceladas', appointments.canceladas, 'cancelada')}
-      `}
-    </div>
-  </div>
-</template>
-<script>
-  import utils from '../js/utils.js';
-
-  export default function (props, { $f7router, $on, $onMounted, $update, $render }) {
-    let loading = false;
-    let errorMessage = '';
-    let appointments = {
-      activas: [],
-      completadas: [],
-      canceladas: [],
-    };
-    let counts = {
-      activas: 0,
-      completadas: 0,
-      canceladas: 0,
-    };
-    let initialized = false;
-
-    const statusLabel = (status) => {
-      if (status === 'activa') return 'Proxima';
-      if (status === 'completada') return 'Completada';
-      return 'Cancelada';
-    };
-
-    const getAppointmentTime = (item) => {
-      const start = ((item.start || '').split('T')[1] || '').slice(0, 5);
-      const end = ((item.end || '').split('T')[1] || '').slice(0, 5);
-      if (start && end) {
-        return `${start} - ${end}`;
-      }
-      return start || end || '';
-    };
-
-    const hasAppointments = () => {
-      return appointments.activas.length || appointments.completadas.length || appointments.canceladas.length;
-    };
-
-    const openAppointment = (item) => {
-      utils.setStoredObject(utils.storageKeys.appointmentSelected, item);
-      $f7router.navigate(`/cita-detalle/${encodeURIComponent(item.id)}/`);
-    };
-
-    const renderSection = (title, items = [], status) => {
-      if (!items.length) {
-        return $h`
-          <div class="block">
-            <div class="vm-card">
-              <div class="vm-section-title">${title}</div>
-              <div class="vm-empty">No hay citas en esta seccion.</div>
-            </div>
-          </div>
-        `;
-      }
-
-      return $h`
-        <div class="list media-list inset list-strong list-dividers-ios">
-          <ul>
-            <li>
-              <div class="item-content item-title">
-                <div class="item-inner">
-                  <div class="item-title-row">
-                    <div class="item-title">${title}</div>
-                  </div>
-                </div>
-              </div>
-            </li>
-            ${items.map((item) => $h`
-              <li>
-                <a href="#" class="item-link item-content" @click=${() => openAppointment(item)}>
-                  <div class="item-inner">
-                    <div class="item-title-row">
-                      <div class="item-title">${item.title || ((item.extendedProps && item.extendedProps.servicio) || 'Cita')}</div>
-                    </div>
-                    <div class="item-subtitle">${(item.extendedProps && item.extendedProps.empleado) || ''}</div>
-                    <div class="item-text">
-                      <div class="vm-chip-row">
-                        <span class="vm-chip">${utils.formatDate(item.start)}</span>
-                        <span class="vm-chip">${getAppointmentTime(item)}</span>
-                        <span class="vm-chip">${statusLabel(status)}</span>
-                      </div>
-                      ${(item.extendedProps && item.extendedProps.empresa) ? `<div class="vm-muted" style="margin-top:8px;">${item.extendedProps.empresa}</div>` : ''}
-                    </div>
-                  </div>
-                </a>
-              </li>
-            `)}
-          </ul>
         </div>
       `;
     };
 
+    const bindAppointmentLinks = (items) => {
+      const pageNode = getPageNode();
+      if (!pageNode) return;
+
+      pageNode.querySelectorAll('.vm-cita-link').forEach((link) => {
+        link.addEventListener('click', (event) => {
+          event.preventDefault();
+          const appointmentId = event.currentTarget.getAttribute('data-id');
+          const appointment = items.find((item) => String(item.id) === String(appointmentId));
+          if (!appointment) return;
+          utils.setStoredObject(utils.storageKeys.appointmentSelected, appointment);
+          $f7router.navigate(`/cita-detalle/${encodeURIComponent(appointment.id)}/`);
+        });
+      });
+    };
+
     const loadAppointments = async () => {
+      const pageNode = getPageNode();
+      const container = pageNode ? pageNode.querySelector('#citas-content') : null;
+      if (!container) return;
+
       if (!utils.isAuthenticated()) {
+        renderLoggedOut(container);
         return;
       }
 
-      loading = true;
-      errorMessage = '';
-      $update();
+      container.innerHTML = '<div class="vm-loading">Cargando citas...</div>';
 
       try {
         const response = await utils.getMyAppointments();
-        appointments = {
-          activas: response && response.activas && Array.isArray(response.activas.data) ? response.activas.data : [],
-          completadas: response && response.completadas && Array.isArray(response.completadas.data) ? response.completadas.data : [],
-          canceladas: response && response.canceladas && Array.isArray(response.canceladas.data) ? response.canceladas.data : [],
-        };
-        counts = {
-          activas: (response && response.activas && response.activas.total) || appointments.activas.length,
-          completadas: (response && response.completadas && response.completadas.total) || appointments.completadas.length,
-          canceladas: (response && response.canceladas && response.canceladas.total) || appointments.canceladas.length,
-        };
+        const activas = response && response.activas && Array.isArray(response.activas.data) ? response.activas.data : [];
+        const completadas = response && response.completadas && Array.isArray(response.completadas.data) ? response.completadas.data : [];
+        const canceladas = response && response.canceladas && Array.isArray(response.canceladas.data) ? response.canceladas.data : [];
+        const allItems = activas.concat(completadas, canceladas);
+
+        container.innerHTML = `
+          <div class="block block-strong inset vm-citas-summary">
+            <div class="vm-section-title">Resumen</div>
+            <div class="vm-chip-row">
+              <span class="vm-chip">Activas: ${utils.escapeHtml((response && response.activas && response.activas.total) || activas.length)}</span>
+              <span class="vm-chip">Completadas: ${utils.escapeHtml((response && response.completadas && response.completadas.total) || completadas.length)}</span>
+              <span class="vm-chip">Canceladas: ${utils.escapeHtml((response && response.canceladas && response.canceladas.total) || canceladas.length)}</span>
+            </div>
+          </div>
+          ${!allItems.length ? '<div class="block"><div class="vm-empty">Todavia no tienes citas registradas.</div></div>' : ''}
+          ${renderSection('Proximas', activas, 'Proxima')}
+          ${renderSection('Completadas', completadas, 'Completada')}
+          ${renderSection('Canceladas', canceladas, 'Cancelada')}
+        `;
+
+        bindAppointmentLinks(allItems);
       } catch (error) {
-        errorMessage = utils.getApiErrorMessage(error, 'No se pudieron cargar tus citas');
-      } finally {
-        loading = false;
-        $update();
+        container.innerHTML = `<div class="vm-empty">${utils.escapeHtml(utils.getApiErrorMessage(error, 'No se pudieron cargar tus citas'))}</div>`;
       }
     };
 
-    const initPage = () => {
-      if (!initialized) {
-        initialized = true;
-      }
-      loadAppointments();
-    };
-
-    $on('pageInit', initPage);
+    $on('pageInit', loadAppointments);
     $on('pageAfterIn', loadAppointments);
-    $onMounted(initPage);
+    $onMounted(loadAppointments);
 
     return $render;
   }
