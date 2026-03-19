@@ -128,6 +128,43 @@
     };
 
     const requestSearch = async (filters, geoFilters = null) => {
+      const hasLocalidad = Boolean(filters.localidad);
+
+      if (hasLocalidad) {
+        const response = await utils.searchProfessionals(filters);
+        const fechas = Array.isArray(response && response.fechas) ? response.fechas : [];
+        const professionals = new Map();
+
+        fechas.forEach((fechaItem) => {
+          Object.values(fechaItem.empleados || {}).forEach((empleado) => {
+            const key = String(empleado.id || empleado.token || Math.random());
+            const incomingServices = Array.isArray(empleado.servicios) ? empleado.servicios : [];
+
+            if (!professionals.has(key)) {
+              professionals.set(key, {
+                ...empleado,
+                servicios: incomingServices,
+              });
+              return;
+            }
+
+            const existing = professionals.get(key);
+            const currentServices = Array.isArray(existing.servicios) ? existing.servicios : [];
+            const mergedServices = [...currentServices];
+
+            incomingServices.forEach((servicio) => {
+              if (!mergedServices.some((item) => String(item.id) === String(servicio.id))) {
+                mergedServices.push(servicio);
+              }
+            });
+
+            existing.servicios = mergedServices;
+          });
+        });
+
+        return Array.from(professionals.values());
+      }
+
       try {
         const response = await utils.searchDirectoryProfessionals(filters);
         return mapDirectoryResults(response);
@@ -178,15 +215,20 @@
           localidad: searchLocalidad,
           query: searchQuery,
         };
-        const geo = await utils.getSearchCoordinates({
-          forcePrompt: true,
-        });
+        const shouldUseRealLocation = !searchLocalidad;
+        const geo = shouldUseRealLocation
+          ? await utils.getSearchCoordinates({
+              forcePrompt: true,
+            })
+          : null;
 
         if (geo) {
           usingRealLocation = true;
           locationMessage = geo.source === 'cache'
             ? 'Resultados ordenados con tu ultima ubicacion conocida.'
             : 'Resultados ordenados por cercania a tu ubicacion actual.';
+        } else if (searchLocalidad) {
+          locationMessage = `Resultados cercanos a ${searchLocalidad}.`;
         } else {
           locationMessage = 'Activa la ubicacion para ordenar por cercania real.';
         }
