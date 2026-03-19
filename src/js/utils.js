@@ -85,16 +85,23 @@ var tmApp = {
       data = null,
       headers = {},
       timeout = 20000,
+      isFormData = false,
     } = options;
 
-    const response = await CapacitorHttp.request({
+    const requestOptions = {
       url,
       method,
       headers,
       data,
       connectTimeout: timeout,
       readTimeout: timeout,
-    });
+    };
+
+    if (isFormData) {
+      requestOptions.dataType = 'formData';
+    }
+
+    const response = await CapacitorHttp.request(requestOptions);
 
     return {
       ok: response.status >= 200 && response.status < 300,
@@ -164,6 +171,7 @@ var tmApp = {
           data: isFormData ? data : (method === 'GET' ? null : data),
           headers,
           timeout,
+          isFormData,
         });
         response = {
           ok: nativeResponse.ok,
@@ -281,6 +289,7 @@ var tmApp = {
           data: isFormData ? data : (method === 'GET' ? null : data),
           headers,
           timeout,
+          isFormData,
         });
         response = {
           ok: nativeResponse.ok,
@@ -538,7 +547,7 @@ var tmApp = {
 
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => formData.append(key, value));
-    formData.append('imagen', file);
+    formData.append('imagen', file, file.name || 'perfil.jpg');
 
     return tmApp.ajaxPostData(fullUrl, formData, {
       isFormData: true,

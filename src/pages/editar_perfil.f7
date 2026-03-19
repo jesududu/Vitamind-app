@@ -57,7 +57,8 @@
       if (apellidosInput) apellidosInput.value = apellidos;
       if (emailInput) emailInput.value = (user && user.email) || paciente.email || '';
       if (avatarImg) {
-        avatarImg.src = utils.normalizeProfessionalImage((user && user.imagen_url) || (user && user.imagen) || '/avatar.png');
+        const avatarUrl = utils.normalizeProfessionalImage((user && user.imagen_url) || (user && user.imagen) || '/avatar.png');
+        avatarImg.src = avatarUrl.includes('?') ? `${avatarUrl}&t=${Date.now()}` : `${avatarUrl}?t=${Date.now()}`;
       }
     };
 
