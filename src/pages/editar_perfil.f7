@@ -12,7 +12,7 @@
         <div class="vm-section-title">Datos del paciente</div>
         <div class="vm-profile-cover" style="display:flex; align-items:center; gap:16px; margin-bottom:20px;">
           <div style="position:relative; flex:0 0 auto;">
-            <img id="profile-avatar" class="vm-avatar vm-avatar--lg" src="/images/avatar/01.jpg" alt="Avatar" />
+            <img id="profile-avatar" class="vm-avatar vm-avatar--lg" src="${utils.normalizeProfessionalImage('')}" alt="Avatar" />
             <a href="#" class="link" @click=${openImageActions} style="color:#175269;position:absolute;right:-6px;bottom:2px;height:28px;">
               <i class="icon f7-icons" style="font-size:35px;">camera_circle_fill</i>
             </a>
@@ -40,6 +40,7 @@
 
   export default function (props, { $el, $on, $f7, $store }) {
     let selectedImageFile = null;
+    let selectedImagePreviewUrl = null;
 
     const getPageNode = () => {
       if ($el && $el[0]) return $el[0];
@@ -65,9 +66,9 @@
       if (nombreInput) nombreInput.value = nombre;
       if (apellidosInput) apellidosInput.value = apellidos;
       if (emailInput) emailInput.value = (user && user.email) || paciente.email || '';
-      if (avatarImg) {
-        const avatarUrl = utils.normalizeProfessionalImage((user && user.imagen_url) || (user && user.imagen) || '/images/avatar/01.jpg');
-        avatarImg.src = avatarUrl.startsWith('/images/')
+      if (avatarImg && !selectedImagePreviewUrl) {
+        const avatarUrl = utils.normalizeProfessionalImage((user && user.imagen_url) || (user && user.imagen) || '');
+        avatarImg.src = avatarUrl.startsWith('data:image/')
           ? avatarUrl
           : (avatarUrl.includes('?') ? `${avatarUrl}&t=${Date.now()}` : `${avatarUrl}?t=${Date.now()}`);
       }
@@ -90,8 +91,11 @@
       try {
         const result = await utils.selectProfileImage(source);
         selectedImageFile = result.file;
+        selectedImagePreviewUrl = result.previewUrl || null;
         const avatarImg = getField('#profile-avatar');
-        if (avatarImg && result.previewUrl) {
+        if (avatarImg && selectedImagePreviewUrl) {
+          avatarImg.src = selectedImagePreviewUrl;
+        } else if (avatarImg && result.previewUrl) {
           avatarImg.src = result.previewUrl;
         } else {
           previewSelectedImage(result.file);
@@ -164,6 +168,7 @@
         );
 
         const refreshedUser = await utils.getCurrentUser();
+        selectedImagePreviewUrl = null;
         utils.saveSession({
           token: ($store.state.session && $store.state.session.token) || utils.getSession().token,
           user: refreshedUser,
@@ -183,7 +188,9 @@
     });
 
     $on('pageAfterIn', () => {
-      loadProfile();
+      if (!selectedImagePreviewUrl) {
+        loadProfile();
+      }
     });
 
     return $render;

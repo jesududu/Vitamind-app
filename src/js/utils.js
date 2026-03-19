@@ -704,7 +704,7 @@ var tmApp = {
 
   normalizeProfessionalImage: function (image) {
     if (!image || typeof image !== 'string') {
-      return '/images/avatar/01.jpg';
+      return 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160"><rect width="160" height="160" rx="80" fill="%23f3efe9"/><circle cx="80" cy="62" r="28" fill="%23d7c8bc"/><path d="M36 132c8-24 28-38 44-38s36 14 44 38" fill="%23d7c8bc"/></svg>';
     }
 
     if (image.startsWith('http')) {
