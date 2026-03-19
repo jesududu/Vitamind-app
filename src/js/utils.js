@@ -1,4 +1,5 @@
 import { Capacitor, CapacitorHttp } from '@capacitor/core';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import env from './env.js';
 
 const apiUrl = env.apiUrl;
@@ -552,6 +553,36 @@ var tmApp = {
     return tmApp.ajaxPostData(fullUrl, formData, {
       isFormData: true,
     });
+  },
+
+  selectProfileImage: async function (source = 'photos') {
+    const sourceType = source === 'camera' ? CameraSource.Camera : CameraSource.Photos;
+    const image = await Camera.getPhoto({
+      quality: 80,
+      allowEditing: false,
+      resultType: CameraResultType.Uri,
+      source: sourceType,
+      width: 500,
+      height: 500,
+      correctOrientation: true,
+    });
+
+    if (!image || !image.webPath) {
+      throw new Error('No se ha seleccionado imagen');
+    }
+
+    const response = await fetch(image.webPath);
+    const blob = await response.blob();
+    const extension = image.format || 'jpg';
+    const fileName = `perfil.${extension}`;
+    const file = new File([blob], fileName, {
+      type: blob.type || `image/${extension}`,
+    });
+
+    return {
+      file,
+      previewUrl: image.webPath,
+    };
   },
 
   changePassword: function () {

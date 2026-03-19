@@ -10,11 +10,15 @@
     <div class="page-content vm-page-content">
       <div class="vm-form-card">
         <div class="vm-section-title">Datos del paciente</div>
-        <div class="vm-profile-cover" style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
-          <img id="profile-avatar" class="vm-avatar vm-avatar--lg" src="/avatar.png" alt="Avatar" style="flex:0 0 auto;" />
+        <div class="vm-profile-cover" style="display:flex; align-items:center; gap:16px; margin-bottom:20px;">
+          <div style="position:relative; flex:0 0 auto;">
+            <img id="profile-avatar" class="vm-avatar vm-avatar--lg" src="/avatar.png" alt="Avatar" />
+            <a href="#" class="link" @click=${openImageActions} style="color:#175269;position:absolute;right:-6px;bottom:2px;height:28px;">
+              <i class="icon f7-icons" style="font-size:35px;">camera_circle_fill</i>
+            </a>
+          </div>
           <div style="flex:1 1 auto;">
-            <div class="vm-section-title" style="margin-bottom:10px;">Foto de perfil</div>
-            <input type="file" id="profile-image" accept="image/*" @change=${handleImageChange} />
+            <a href="#" class="button button-outline" @click=${openImageActions}>Seleccionar foto</a>
           </div>
         </div>
         <div class="list no-hairlines-md">
@@ -80,13 +84,45 @@
       reader.readAsDataURL(file);
     };
 
-    const handleImageChange = (event) => {
-      const file = event && event.target && event.target.files && event.target.files[0]
-        ? event.target.files[0]
-        : null;
+    const selectImage = async (source) => {
+      try {
+        const result = await utils.selectProfileImage(source);
+        selectedImageFile = result.file;
+        const avatarImg = getField('#profile-avatar');
+        if (avatarImg && result.previewUrl) {
+          avatarImg.src = result.previewUrl;
+        } else {
+          previewSelectedImage(result.file);
+        }
+      } catch (error) {
+        const message = utils.getApiErrorMessage(error, 'No se ha seleccionado imagen');
+        $f7.dialog.alert(message);
+      }
+    };
 
-      selectedImageFile = file;
-      previewSelectedImage(file);
+    const openImageActions = (event) => {
+      event.preventDefault();
+
+      $f7.actions.create({
+        buttons: [
+          [
+            {
+              text: 'Hacer foto',
+              onClick: () => selectImage('camera'),
+            },
+            {
+              text: 'Seleccionar foto',
+              onClick: () => selectImage('photos'),
+            },
+          ],
+          [
+            {
+              text: 'Cancelar',
+              color: 'red',
+            },
+          ],
+        ],
+      }).open();
     };
 
     const loadProfile = async () => {
@@ -142,11 +178,6 @@
 
     $on('pageInit', () => {
       loadProfile();
-
-      const imageInput = getField('#profile-image');
-      if (imageInput) {
-        imageInput.addEventListener('change', handleImageChange);
-      }
     });
 
     $on('pageAfterIn', () => {
