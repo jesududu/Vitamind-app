@@ -28,15 +28,17 @@ var tmApp = {
   nombreEmpresa,
   idiomaAlmacenado,
   handlingInvalidToken,
-  storageKeys: {
-    token: 'sanctum_token',
-    pacienteId: 'paciente_id',
-    user: 'vitamind_datos_usu',
-    appointmentDraft: 'vitamind_reserva_borrador',
-    appointmentSelected: 'vitamind_cita_seleccionada',
-    professionalMap: 'vitamind_professional_map',
-    profileImageDraft: 'vitamind_profile_image_draft',
-  },
+    storageKeys: {
+      token: 'sanctum_token',
+      pacienteId: 'paciente_id',
+      user: 'vitamind_datos_usu',
+      appointmentDraft: 'vitamind_reserva_borrador',
+      appointmentSelected: 'vitamind_cita_seleccionada',
+      professionalMap: 'vitamind_professional_map',
+      profileImageDraft: 'vitamind_profile_image_draft',
+      searchCoordinates: 'vitamind_search_coordinates',
+      searchGeoFailedAt: 'vitamind_search_geo_failed_at',
+    },
   missingApiEndpoints: {
     registerDevice: '/register-device',
     notifications: '/notificaciones',
@@ -880,11 +882,11 @@ var tmApp = {
     });
   },
 
-  getCurrentLocation: function (options = {}) {
-    const {
-      enableHighAccuracy = true,
-      timeout = 8000,
-      maximumAge = 120000,
+    getCurrentLocation: function (options = {}) {
+      const {
+        enableHighAccuracy = true,
+        timeout = 8000,
+        maximumAge = 120000,
     } = options;
 
     return new Promise((resolve, reject) => {
@@ -908,9 +910,54 @@ var tmApp = {
           timeout,
           maximumAge,
         },
-      );
-    });
-  },
+        );
+      });
+    },
+
+    getSearchCoordinates: async function () {
+      const expiration = 15 * 60 * 1000;
+      const now = Date.now();
+      const cached = tmApp.getStoredObject(tmApp.storageKeys.searchCoordinates);
+      const geoFailedAt = Number(localStorage.getItem(tmApp.storageKeys.searchGeoFailedAt) || 0);
+
+      if (cached && cached.lat && cached.lng && cached.timestamp && (now - cached.timestamp < expiration)) {
+        return {
+          lat: cached.lat,
+          lng: cached.lng,
+          source: 'cache',
+        };
+      }
+
+      if (geoFailedAt && (now - geoFailedAt < expiration)) {
+        return null;
+      }
+
+      try {
+        const location = await tmApp.getCurrentLocation({
+          enableHighAccuracy: false,
+          timeout: 3000,
+          maximumAge: expiration,
+        });
+
+        const coords = {
+          lat: location.lat,
+          lng: location.lng,
+          timestamp: now,
+        };
+
+        tmApp.setStoredObject(tmApp.storageKeys.searchCoordinates, coords);
+        localStorage.removeItem(tmApp.storageKeys.searchGeoFailedAt);
+
+        return {
+          lat: coords.lat,
+          lng: coords.lng,
+          source: 'gps',
+        };
+      } catch (error) {
+        localStorage.setItem(tmApp.storageKeys.searchGeoFailedAt, String(now));
+        return null;
+      }
+    },
 
     searchProfessionals: function (filters = {}) {
       const url = apiUrl + '/horarios-por-localidad';

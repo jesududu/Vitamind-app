@@ -23,7 +23,7 @@
               <div class="item-inner">
                 <div class="item-title item-label">Localidad</div>
                 <div class="item-input-wrap">
-                  <input type="text" id="home-localidad" placeholder="Madrid, Cordoba..." />
+                  <input type="text" id="home-localidad" placeholder="Madrid, Cordoba..." @focus=${openSearch} @click=${openSearch} />
                 </div>
               </div>
             </li>
@@ -31,7 +31,7 @@
               <div class="item-inner">
                 <div class="item-title item-label">Profesional o servicio</div>
                 <div class="item-input-wrap">
-                  <input type="text" id="home-query" placeholder="Psicologia, ansiedad, terapia..." />
+                  <input type="text" id="home-query" placeholder="Psicologia, ansiedad, terapia..." @focus=${openSearch} @click=${openSearch} />
                 </div>
               </div>
             </li>

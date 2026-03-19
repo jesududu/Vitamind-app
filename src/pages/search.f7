@@ -42,6 +42,9 @@
           ${!searchLoading && searchMessage && $h`
             <div class="vm-empty">${searchMessage}</div>
           `}
+          ${!searchLoading && locationMessage && $h`
+            <div class="vm-muted">${locationMessage}</div>
+          `}
           ${!searchLoading && !searchMessage && searchResults.map((item) => {
             const servicio = item.servicios && item.servicios.length ? item.servicios[0] : null;
             return $h`
@@ -53,6 +56,7 @@
                     <div class="vm-card-subtitle">${item.empresa_nombre || item.direccion || ''}</div>
                     <div class="vm-chip-row">
                       ${servicio ? $h`<span class="vm-chip">${servicio.titulo}</span>` : ''}
+                      ${item.distancia ? $h`<span class="vm-chip">${item.distancia} km</span>` : ''}
                     </div>
                     <div class="vm-actions">
                       <a href="#" class="button button-fill button-small" @click=${() => openProfessional(item.id)}>Abrir perfil</a>
@@ -77,6 +81,7 @@
     let searchMessage = 'Introduce una localidad valida o un nombre de profesional para comenzar.';
     let searchResults = [];
     let initialized = false;
+    let locationMessage = '';
     const getPageNode = () => {
       if ($el && $el[0]) return $el[0];
       if ($el && $el.nodeType === 1) return $el;
@@ -156,7 +161,7 @@
       return Array.from(professionals.values());
     };
 
-    const requestSearch = async (filters) => {
+    const requestSearch = async (filters, geoFilters = null) => {
       try {
         const response = await utils.searchDirectoryProfessionals(filters);
         return mapDirectoryResults(response);
@@ -168,7 +173,10 @@
           throw error;
         }
 
-        const response = await utils.searchProfessionals(filters);
+        const response = await utils.searchProfessionals({
+          ...filters,
+          ...(geoFilters || {}),
+        });
         return mapAvailabilityResults(response);
       }
     };
@@ -186,14 +194,27 @@
 
       searchLoading = true;
       searchMessage = '';
+      locationMessage = '';
       searchResults = [];
       $update();
 
       try {
-        searchResults = await requestSearch({
+        const filters = {
           localidad: searchLocalidad,
           query: searchQuery,
-        });
+        };
+        const geo = await utils.getSearchCoordinates();
+
+        if (geo) {
+          locationMessage = geo.source === 'cache'
+            ? 'Resultados ordenados con tu ultima ubicacion conocida.'
+            : 'Resultados ordenados por cercania a tu ubicacion actual.';
+        }
+
+        searchResults = await requestSearch(filters, geo ? {
+          lat: geo.lat,
+          lng: geo.lng,
+        } : null);
 
         if (!searchResults.length) {
           searchMessage = 'No hemos encontrado profesionales con esos filtros.';
