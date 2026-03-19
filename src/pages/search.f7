@@ -91,7 +91,7 @@
       searchQuery = queryInput ? queryInput.value.trim() : searchQuery;
     };
 
-    const mapSearchResults = (response) => {
+    const mapDirectoryResults = (response) => {
       const empleados = Array.isArray(response && response.empleados) ? response.empleados : [];
       const professionals = new Map();
 
@@ -122,9 +122,55 @@
       return Array.from(professionals.values());
     };
 
+    const mapAvailabilityResults = (response) => {
+      const fechas = Array.isArray(response && response.fechas) ? response.fechas : [];
+      const professionals = new Map();
+
+      fechas.forEach((fechaItem) => {
+        Object.values(fechaItem.empleados || {}).forEach((empleado) => {
+          const key = String(empleado.id || empleado.token || Math.random());
+          const incomingServices = Array.isArray(empleado.servicios) ? empleado.servicios : [];
+
+          if (!professionals.has(key)) {
+            professionals.set(key, {
+              ...empleado,
+              servicios: incomingServices,
+            });
+            return;
+          }
+
+          const existing = professionals.get(key);
+          const currentServices = Array.isArray(existing.servicios) ? existing.servicios : [];
+          const mergedServices = [...currentServices];
+
+          incomingServices.forEach((servicio) => {
+            if (!mergedServices.some((item) => String(item.id) === String(servicio.id))) {
+              mergedServices.push(servicio);
+            }
+          });
+
+          existing.servicios = mergedServices;
+        });
+      });
+
+      return Array.from(professionals.values());
+    };
+
     const requestSearch = async (filters) => {
-      const response = await utils.searchDirectoryProfessionals(filters);
-      return mapSearchResults(response);
+      try {
+        const response = await utils.searchDirectoryProfessionals(filters);
+        return mapDirectoryResults(response);
+      } catch (error) {
+        const message = utils.getApiErrorMessage(error, '');
+        const looksLikeMissingColumn = message.includes('Column not found') || message.includes('Unknown column') || message.includes('SQLSTATE');
+
+        if (!looksLikeMissingColumn) {
+          throw error;
+        }
+
+        const response = await utils.searchProfessionals(filters);
+        return mapAvailabilityResults(response);
+      }
     };
 
     const loadResults = async () => {
