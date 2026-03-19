@@ -80,9 +80,17 @@
     let searchResults = [];
     let initialized = false;
 
+    const getPageEl = () => {
+      if ($el && typeof $el.find === 'function') return $el;
+      if ($el && $el.nodeType === 1) return $f7.$($el);
+      if ($el && $el[0]) return $f7.$($el[0]);
+      return $f7.$('.page[data-name="search"].page-current');
+    };
+
     const syncInputs = () => {
-      const localidadInput = $el.find('#search-localidad');
-      const queryInput = $el.find('#search-query');
+      const pageEl = getPageEl();
+      const localidadInput = pageEl.find('#search-localidad');
+      const queryInput = pageEl.find('#search-query');
       searchLocalidad = localidadInput.length ? localidadInput.val() : searchLocalidad;
       searchQuery = queryInput.length ? queryInput.val() : searchQuery;
     };

@@ -15,7 +15,12 @@
   import utils from '../js/utils.js';
 
   export default function (props, { $el, $on, $onMounted, $f7router, $f7 }) {
-    const getPageEl = () => (typeof $el !== 'undefined' && $el && typeof $el.find === 'function' ? $el : $f7.$($el));
+    const getPageEl = () => {
+      if ($el && typeof $el.find === 'function') return $el;
+      if ($el && $el.nodeType === 1) return $f7.$($el);
+      if ($el && $el[0]) return $f7.$($el[0]);
+      return $f7.$('.page[data-name="citas"].page-current');
+    };
     let initialized = false;
 
     const renderSection = (title, items = []) => `

@@ -99,7 +99,7 @@
     };
 
     const openSearch = () => {
-      const pageEl = $el;
+      const pageEl = getPageEl();
       const localidadInput = pageEl.find('#home-localidad');
       const queryInput = pageEl.find('#home-query');
       const localidad = localidadInput.length ? localidadInput.val() : '';
@@ -131,3 +131,9 @@
     return $render;
   }
 </script>
+    const getPageEl = () => {
+      if ($el && typeof $el.find === 'function') return $el;
+      if ($el && $el.nodeType === 1) return $f7.$($el);
+      if ($el && $el[0]) return $f7.$($el[0]);
+      return $f7.$('.page[data-name="home"].page-current');
+    };
