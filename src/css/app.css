@@ -141,6 +141,13 @@ body {
   border-radius: 28px;
 }
 
+.avatar-circle,
+.imgUsu.avatar-circle {
+  border-radius: 50%;
+  object-fit: cover;
+  overflow: hidden;
+}
+
 .vm-detail-header {
   display: grid;
   grid-template-columns: 96px 1fr;
