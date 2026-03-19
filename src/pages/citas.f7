@@ -59,7 +59,7 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $f7router, $on, $onMounted, $update }) {
+  export default function (props, { $f7router, $on, $onMounted, $update, $render }) {
     let loading = false;
     let errorMessage = '';
     let appointments = {
@@ -127,16 +127,16 @@
                 <a href="#" class="item-link item-content" @click=${() => openAppointment(item)}>
                   <div class="item-inner">
                     <div class="item-title-row">
-                      <div class="item-title">${item.title || item.extendedProps?.servicio || 'Cita'}</div>
+                      <div class="item-title">${item.title || ((item.extendedProps && item.extendedProps.servicio) || 'Cita')}</div>
                     </div>
-                    <div class="item-subtitle">${item.extendedProps?.empleado || ''}</div>
+                    <div class="item-subtitle">${(item.extendedProps && item.extendedProps.empleado) || ''}</div>
                     <div class="item-text">
                       <div class="vm-chip-row">
                         <span class="vm-chip">${utils.formatDate(item.start)}</span>
                         <span class="vm-chip">${getAppointmentTime(item)}</span>
                         <span class="vm-chip">${statusLabel(status)}</span>
                       </div>
-                      ${item.extendedProps?.empresa ? $h`<div class="vm-muted" style="margin-top:8px;">${item.extendedProps.empresa}</div>` : ''}
+                      ${(item.extendedProps && item.extendedProps.empresa) ? $h`<div class="vm-muted" style="margin-top:8px;">${item.extendedProps.empresa}</div>` : ''}
                     </div>
                   </div>
                 </a>
