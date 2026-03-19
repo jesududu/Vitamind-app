@@ -10,21 +10,11 @@
     <div class="page-content vm-page-content">
       <div class="vm-form-card">
         <div class="vm-section-title">Datos del paciente</div>
-        <div class="vm-profile-cover" style="display:flex; align-items:center; gap:16px; margin-bottom:20px;">
-          <div style="position:relative; flex:0 0 auto;">
-            <img id="profile-avatar" class="vm-avatar vm-avatar--lg" src="${utils.normalizeProfessionalImage('')}" alt="Avatar" />
-            <a href="#" class="link" @click=${openImageActions} style="color:#175269;position:absolute;right:-6px;bottom:2px;height:28px;">
-              <i class="icon f7-icons" style="font-size:35px;">camera_circle_fill</i>
-            </a>
-          </div>
-          <div style="flex:1 1 auto;">
-            <a href="#" class="button button-outline" @click=${openImageActions}>Seleccionar foto</a>
-          </div>
-        </div>
         <div class="list no-hairlines-md">
           <ul>
             <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Nombre</div><div class="item-input-wrap"><input type="text" id="profile-nombre" /></div></div></li>
             <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Apellidos</div><div class="item-input-wrap"><input type="text" id="profile-apellidos" /></div></div></li>
+            <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Telefono</div><div class="item-input-wrap"><input type="tel" id="profile-telefono" /></div></div></li>
             <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Email</div><div class="item-input-wrap"><input type="email" id="profile-email" /></div></div></li>
           </ul>
         </div>
@@ -39,9 +29,6 @@
   import utils from '../js/utils.js';
 
   export default function (props, { $el, $on, $f7, $store }) {
-    let selectedImageFile = null;
-    let selectedImagePreviewUrl = null;
-
     const getPageNode = () => {
       if ($el && $el[0]) return $el[0];
       if ($el && $el.nodeType === 1) return $el;
@@ -60,92 +47,13 @@
       const apellidos = paciente.apellidos || userNameParts.slice(1).join(' ') || '';
       const nombreInput = getField('#profile-nombre');
       const apellidosInput = getField('#profile-apellidos');
+      const telefonoInput = getField('#profile-telefono');
       const emailInput = getField('#profile-email');
-      const avatarImg = getField('#profile-avatar');
 
       if (nombreInput) nombreInput.value = nombre;
       if (apellidosInput) apellidosInput.value = apellidos;
+      if (telefonoInput) telefonoInput.value = paciente.telefono || user.telefono || '';
       if (emailInput) emailInput.value = (user && user.email) || paciente.email || '';
-      if (avatarImg && !selectedImagePreviewUrl) {
-        const avatarUrl = utils.normalizeProfessionalImage((user && user.imagen_url) || (user && user.imagen) || '');
-        avatarImg.src = avatarUrl.startsWith('data:image/')
-          ? avatarUrl
-          : (avatarUrl.includes('?') ? `${avatarUrl}&t=${Date.now()}` : `${avatarUrl}?t=${Date.now()}`);
-      }
-    };
-
-    const previewSelectedImage = (file) => {
-      const avatarImg = getField('#profile-avatar');
-      if (!avatarImg || !file) return;
-
-      const reader = new FileReader();
-      reader.onload = (loadEvent) => {
-        if (loadEvent && loadEvent.target && loadEvent.target.result) {
-          avatarImg.src = loadEvent.target.result;
-        }
-      };
-      reader.readAsDataURL(file);
-    };
-
-    const restoreSelectedImageDraft = () => {
-      const draft = utils.getProfileImageDraft();
-      const avatarImg = getField('#profile-avatar');
-
-      if (!draft || !draft.dataUrl || !avatarImg) {
-        return;
-      }
-
-      selectedImagePreviewUrl = draft.dataUrl;
-      selectedImageFile = utils.dataUrlToFile(draft.dataUrl, draft.fileName || 'perfil.jpg');
-      avatarImg.src = selectedImagePreviewUrl;
-    };
-
-    const selectImage = async (source) => {
-      try {
-        const result = await utils.selectProfileImage(source);
-        selectedImageFile = result.file;
-        selectedImagePreviewUrl = result.previewUrl || null;
-        utils.setProfileImageDraft({
-          dataUrl: selectedImagePreviewUrl,
-          fileName: result.file ? result.file.name : 'perfil.jpg',
-        });
-        const avatarImg = getField('#profile-avatar');
-        if (avatarImg && selectedImagePreviewUrl) {
-          avatarImg.src = selectedImagePreviewUrl;
-        } else if (avatarImg && result.previewUrl) {
-          avatarImg.src = result.previewUrl;
-        } else {
-          previewSelectedImage(result.file);
-        }
-      } catch (error) {
-        const message = utils.getApiErrorMessage(error, 'No se ha seleccionado imagen');
-        $f7.dialog.alert(message);
-      }
-    };
-
-    const openImageActions = (event) => {
-      event.preventDefault();
-
-      $f7.actions.create({
-        buttons: [
-          [
-            {
-              text: 'Hacer foto',
-              onClick: () => selectImage('camera'),
-            },
-            {
-              text: 'Seleccionar foto',
-              onClick: () => selectImage('photos'),
-            },
-          ],
-          [
-            {
-              text: 'Cancelar',
-              color: 'red',
-            },
-          ],
-        ],
-      }).open();
     };
 
     const loadProfile = async () => {
@@ -170,9 +78,8 @@
 
       const nombreInput = getField('#profile-nombre');
       const apellidosInput = getField('#profile-apellidos');
+      const telefonoInput = getField('#profile-telefono');
       const emailInput = getField('#profile-email');
-      const draft = utils.getProfileImageDraft();
-      const file = selectedImageFile || (draft && draft.dataUrl ? utils.dataUrlToFile(draft.dataUrl, draft.fileName || 'perfil.jpg') : null);
 
       try {
         $f7.preloader.show();
@@ -180,15 +87,12 @@
           {
             nombre: nombreInput ? nombreInput.value : '',
             apellidos: apellidosInput ? apellidosInput.value : '',
+            telefono: telefonoInput ? telefonoInput.value : '',
             email: emailInput ? emailInput.value : '',
-          },
-          file,
+          }
         );
 
         const refreshedUser = await utils.getCurrentUser();
-        selectedImagePreviewUrl = null;
-        selectedImageFile = null;
-        utils.clearProfileImageDraft();
         utils.saveSession({
           token: ($store.state.session && $store.state.session.token) || utils.getSession().token,
           user: refreshedUser,
@@ -204,15 +108,11 @@
     };
 
     $on('pageInit', () => {
-      restoreSelectedImageDraft();
       loadProfile();
     });
 
     $on('pageAfterIn', () => {
-      restoreSelectedImageDraft();
-      if (!selectedImagePreviewUrl) {
-        loadProfile();
-      }
+      loadProfile();
     });
 
     return $render;

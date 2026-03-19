@@ -33,9 +33,14 @@
         <div class="list media-list list-strong mt-tm-ios" style="margin-top:0px;">
           <ul>
             <li>
-              <a href="/editar-perfil/" class="item-content" data-reload-detail="true">
+              <a href="#" class="item-content">
                 <div class="item-media optWedding">
-                  <img class="imgUsu avatar-circle" src="${getAvatarUrl()}" width="90" />
+                  <div style="position:relative;">
+                    <img class="imgUsu avatar-circle" src="${getAvatarUrl()}" width="90" />
+                    <a href="#" class="link" @click=${openImageActions} style="color:#175269;position:absolute;left:69px;bottom:10px;height:28px;">
+                      <i class="icon f7-icons" style="font-size:35px;">camera_circle_fill</i>
+                    </a>
+                  </div>
                 </div>
                 <div class="item-inner">
                   <div class="item-title-row">
@@ -165,6 +170,51 @@
     const getUserName = () => utils.escapeHtml(getUser().name || getUser().nombre || 'Paciente');
     const getUserEmail = () => utils.escapeHtml(getUser().email || '');
     const getAvatarUrl = () => utils.normalizeProfessionalImage(getUser().imagen || getUser().avatar || '');
+
+    const refreshLoggedUser = async () => {
+      await utils.refreshCurrentUser();
+      $store.dispatch('refreshSession');
+      $update();
+    };
+
+    const selectImage = async (source) => {
+      try {
+        $f7.preloader.show();
+        const result = await utils.selectProfileImage(source);
+        await utils.updateProfileImage(result.file);
+        await refreshLoggedUser();
+        $f7.dialog.alert('Imagen cambiada correctamente');
+      } catch (error) {
+        $f7.dialog.alert(utils.getApiErrorMessage(error, 'No se pudo cambiar la imagen'));
+      } finally {
+        $f7.preloader.hide();
+      }
+    };
+
+    const openImageActions = (event) => {
+      event.preventDefault();
+
+      $f7.actions.create({
+        buttons: [
+          [
+            {
+              text: 'Hacer foto',
+              onClick: () => selectImage('camera'),
+            },
+            {
+              text: 'Seleccionar foto',
+              onClick: () => selectImage('photos'),
+            },
+          ],
+          [
+            {
+              text: 'Cancelar',
+              color: 'red',
+            },
+          ],
+        ],
+      }).open();
+    };
 
     const logout = async (event) => {
       event.preventDefault();

@@ -571,6 +571,18 @@ var tmApp = {
     });
   },
 
+  updateProfileImage: async function (file) {
+    const currentUser = await tmApp.getCurrentUser();
+    const paciente = currentUser && currentUser.paciente ? currentUser.paciente : {};
+
+    return tmApp.updateProfile({
+      nombre: paciente.nombre || (currentUser && currentUser.name ? String(currentUser.name).split(' ')[0] : ''),
+      apellidos: paciente.apellidos || (currentUser && currentUser.name ? String(currentUser.name).split(' ').slice(1).join(' ') : ''),
+      email: (currentUser && currentUser.email) || paciente.email || '',
+      telefono: paciente.telefono || currentUser?.telefono || '',
+    }, file);
+  },
+
   dataUrlToFile: function (dataUrl, fileName = 'perfil.jpg') {
     const parts = String(dataUrl).split(',');
     const match = parts[0].match(/:(.*?);/);
