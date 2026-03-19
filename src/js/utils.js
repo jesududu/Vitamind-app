@@ -1176,6 +1176,21 @@ var tmApp = {
     return tmApp.fetchPublicData(fullUrl);
   },
 
+  cargarContenido: async function (funct, contenedor) {
+    const target = document.querySelector(`.${contenedor}`);
+    if (!target) return;
+
+    target.innerHTML = '<div class="vm-loading">Cargando contenido...</div>';
+
+    try {
+      const response = await tmApp.getDynamicContent(funct);
+      const contenido = response && response.contenido ? response.contenido : {};
+      target.innerHTML = contenido.descripcion || '<p class="vm-empty">No hay contenido disponible.</p>';
+    } catch (error) {
+      target.innerHTML = `<p class="vm-empty">${tmApp.escapeHtml(tmApp.getApiErrorMessage(error, 'No se pudo cargar el contenido'))}</p>`;
+    }
+  },
+
   getConditionDetail: function (tipo) {
     const url = apiUrl + `/condiciones/${tipo}`;
     const fullUrl = url;

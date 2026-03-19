@@ -20,28 +20,10 @@
   import utils from '../js/utils.js';
 
   export default function (props, { $on }) {
-    const getPageEl = () => document.querySelector('.page[data-name="info"].page-current') || document.querySelector('.page[data-name="info"]');
-
-    const renderHtml = (html) => {
-      const pageEl = getPageEl();
-      const target = pageEl ? pageEl.querySelector('.tmInformacion') : null;
-      if (target) {
-        target.innerHTML = html;
-      }
-    };
-
-    const load = async () => {
-      try {
-        renderHtml('<div class="vm-loading">Cargando informacion de VitaMind...</div>');
-        const response = await utils.getDynamicContent('cargar_informacion');
-        const contenido = response && response.contenido ? response.contenido : {};
-        renderHtml(contenido.descripcion || '<p class="vm-empty">No hay contenido disponible.</p>');
-      } catch (error) {
-        renderHtml(`<p class="vm-empty">${utils.escapeHtml(utils.getApiErrorMessage(error, 'No se pudo cargar el contenido'))}</p>`);
-      }
-    };
-
     $on('pageAfterIn', load);
+    function load() {
+      utils.cargarContenido('cargar_informacion', 'tmInformacion');
+    }
 
     return $render;
   }
