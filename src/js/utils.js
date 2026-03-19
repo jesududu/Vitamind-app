@@ -912,18 +912,31 @@ var tmApp = {
     });
   },
 
-  searchProfessionals: function (filters = {}) {
-    const url = apiUrl + '/horarios-por-localidad';
-    const fullUrl = url;
-    return tmApp.ajaxPostData(fullUrl, {
-      origen: 'app',
-      paciente_id: tmApp.getSession().pacienteId,
-      dias: 5,
-      ...filters,
-    }, {
-      auth: tmApp.isAuthenticated(),
-    });
-  },
+    searchProfessionals: function (filters = {}) {
+      const url = apiUrl + '/horarios-por-localidad';
+      const fullUrl = url;
+      const payload = {
+        origen: 'app',
+        dias: 5,
+        ...filters,
+      };
+      const session = tmApp.getSession();
+
+      if (session.pacienteId) {
+        payload.paciente_id = session.pacienteId;
+      }
+
+      if (!tmApp.isAuthenticated()) {
+        return tmApp.fetchPublicData(fullUrl, {
+          method: 'POST',
+          data: payload,
+        });
+      }
+
+      return tmApp.ajaxPostData(fullUrl, payload, {
+        auth: true,
+      });
+    },
 
   getProfessionalsList: function (params = {}) {
     const queryString = tmApp.objectToQueryString(params);

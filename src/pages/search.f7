@@ -56,7 +56,7 @@
                     <div class="vm-card-subtitle">${item.empresa_nombre || item.direccion || ''}</div>
                     <div class="vm-chip-row">
                       ${servicio ? $h`<span class="vm-chip">${servicio.titulo}</span>` : ''}
-                      ${item.distancia ? $h`<span class="vm-chip">${item.distancia} km</span>` : ''}
+                      ${usingRealLocation && item.distancia ? $h`<span class="vm-chip">${item.distancia} km</span>` : ''}
                     </div>
                     <div class="vm-actions">
                       <a href="#" class="button button-fill button-small" @click=${() => openProfessional(item.id)}>Abrir perfil</a>
@@ -82,6 +82,7 @@
     let searchResults = [];
     let initialized = false;
     let locationWarning = '';
+    let usingRealLocation = false;
 
     const getPageNode = () => {
       if ($el && $el[0]) return $el[0];
@@ -131,6 +132,11 @@
       return Array.from(professionals.values());
     };
 
+    const requestSearch = async (filters) => {
+      const response = await utils.searchProfessionals(filters);
+      return mapSearchResults(response);
+    };
+
     const loadResults = async () => {
       syncInputs();
 
@@ -146,13 +152,21 @@
       searchMessage = '';
       locationWarning = '';
       searchResults = [];
+      usingRealLocation = false;
       $update();
 
       try {
-        let locationFilters = {};
+        const baseFilters = {
+          localidad: searchLocalidad,
+          query: searchQuery,
+        };
+        let locationFilters = null;
 
         try {
-          const location = await utils.getCurrentLocation();
+          const location = await utils.getCurrentLocation({
+            timeout: 3000,
+            maximumAge: 300000,
+          });
           locationFilters = {
             lat: location.lat,
             lng: location.lng,
@@ -161,12 +175,30 @@
           locationWarning = 'No se ha podido usar tu ubicacion real. La distancia puede no mostrarse correctamente.';
         }
 
-        const response = await utils.searchProfessionals({
-          localidad: searchLocalidad,
-          query: searchQuery,
-          ...locationFilters,
-        });
-        searchResults = mapSearchResults(response);
+        if (locationFilters) {
+          try {
+            searchResults = await requestSearch({
+              ...baseFilters,
+              ...locationFilters,
+            });
+            usingRealLocation = true;
+          } catch (locationSearchError) {
+            locationWarning = 'No se ha podido calcular la distancia con tu ubicacion actual. Mostramos resultados sin distancia.';
+            searchResults = await requestSearch(baseFilters);
+            usingRealLocation = false;
+          }
+        } else {
+          searchResults = await requestSearch(baseFilters);
+        }
+
+        if (!searchResults.length && locationFilters) {
+          searchResults = await requestSearch(baseFilters);
+          usingRealLocation = false;
+          if (!locationWarning) {
+            locationWarning = 'No se han encontrado resultados con tu ubicacion actual. Mostramos la busqueda general.';
+          }
+        }
+
         if (!searchResults.length) {
           searchMessage = 'No hemos encontrado disponibilidad con esos filtros.';
         }
