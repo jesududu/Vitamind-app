@@ -1058,7 +1058,6 @@ var tmApp = {
 
   getProfessionalSlots: function (token, params = {}) {
     const queryString = tmApp.objectToQueryString({
-      paciente_id: tmApp.getSession().pacienteId,
       ...params,
     });
     const url = apiUrl + `/horarios/por-token/${token}`;
