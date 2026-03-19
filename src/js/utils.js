@@ -182,7 +182,7 @@ var tmApp = {
     let raw = '';
 
     try {
-      if (tmApp.isNativeApp()) {
+      if (tmApp.isNativeApp() && !isFormData) {
         const nativeResponse = await tmApp.requestNativeHttp(url, {
           method,
           data: isFormData ? data : (method === 'GET' ? null : data),
@@ -300,7 +300,7 @@ var tmApp = {
     let raw = '';
 
     try {
-      if (tmApp.isNativeApp()) {
+      if (tmApp.isNativeApp() && !isFormData) {
         const nativeResponse = await tmApp.requestNativeHttp(url, {
           method,
           data: isFormData ? data : (method === 'GET' ? null : data),
