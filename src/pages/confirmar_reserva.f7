@@ -7,64 +7,98 @@
         <div class="title">Confirmar reserva</div>
       </div>
     </div>
+
     <div class="page-content vm-page-content">
-      <div id="confirmar-content"></div>
+      ${!utils.isAuthenticated() && $h`
+        <div class="block">
+          <div class="vm-empty">Debes iniciar sesion para confirmar la cita.</div>
+        </div>
+      `}
+
+      ${utils.isAuthenticated() && !draft && $h`
+        <div class="block">
+          <div class="vm-empty">No hay ninguna reserva en preparacion.</div>
+        </div>
+      `}
+
+      ${utils.isAuthenticated() && draft && $h`
+        <div class="block block-strong inset">
+          <div class="vm-section-title">Resumen de la cita</div>
+          <div class="vm-kv"><span>Profesional</span><strong>${draft.profesional || 'Profesional'}</strong></div>
+          <div class="vm-kv"><span>Servicio</span><strong>${draft.servicio_titulo || 'Servicio'}</strong></div>
+          <div class="vm-kv"><span>Fecha</span><strong>${utils.formatDate(draft.fecha)}</strong></div>
+          <div class="vm-kv"><span>Hora</span><strong>${formatTimeRange()}</strong></div>
+          <div class="vm-kv"><span>Centro</span><strong>${draft.empresa_nombre || draft.empresa || 'No especificado'}</strong></div>
+          <div class="vm-kv"><span>Modalidad</span><strong>${draft.consulta_online ? 'Online o presencial segun servicio' : 'Presencial'}</strong></div>
+          <div class="vm-kv"><span>Nota</span><strong>${draft.nota || 'Sin nota'}</strong></div>
+        </div>
+
+        <div class="block">
+          <a href="#" class="button button-fill button-large" @click=${submitReservation}>Confirmar cita</a>
+        </div>
+      `}
     </div>
   </div>
 </template>
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $on, $f7, $f7router }) {
-    const render = () => {
-      const draft = utils.getStoredObject(utils.storageKeys.appointmentDraft);
-      const container = $el.find('#confirmar-content');
+  export default function (props, { $f7, $f7router, $on, $onMounted, $render }) {
+    let draft = null;
+    let initialized = false;
 
+    const loadDraft = () => {
+      draft = utils.getStoredObject(utils.storageKeys.appointmentDraft);
+    };
+
+    const formatTimeRange = () => {
+      if (!draft) return '';
+      const start = String(draft.hora_inicio || '').slice(0, 5);
+      const end = String(draft.hora_fin || '').slice(0, 5);
+      if (start && end) {
+        return `${start} - ${end}`;
+      }
+      return start || end || '';
+    };
+
+    const submitReservation = async () => {
       if (!draft) {
-        container.html('<div class="vm-form-card"><div class="vm-section-title">No hay reserva en preparacion</div></div>');
+        $f7.dialog.alert('No hay ninguna reserva en preparacion.');
         return;
       }
 
-      container.html(`
-        <div class="vm-card">
-          <div class="vm-section-title">Resumen</div>
-          <div class="vm-kv"><span>Profesional</span><strong>${utils.escapeHtml(draft.profesional)}</strong></div>
-          <div class="vm-kv"><span>Servicio</span><strong>${utils.escapeHtml(draft.servicio_titulo)}</strong></div>
-          <div class="vm-kv"><span>Fecha</span><strong>${utils.escapeHtml(utils.formatDate(draft.fecha))}</strong></div>
-          <div class="vm-kv"><span>Hora</span><strong>${utils.escapeHtml(draft.hora_inicio.slice(0, 5))}</strong></div>
-          <div class="vm-kv"><span>Modalidad</span><strong>${draft.consulta_online ? 'Online o presencial segun servicio' : 'Presencial'}</strong></div>
-          <div class="vm-kv"><span>Nota</span><strong>${utils.escapeHtml(draft.nota || 'Sin nota')}</strong></div>
-          <div class="vm-actions">
-            <a href="#" id="confirmar-reserva-btn" class="button button-fill">Confirmar cita</a>
-          </div>
-        </div>
-      `);
-
-      $el.find('#confirmar-reserva-btn').on('click', async () => {
-        try {
-          $f7.preloader.show();
-          const response = await utils.createReservation({
-            paciente_id: draft.paciente_id,
-            servicio_id: draft.servicio_id,
-            empleado_id: draft.empleado_id,
-            empresa_id: draft.empresa_id,
-            fecha: draft.fecha,
-            hora_inicio: draft.hora_inicio,
-            hora_fin: draft.hora_fin,
-            nota: draft.nota,
-          });
-          utils.setStoredObject(utils.storageKeys.appointmentDraft, null);
-          $f7.dialog.alert(response.message || 'Reserva confirmada');
-          $f7router.navigate('/citas/');
-        } catch (error) {
-          $f7.dialog.alert(error.message);
-        } finally {
-          $f7.preloader.hide();
-        }
-      });
+      try {
+        $f7.preloader.show();
+        const response = await utils.createReservation({
+          paciente_id: draft.paciente_id,
+          servicio_id: draft.servicio_id,
+          empleado_id: draft.empleado_id,
+          empresa_id: draft.empresa_id,
+          fecha: draft.fecha,
+          hora_inicio: draft.hora_inicio,
+          hora_fin: draft.hora_fin,
+          nota: draft.nota || '',
+        });
+        utils.setStoredObject(utils.storageKeys.appointmentDraft, null);
+        $f7.dialog.alert(response && response.message ? response.message : 'Reserva confirmada');
+        $f7router.navigate('/citas/');
+      } catch (error) {
+        $f7.dialog.alert(utils.getApiErrorMessage(error, 'No se pudo confirmar la reserva'));
+      } finally {
+        $f7.preloader.hide();
+      }
     };
 
-    $on('pageInit', render);
+    const initPage = () => {
+      loadDraft();
+      if (!initialized) {
+        initialized = true;
+      }
+    };
+
+    $on('pageInit', initPage);
+    $on('pageAfterIn', initPage);
+    $onMounted(initPage);
 
     return $render;
   }
