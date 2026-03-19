@@ -12,7 +12,6 @@
       </div>
     </div>
     <div class="page-content">
-      <div class="block tmInformacion"></div>
       <div class="block">
         <p class="vm-inline-note">Iremos informando de todas las novedades de VitaMind por aqui. Mantente atento a futuras actualizaciones.</p>
       </div>
@@ -20,14 +19,7 @@
   </div>
 </template>
 <script>
-  import utils from '../js/utils.js';
-
-  export default function (props, { $on }) {
-    $on('pageAfterIn', load);
-    function load() {
-      utils.cargarContenido('cargar_informacion', 'tmInformacion');
-    }
-
+  export default function () {
     return $render;
   }
 </script>
