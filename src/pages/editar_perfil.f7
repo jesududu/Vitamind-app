@@ -32,16 +32,33 @@
   import utils from '../js/utils.js';
 
   export default function (props, { $el, $on, $f7, $store }) {
+    const getPageNode = () => {
+      if ($el && $el[0]) return $el[0];
+      if ($el && $el.nodeType === 1) return $el;
+      return document.querySelector('.page[data-name="editar-perfil"].page-current') || document.querySelector('.page[data-name="editar-perfil"]');
+    };
+
+    const getField = (selector) => {
+      const pageNode = getPageNode();
+      return pageNode ? pageNode.querySelector(selector) : null;
+    };
+
     const fillForm = (user) => {
       const paciente = (user && user.paciente) || {};
       const userNameParts = ((user && user.name) || '').split(' ');
       const nombre = paciente.nombre || userNameParts[0] || '';
       const apellidos = paciente.apellidos || userNameParts.slice(1).join(' ') || '';
+      const nombreInput = getField('#profile-nombre');
+      const apellidosInput = getField('#profile-apellidos');
+      const emailInput = getField('#profile-email');
+      const avatarImg = getField('#profile-avatar');
 
-      $el.find('#profile-nombre').val(nombre);
-      $el.find('#profile-apellidos').val(apellidos);
-      $el.find('#profile-email').val((user && user.email) || paciente.email || '');
-      $el.find('#profile-avatar').attr('src', (user && user.imagen_url) || '/avatar.png');
+      if (nombreInput) nombreInput.value = nombre;
+      if (apellidosInput) apellidosInput.value = apellidos;
+      if (emailInput) emailInput.value = (user && user.email) || paciente.email || '';
+      if (avatarImg) {
+        avatarImg.src = utils.normalizeProfessionalImage((user && user.imagen_url) || (user && user.imagen) || '/avatar.png');
+      }
     };
 
     const loadProfile = async () => {
@@ -61,35 +78,52 @@
       }
     };
 
+    const submitProfile = async (event) => {
+      if (event) event.preventDefault();
+
+      const nombreInput = getField('#profile-nombre');
+      const apellidosInput = getField('#profile-apellidos');
+      const emailInput = getField('#profile-email');
+      const imageInput = getField('#profile-image');
+      const file = imageInput && imageInput.files && imageInput.files[0] ? imageInput.files[0] : null;
+
+      try {
+        $f7.preloader.show();
+        const response = await utils.updateProfile(
+          {
+            nombre: nombreInput ? nombreInput.value : '',
+            apellidos: apellidosInput ? apellidosInput.value : '',
+            email: emailInput ? emailInput.value : '',
+          },
+          file,
+        );
+
+        const refreshedUser = await utils.getCurrentUser();
+        utils.saveSession({
+          token: ($store.state.session && $store.state.session.token) || utils.getSession().token,
+          user: refreshedUser,
+        });
+        $store.dispatch('refreshSession');
+        fillForm(refreshedUser);
+        $f7.dialog.alert((response && response.message) || 'Perfil actualizado correctamente');
+      } catch (error) {
+        $f7.dialog.alert(utils.getApiErrorMessage(error, 'No se pudo guardar tu perfil'));
+      } finally {
+        $f7.preloader.hide();
+      }
+    };
+
     $on('pageInit', () => {
       loadProfile();
 
-      $el.find('#profile-submit').on('click', async () => {
-        try {
-          $f7.preloader.show();
-          const response = await utils.updateProfile(
-            {
-              nombre: $el.find('#profile-nombre').val(),
-              apellidos: $el.find('#profile-apellidos').val(),
-              email: $el.find('#profile-email').val(),
-            },
-            (($el.find('#profile-image')[0] && $el.find('#profile-image')[0].files && $el.find('#profile-image')[0].files[0]) || null),
-          );
+      const submitButton = getField('#profile-submit');
+      if (submitButton) {
+        submitButton.addEventListener('click', submitProfile);
+      }
+    });
 
-          const refreshedUser = await utils.getCurrentUser();
-          utils.saveSession({
-            token: $store.state.session.token,
-            user: refreshedUser,
-          });
-          $store.dispatch('refreshSession');
-          fillForm(refreshedUser);
-          $f7.dialog.alert((response && response.message) || 'Perfil actualizado correctamente');
-        } catch (error) {
-          $f7.dialog.alert(utils.getApiErrorMessage(error, 'No se pudo guardar tu perfil'));
-        } finally {
-          $f7.preloader.hide();
-        }
-      });
+    $on('pageAfterIn', () => {
+      loadProfile();
     });
 
     return $render;
