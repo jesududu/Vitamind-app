@@ -15,7 +15,7 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $f7, $f7router, $on, $onMounted, $render }) {
+  export default function (props, { $el, $f7, $f7router, $on, $onMounted }) {
     const getPageNode = () => {
       if ($el && $el[0]) return $el[0];
       if ($el && $el.nodeType === 1) return $el;

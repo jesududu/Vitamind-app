@@ -15,7 +15,7 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $on, $f7route, $f7, $f7router, $render }) {
+  export default function (props, { $el, $on, $f7route, $f7, $f7router }) {
     const render = () => {
       const cita = utils.getStoredObject(utils.storageKeys.appointmentSelected);
       const container = $el.find('#detalle-content');
