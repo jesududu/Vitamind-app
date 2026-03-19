@@ -13,6 +13,9 @@
     </div>
     <div class="page-content">
       <div class="block tmNormas"></div>
+      <div class="block">
+        <p class="vm-inline-note">Consulta aqui la politica de privacidad y el tratamiento de datos personales de VitaMind.</p>
+      </div>
     </div>
   </div>
 </template>

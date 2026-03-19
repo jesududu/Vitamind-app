@@ -13,6 +13,9 @@
     </div>
     <div class="page-content">
       <div class="block tmInformacion"></div>
+      <div class="block">
+        <p class="vm-inline-note">Iremos informando de todas las novedades de VitaMind por aqui. Mantente atento a futuras actualizaciones.</p>
+      </div>
     </div>
   </div>
 </template>
