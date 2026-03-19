@@ -82,6 +82,12 @@
     let latestError = '';
     let initialized = false;
 
+    const getPageNode = () => {
+      if ($el && $el[0]) return $el[0];
+      if ($el && $el.nodeType === 1) return $el;
+      return document.querySelector('.page[data-name="home"].page-current') || document.querySelector('.page[data-name="home"]');
+    };
+
     const loadLatestProfessionals = async () => {
       loadingLatest = true;
       latestError = '';
@@ -99,11 +105,11 @@
     };
 
     const openSearch = () => {
-      const pageEl = getPageEl();
-      const localidadInput = pageEl.find('#home-localidad');
-      const queryInput = pageEl.find('#home-query');
-      const localidad = localidadInput.length ? localidadInput.val() : '';
-      const query = queryInput.length ? queryInput.val() : '';
+      const pageNode = getPageNode();
+      const localidadInput = pageNode ? pageNode.querySelector('#home-localidad') : null;
+      const queryInput = pageNode ? pageNode.querySelector('#home-query') : null;
+      const localidad = localidadInput ? localidadInput.value.trim() : '';
+      const query = queryInput ? queryInput.value.trim() : '';
       const params = new URLSearchParams();
 
       if (localidad) params.set('localidad', localidad);
@@ -131,9 +137,3 @@
     return $render;
   }
 </script>
-    const getPageEl = () => {
-      if ($el && typeof $el.find === 'function') return $el;
-      if ($el && $el.nodeType === 1) return $f7.$($el);
-      if ($el && $el[0]) return $f7.$($el[0]);
-      return $f7.$('.page[data-name="home"].page-current');
-    };

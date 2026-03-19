@@ -80,19 +80,52 @@
     let searchResults = [];
     let initialized = false;
 
-    const getPageEl = () => {
-      if ($el && typeof $el.find === 'function') return $el;
-      if ($el && $el.nodeType === 1) return $f7.$($el);
-      if ($el && $el[0]) return $f7.$($el[0]);
-      return $f7.$('.page[data-name="search"].page-current');
+    const getPageNode = () => {
+      if ($el && $el[0]) return $el[0];
+      if ($el && $el.nodeType === 1) return $el;
+      return document.querySelector('.page[data-name="search"].page-current') || document.querySelector('.page[data-name="search"]');
     };
 
     const syncInputs = () => {
-      const pageEl = getPageEl();
-      const localidadInput = pageEl.find('#search-localidad');
-      const queryInput = pageEl.find('#search-query');
-      searchLocalidad = localidadInput.length ? localidadInput.val() : searchLocalidad;
-      searchQuery = queryInput.length ? queryInput.val() : searchQuery;
+      const pageNode = getPageNode();
+      const localidadInput = pageNode ? pageNode.querySelector('#search-localidad') : null;
+      const queryInput = pageNode ? pageNode.querySelector('#search-query') : null;
+      searchLocalidad = localidadInput ? localidadInput.value.trim() : searchLocalidad;
+      searchQuery = queryInput ? queryInput.value.trim() : searchQuery;
+    };
+
+    const mapSearchResults = (response) => {
+      const fechas = (response && response.fechas) || [];
+      const professionals = new Map();
+
+      fechas.forEach((fechaItem) => {
+        Object.values(fechaItem.empleados || {}).forEach((empleado) => {
+          const existing = professionals.get(String(empleado.id));
+          const servicios = Array.isArray(empleado.servicios) ? empleado.servicios : [];
+
+          if (!existing) {
+            professionals.set(String(empleado.id), {
+              ...empleado,
+              primeraFecha: fechaItem.fecha,
+              servicios,
+            });
+            return;
+          }
+
+          const currentServices = Array.isArray(existing.servicios) ? existing.servicios : [];
+          const mergedServices = [...currentServices];
+
+          servicios.forEach((servicio) => {
+            if (!mergedServices.some((item) => String(item.id) === String(servicio.id))) {
+              mergedServices.push(servicio);
+            }
+          });
+
+          existing.servicios = mergedServices;
+        });
+      });
+
+      return Array.from(professionals.values());
     };
 
     const loadResults = async () => {
@@ -116,20 +149,7 @@
           localidad: searchLocalidad,
           query: searchQuery,
         });
-        const fechas = (response && response.fechas) || [];
-        const profesionales = new Map();
-
-        fechas.forEach((fechaItem) => {
-          Object.values(fechaItem.empleados || {}).forEach((empleado) => {
-            if (!profesionales.has(empleado.id)) {
-              profesionales.set(empleado.id, Object.assign({}, empleado, {
-                primeraFecha: fechaItem.fecha,
-              }));
-            }
-          });
-        });
-
-        searchResults = Array.from(profesionales.values());
+        searchResults = mapSearchResults(response);
         if (!searchResults.length) {
           searchMessage = 'No hemos encontrado disponibilidad con esos filtros.';
         }
@@ -158,11 +178,19 @@
     };
 
     const initPage = () => {
-      if (initialized) return;
-      initialized = true;
       const query = $f7route.query || {};
       searchLocalidad = query.localidad || '';
       searchQuery = query.query || '';
+      if (!initialized) {
+        initialized = true;
+        if (searchLocalidad || searchQuery) {
+          loadResults();
+        } else {
+          $update();
+        }
+        return;
+      }
+
       if (searchLocalidad || searchQuery) {
         loadResults();
       } else {
