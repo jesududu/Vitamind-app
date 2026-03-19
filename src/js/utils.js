@@ -101,6 +101,7 @@ var tmApp = {
 
     if (isFormData) {
       requestOptions.dataType = 'formData';
+      requestOptions.data = tmApp.formDataToNativeData(data);
     }
 
     const response = await CapacitorHttp.request(requestOptions);
@@ -110,6 +111,20 @@ var tmApp = {
       status: response.status,
       data: tmApp.parseHttpResponseData(response.data),
     };
+  },
+
+  formDataToNativeData: function (formData) {
+    if (!formData || typeof formData.entries !== 'function') {
+      return formData;
+    }
+
+    const nativeData = {};
+
+    for (const [key, value] of formData.entries()) {
+      nativeData[key] = value;
+    }
+
+    return nativeData;
   },
 
   fetchAPI: async function (endpoint, options = {}) {
