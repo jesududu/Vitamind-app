@@ -56,7 +56,6 @@
                     <div class="vm-card-subtitle">${item.empresa_nombre || item.direccion || ''}</div>
                     <div class="vm-chip-row">
                       ${servicio ? $h`<span class="vm-chip">${servicio.titulo}</span>` : ''}
-                      ${usingRealLocation && item.distancia ? $h`<span class="vm-chip">${item.distancia} km</span>` : ''}
                     </div>
                     <div class="vm-actions">
                       <a href="#" class="button button-fill button-small" @click=${() => openProfessional(item.id)}>Abrir perfil</a>
@@ -128,40 +127,6 @@
       return Array.from(professionals.values());
     };
 
-    const mapAvailabilityResults = (response) => {
-      const fechas = Array.isArray(response && response.fechas) ? response.fechas : [];
-      const professionals = new Map();
-
-      fechas.forEach((fechaItem) => {
-        Object.values(fechaItem.empleados || {}).forEach((empleado) => {
-          const key = String(empleado.id || empleado.token || Math.random());
-          const incomingServices = Array.isArray(empleado.servicios) ? empleado.servicios : [];
-
-          if (!professionals.has(key)) {
-            professionals.set(key, {
-              ...empleado,
-              servicios: incomingServices,
-            });
-            return;
-          }
-
-          const existing = professionals.get(key);
-          const currentServices = Array.isArray(existing.servicios) ? existing.servicios : [];
-          const mergedServices = [...currentServices];
-
-          incomingServices.forEach((servicio) => {
-            if (!mergedServices.some((item) => String(item.id) === String(servicio.id))) {
-              mergedServices.push(servicio);
-            }
-          });
-
-          existing.servicios = mergedServices;
-        });
-      });
-
-      return Array.from(professionals.values());
-    };
-
     const requestSearch = async (filters, geoFilters = null) => {
       try {
         const response = await utils.searchDirectoryProfessionals(filters);
@@ -174,27 +139,19 @@
           throw error;
         }
 
-        if (filters.query && !filters.localidad) {
-          const catalogResults = await utils.searchProfessionalsCatalog({
-            ...filters,
-            ...(geoFilters || {}),
-          });
-
-          return catalogResults.map((item) => ({
-            id: item.id,
-            nombre_completo: item.nombre_completo || item.nombre || 'Profesional',
-            foto: item.foto || item.imagen || item.imagen_url || '',
-            empresa_nombre: item.empresa_nombre || item.empresa?.razon_social || '',
-            direccion: item.direccion || item.empresa?.direccion || '',
-            servicios: Array.isArray(item.servicios) ? item.servicios : [],
-          }));
-        }
-
-        const response = await utils.searchProfessionals({
+        const catalogResults = await utils.searchProfessionalsCatalog({
           ...filters,
           ...(geoFilters || {}),
         });
-        return mapAvailabilityResults(response);
+
+        return catalogResults.map((item) => ({
+          id: item.id,
+          nombre_completo: item.nombre_completo || item.nombre || 'Profesional',
+          foto: item.foto || item.imagen || item.imagen_url || '',
+          empresa_nombre: item.empresa_nombre || item.empresa?.razon_social || '',
+          direccion: item.direccion || item.empresa?.direccion || item.localidad || '',
+          servicios: Array.isArray(item.servicios) ? item.servicios : [],
+        }));
       }
     };
 
