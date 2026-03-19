@@ -84,7 +84,11 @@
         }
         const settingsView = $f7.views.get('#view-settings');
         if (settingsView && settingsView.router) {
-          settingsView.router.refreshPage();
+          settingsView.router.navigate('/cli/settings/', {
+            reloadCurrent: true,
+            ignoreCache: true,
+            clearPreviousHistory: true,
+          });
         }
         $f7.tab.show('#view-home');
       } catch (error) {
