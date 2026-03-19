@@ -12,8 +12,8 @@
         <div class="vm-section-title">Datos del paciente</div>
         <div class="vm-profile-cover">
           <img id="profile-avatar" class="vm-avatar vm-avatar--lg" src="/avatar.png" alt="Avatar" />
-          <div class="vm-actions" style="margin-top:12px;">
-            <a href="#" id="profile-select-image" class="button button-outline">Seleccionar foto</a>
+          <div class="vm-actions" style="margin-top:18px; margin-bottom:10px;">
+            <a href="#" id="profile-select-image" class="button button-outline" @click=${openImagePicker}>Seleccionar foto</a>
           </div>
         </div>
         <div class="list no-hairlines-md">
@@ -21,11 +21,11 @@
             <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Nombre</div><div class="item-input-wrap"><input type="text" id="profile-nombre" /></div></div></li>
             <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Apellidos</div><div class="item-input-wrap"><input type="text" id="profile-apellidos" /></div></div></li>
             <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Email</div><div class="item-input-wrap"><input type="email" id="profile-email" /></div></div></li>
-            <li class="item-content item-input" style="display:none;"><div class="item-inner"><div class="item-title item-label">Foto</div><div class="item-input-wrap"><input type="file" id="profile-image" accept="image/*" /></div></div></li>
+            <li class="item-content item-input" style="display:none;"><div class="item-inner"><div class="item-title item-label">Foto</div><div class="item-input-wrap"><input type="file" id="profile-image" accept="image/*" @change=${handleImageChange} /></div></div></li>
           </ul>
         </div>
         <div class="vm-actions">
-          <a href="#" id="profile-submit" class="button button-fill">Guardar cambios</a>
+          <a href="#" id="profile-submit" class="button button-fill" @click=${submitProfile}>Guardar cambios</a>
         </div>
       </div>
     </div>
@@ -35,6 +35,8 @@
   import utils from '../js/utils.js';
 
   export default function (props, { $el, $on, $f7, $store }) {
+    let selectedImageFile = null;
+
     const getPageNode = () => {
       if ($el && $el[0]) return $el[0];
       if ($el && $el.nodeType === 1) return $el;
@@ -78,6 +80,23 @@
       reader.readAsDataURL(file);
     };
 
+    const openImagePicker = (event) => {
+      event.preventDefault();
+      const imageInput = getField('#profile-image');
+      if (imageInput) {
+        imageInput.click();
+      }
+    };
+
+    const handleImageChange = (event) => {
+      const file = event && event.target && event.target.files && event.target.files[0]
+        ? event.target.files[0]
+        : null;
+
+      selectedImageFile = file;
+      previewSelectedImage(file);
+    };
+
     const loadProfile = async () => {
       if (!utils.isAuthenticated()) {
         $f7.views.main.router.navigate('/login/');
@@ -101,8 +120,7 @@
       const nombreInput = getField('#profile-nombre');
       const apellidosInput = getField('#profile-apellidos');
       const emailInput = getField('#profile-email');
-      const imageInput = getField('#profile-image');
-      const file = imageInput && imageInput.files && imageInput.files[0] ? imageInput.files[0] : null;
+      const file = selectedImageFile;
 
       try {
         $f7.preloader.show();
@@ -132,26 +150,6 @@
 
     $on('pageInit', () => {
       loadProfile();
-
-      const submitButton = getField('#profile-submit');
-      const selectImageButton = getField('#profile-select-image');
-      const imageInput = getField('#profile-image');
-
-      if (submitButton) {
-        submitButton.addEventListener('click', submitProfile);
-      }
-      if (selectImageButton && imageInput) {
-        selectImageButton.addEventListener('click', (event) => {
-          event.preventDefault();
-          imageInput.click();
-        });
-      }
-      if (imageInput) {
-        imageInput.addEventListener('change', () => {
-          const file = imageInput.files && imageInput.files[0] ? imageInput.files[0] : null;
-          previewSelectedImage(file);
-        });
-      }
     });
 
     $on('pageAfterIn', () => {
