@@ -938,6 +938,18 @@ var tmApp = {
       });
     },
 
+    searchDirectoryProfessionals: function (filters = {}) {
+      const url = apiUrl + '/buscar';
+      const fullUrl = url;
+      return tmApp.fetchPublicData(fullUrl, {
+        method: 'POST',
+        data: {
+          localidad: filters.localidad || '',
+          query: filters.query || '',
+        },
+      });
+    },
+
   getProfessionalsList: function (params = {}) {
     const queryString = tmApp.objectToQueryString(params);
     const url = apiUrl + '/profesionales';

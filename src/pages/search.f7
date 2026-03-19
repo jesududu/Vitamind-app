@@ -29,7 +29,7 @@
           </ul>
         </div>
         <div class="vm-actions">
-          <a href="#" class="button button-fill" @click=${loadResults}>Buscar disponibilidad</a>
+          <a href="#" class="button button-fill" @click=${loadResults}>Buscar profesionales</a>
         </div>
       </section>
 
@@ -37,13 +37,10 @@
         <div class="vm-section-title">Resultados</div>
         <div class="vm-list">
           ${searchLoading && $h`
-            <div class="vm-loading">Consultando horarios disponibles...</div>
+            <div class="vm-loading">Buscando profesionales...</div>
           `}
           ${!searchLoading && searchMessage && $h`
             <div class="vm-empty">${searchMessage}</div>
-          `}
-          ${!searchLoading && locationWarning && $h`
-            <div class="vm-muted">${locationWarning}</div>
           `}
           ${!searchLoading && !searchMessage && searchResults.map((item) => {
             const servicio = item.servicios && item.servicios.length ? item.servicios[0] : null;
@@ -56,7 +53,6 @@
                     <div class="vm-card-subtitle">${item.empresa_nombre || item.direccion || ''}</div>
                     <div class="vm-chip-row">
                       ${servicio ? $h`<span class="vm-chip">${servicio.titulo}</span>` : ''}
-                      ${usingRealLocation && item.distancia ? $h`<span class="vm-chip">${item.distancia} km</span>` : ''}
                     </div>
                     <div class="vm-actions">
                       <a href="#" class="button button-fill button-small" @click=${() => openProfessional(item.id)}>Abrir perfil</a>
@@ -81,9 +77,6 @@
     let searchMessage = 'Introduce una localidad valida o un nombre de profesional para comenzar.';
     let searchResults = [];
     let initialized = false;
-    let locationWarning = '';
-    let usingRealLocation = false;
-
     const getPageNode = () => {
       if ($el && $el[0]) return $el[0];
       if ($el && $el.nodeType === 1) return $el;
@@ -99,41 +92,38 @@
     };
 
     const mapSearchResults = (response) => {
-      const fechas = (response && response.fechas) || [];
+      const empleados = Array.isArray(response && response.empleados) ? response.empleados : [];
       const professionals = new Map();
 
-      fechas.forEach((fechaItem) => {
-        Object.values(fechaItem.empleados || {}).forEach((empleado) => {
-          const existing = professionals.get(String(empleado.id));
-          const servicios = Array.isArray(empleado.servicios) ? empleado.servicios : [];
-
-          if (!existing) {
-            professionals.set(String(empleado.id), {
-              ...empleado,
-              primeraFecha: fechaItem.fecha,
-              servicios,
-            });
-            return;
-          }
-
-          const currentServices = Array.isArray(existing.servicios) ? existing.servicios : [];
-          const mergedServices = [...currentServices];
-
-          servicios.forEach((servicio) => {
-            if (!mergedServices.some((item) => String(item.id) === String(servicio.id))) {
-              mergedServices.push(servicio);
-            }
+      empleados.forEach((empleado) => {
+        const key = String(empleado.id || empleado.token || Math.random());
+        if (!professionals.has(key)) {
+          professionals.set(key, {
+            ...empleado,
+            servicios: Array.isArray(empleado.servicios) ? empleado.servicios : [],
           });
+          return;
+        }
 
-          existing.servicios = mergedServices;
+        const existing = professionals.get(key);
+        const currentServices = Array.isArray(existing.servicios) ? existing.servicios : [];
+        const incomingServices = Array.isArray(empleado.servicios) ? empleado.servicios : [];
+        const mergedServices = [...currentServices];
+
+        incomingServices.forEach((servicio) => {
+          if (!mergedServices.some((item) => String(item.id) === String(servicio.id))) {
+            mergedServices.push(servicio);
+          }
         });
+
+        existing.servicios = mergedServices;
       });
 
       return Array.from(professionals.values());
     };
 
     const requestSearch = async (filters) => {
-      const response = await utils.searchProfessionals(filters);
+      const response = await utils.searchDirectoryProfessionals(filters);
       return mapSearchResults(response);
     };
 
@@ -150,57 +140,17 @@
 
       searchLoading = true;
       searchMessage = '';
-      locationWarning = '';
       searchResults = [];
-      usingRealLocation = false;
       $update();
 
       try {
-        const baseFilters = {
+        searchResults = await requestSearch({
           localidad: searchLocalidad,
           query: searchQuery,
-        };
-        let locationFilters = null;
-
-        try {
-          const location = await utils.getCurrentLocation({
-            timeout: 3000,
-            maximumAge: 300000,
-          });
-          locationFilters = {
-            lat: location.lat,
-            lng: location.lng,
-          };
-        } catch (locationError) {
-          locationWarning = 'No se ha podido usar tu ubicacion real. La distancia puede no mostrarse correctamente.';
-        }
-
-        if (locationFilters) {
-          try {
-            searchResults = await requestSearch({
-              ...baseFilters,
-              ...locationFilters,
-            });
-            usingRealLocation = true;
-          } catch (locationSearchError) {
-            locationWarning = 'No se ha podido calcular la distancia con tu ubicacion actual. Mostramos resultados sin distancia.';
-            searchResults = await requestSearch(baseFilters);
-            usingRealLocation = false;
-          }
-        } else {
-          searchResults = await requestSearch(baseFilters);
-        }
-
-        if (!searchResults.length && locationFilters) {
-          searchResults = await requestSearch(baseFilters);
-          usingRealLocation = false;
-          if (!locationWarning) {
-            locationWarning = 'No se han encontrado resultados con tu ubicacion actual. Mostramos la busqueda general.';
-          }
-        }
+        });
 
         if (!searchResults.length) {
-          searchMessage = 'No hemos encontrado disponibilidad con esos filtros.';
+          searchMessage = 'No hemos encontrado profesionales con esos filtros.';
         }
       } catch (error) {
         searchResults = [];
