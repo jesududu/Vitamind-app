@@ -141,11 +141,11 @@ body {
   border-radius: 28px;
 }
 
-.avatar-circle,
-.imgUsu.avatar-circle {
+.avatar-circle {
+  width: 90px;
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
   object-fit: cover;
-  overflow: hidden;
 }
 
 .vm-detail-header {
