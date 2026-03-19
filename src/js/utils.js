@@ -914,13 +914,16 @@ var tmApp = {
       });
     },
 
-    getSearchCoordinates: async function () {
+    getSearchCoordinates: async function (options = {}) {
+      const {
+        forcePrompt = false,
+      } = options;
       const expiration = 15 * 60 * 1000;
       const now = Date.now();
       const cached = tmApp.getStoredObject(tmApp.storageKeys.searchCoordinates);
       const geoFailedAt = Number(localStorage.getItem(tmApp.storageKeys.searchGeoFailedAt) || 0);
 
-      if (cached && cached.lat && cached.lng && cached.timestamp && (now - cached.timestamp < expiration)) {
+      if (!forcePrompt && cached && cached.lat && cached.lng && cached.timestamp && (now - cached.timestamp < expiration)) {
         return {
           lat: cached.lat,
           lng: cached.lng,
@@ -928,7 +931,7 @@ var tmApp = {
         };
       }
 
-      if (geoFailedAt && (now - geoFailedAt < expiration)) {
+      if (!forcePrompt && geoFailedAt && (now - geoFailedAt < expiration)) {
         return null;
       }
 

@@ -56,7 +56,7 @@
                     <div class="vm-card-subtitle">${item.empresa_nombre || item.direccion || ''}</div>
                     <div class="vm-chip-row">
                       ${servicio ? $h`<span class="vm-chip">${servicio.titulo}</span>` : ''}
-                      ${item.distancia ? $h`<span class="vm-chip">${item.distancia} km</span>` : ''}
+                      ${usingRealLocation && item.distancia ? $h`<span class="vm-chip">${item.distancia} km</span>` : ''}
                     </div>
                     <div class="vm-actions">
                       <a href="#" class="button button-fill button-small" @click=${() => openProfessional(item.id)}>Abrir perfil</a>
@@ -82,6 +82,7 @@
     let searchResults = [];
     let initialized = false;
     let locationMessage = '';
+    let usingRealLocation = false;
     const getPageNode = () => {
       if ($el && $el[0]) return $el[0];
       if ($el && $el.nodeType === 1) return $el;
@@ -196,6 +197,7 @@
       searchMessage = '';
       locationMessage = '';
       searchResults = [];
+      usingRealLocation = false;
       $update();
 
       try {
@@ -203,12 +205,17 @@
           localidad: searchLocalidad,
           query: searchQuery,
         };
-        const geo = await utils.getSearchCoordinates();
+        const geo = await utils.getSearchCoordinates({
+          forcePrompt: true,
+        });
 
         if (geo) {
+          usingRealLocation = true;
           locationMessage = geo.source === 'cache'
             ? 'Resultados ordenados con tu ultima ubicacion conocida.'
             : 'Resultados ordenados por cercania a tu ubicacion actual.';
+        } else {
+          locationMessage = 'Activa la ubicacion para ordenar por cercania real.';
         }
 
         searchResults = await requestSearch(filters, geo ? {
