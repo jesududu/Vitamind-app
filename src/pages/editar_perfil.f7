@@ -10,10 +10,11 @@
     <div class="page-content vm-page-content">
       <div class="vm-form-card">
         <div class="vm-section-title">Datos del paciente</div>
-        <div class="vm-profile-cover">
-          <img id="profile-avatar" class="vm-avatar vm-avatar--lg" src="/avatar.png" alt="Avatar" />
-          <div class="vm-actions" style="margin-top:18px; margin-bottom:10px;">
-            <a href="#" id="profile-select-image" class="button button-outline" @click=${openImagePicker}>Seleccionar foto</a>
+        <div class="vm-profile-cover" style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
+          <img id="profile-avatar" class="vm-avatar vm-avatar--lg" src="/avatar.png" alt="Avatar" style="flex:0 0 auto;" />
+          <div style="flex:1 1 auto;">
+            <div class="vm-section-title" style="margin-bottom:10px;">Foto de perfil</div>
+            <input type="file" id="profile-image" accept="image/*" @change=${handleImageChange} />
           </div>
         </div>
         <div class="list no-hairlines-md">
@@ -21,7 +22,6 @@
             <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Nombre</div><div class="item-input-wrap"><input type="text" id="profile-nombre" /></div></div></li>
             <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Apellidos</div><div class="item-input-wrap"><input type="text" id="profile-apellidos" /></div></div></li>
             <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Email</div><div class="item-input-wrap"><input type="email" id="profile-email" /></div></div></li>
-            <li class="item-content item-input" style="display:none;"><div class="item-inner"><div class="item-title item-label">Foto</div><div class="item-input-wrap"><input type="file" id="profile-image" accept="image/*" @change=${handleImageChange} /></div></div></li>
           </ul>
         </div>
         <div class="vm-actions">
@@ -78,14 +78,6 @@
         }
       };
       reader.readAsDataURL(file);
-    };
-
-    const openImagePicker = (event) => {
-      event.preventDefault();
-      const imageInput = getField('#profile-image');
-      if (imageInput) {
-        imageInput.click();
-      }
     };
 
     const handleImageChange = (event) => {
@@ -150,6 +142,11 @@
 
     $on('pageInit', () => {
       loadProfile();
+
+      const imageInput = getField('#profile-image');
+      if (imageInput) {
+        imageInput.addEventListener('change', handleImageChange);
+      }
     });
 
     $on('pageAfterIn', () => {
