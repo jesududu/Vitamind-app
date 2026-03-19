@@ -8,16 +8,7 @@
       </div>
     </div>
     <div class="page-content vm-page-content">
-      <div id="favoritos-content" class="vm-list"></div>
-    </div>
-  </div>
-</template>
-<script>
-  import utils from '../js/utils.js';
-
-  export default function (props, { $el, $on, $f7 }) {
-    const renderLoggedOut = () => {
-      $el.find('#favoritos-content').html(`
+      ${!isAuthenticated && $h`
         <div class="vm-form-card">
           <div class="vm-section-title">Acceso paciente</div>
           <p class="vm-muted">Necesitas iniciar sesion para ver tus profesionales favoritos.</p>
@@ -25,63 +16,103 @@
             <a href="/login/" class="button button-fill">Ir a login</a>
           </div>
         </div>
-      `);
-    };
+      `}
 
-    const renderFavorites = async () => {
-      if (!utils.isAuthenticated()) {
-        renderLoggedOut();
+      ${isAuthenticated && loading && $h`
+        <div class="vm-loading">Cargando favoritos...</div>
+      `}
+
+      ${isAuthenticated && !loading && errorMessage && $h`
+        <div class="vm-card">
+          <p class="vm-empty">${errorMessage}</p>
+        </div>
+      `}
+
+      ${isAuthenticated && !loading && !errorMessage && favorites.length === 0 && $h`
+        <div class="vm-card">
+          <p class="vm-empty">No tienes profesionales favoritos todavia.</p>
+        </div>
+      `}
+
+      ${isAuthenticated && !loading && !errorMessage && favorites.length > 0 && $h`
+        <div class="block-title">Profesionales guardados</div>
+        <div class="vm-list">
+          ${favorites.map((favorito) => $h`
+            <div class="vm-card">
+              <div class="vm-professional">
+                <img src="${getFavoriteImage(favorito)}" alt="${getFavoriteName(favorito)}" />
+                <div>
+                  <h3 class="vm-card-title">${getFavoriteName(favorito)}</h3>
+                  ${getFavoriteSubtitle(favorito) && $h`<p class="vm-card-subtitle">${getFavoriteSubtitle(favorito)}</p>`}
+                  ${getFavoriteAddress(favorito) && $h`<p class="vm-muted">${getFavoriteAddress(favorito)}</p>`}
+                  <div class="vm-actions">
+                    <a href="/profesional/${encodeURIComponent(getFavoriteToken(favorito))}/" class="button button-fill button-small">Ver perfil</a>
+                    <a href="#" class="button button-outline button-small" @click=${(event) => removeFavorite(event, favorito)}>Quitar</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `)}
+        </div>
+      `}
+    </div>
+  </div>
+</template>
+<script>
+  import utils from '../js/utils.js';
+
+  export default function (props, { $f7, $on, $update }) {
+    let isAuthenticated = utils.isAuthenticated();
+    let loading = false;
+    let errorMessage = '';
+    let favorites = [];
+
+    const getFavoriteName = (favorito) => utils.escapeHtml(favorito.nombre || 'Profesional');
+    const getFavoriteSubtitle = (favorito) => utils.escapeHtml(favorito.credenciales || favorito.especialidad || '');
+    const getFavoriteAddress = (favorito) => utils.escapeHtml(favorito.direccion || favorito.empresa_nombre || '');
+    const getFavoriteToken = (favorito) => favorito.token || favorito.id;
+    const getFavoriteImage = (favorito) => utils.normalizeProfessionalImage(favorito.imagen || favorito.imagen_url || '');
+
+    const loadFavorites = async () => {
+      isAuthenticated = utils.isAuthenticated();
+      errorMessage = '';
+      favorites = [];
+
+      if (!isAuthenticated) {
+        $update();
         return;
       }
 
       try {
-        $el.find('#favoritos-content').html('<div class="vm-loading">Cargando favoritos...</div>');
+        loading = true;
+        $update();
         const response = await utils.getFavorites();
-        const favoritos = (response && response.favoritos) || [];
-
-        if (!favoritos.length) {
-          $el.find('#favoritos-content').html('<div class="vm-card"><p class="vm-empty">No tienes profesionales favoritos todavia.</p></div>');
-          return;
-        }
-
-        $el.find('#favoritos-content').html(favoritos.map((favorito) => `
-          <div class="vm-card">
-            <div class="vm-professional">
-              <img src="${utils.escapeHtml(favorito.imagen || '/avatar.png')}" alt="${utils.escapeHtml(favorito.nombre || 'Profesional')}" />
-              <div>
-                <h3 class="vm-card-title">${utils.escapeHtml(favorito.nombre || 'Profesional')}</h3>
-                <p class="vm-card-subtitle">${utils.escapeHtml(favorito.credenciales || '')}</p>
-                <p class="vm-muted">${utils.escapeHtml(favorito.direccion || '')}</p>
-                <div class="vm-actions">
-                  <a href="/profesional/${encodeURIComponent(favorito.token || favorito.id)}/" class="button button-fill button-small">Ver perfil</a>
-                  <a href="#" class="button button-outline button-small favorite-remove" data-id="${utils.escapeHtml(favorito.id)}">Quitar</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        `).join(''));
-
-        $el.find('.favorite-remove').each((index, element) => {
-          element.addEventListener('click', async (event) => {
-            event.preventDefault();
-            try {
-              $f7.preloader.show();
-              await utils.removeFavorite(element.dataset.id);
-              await renderFavorites();
-            } catch (error) {
-              $f7.dialog.alert(utils.getApiErrorMessage(error, 'No se pudo eliminar el favorito'));
-            } finally {
-              $f7.preloader.hide();
-            }
-          });
-        });
+        favorites = (response && response.favoritos) || [];
       } catch (error) {
-        $el.find('#favoritos-content').html(`<div class="vm-card"><p class="vm-empty">${utils.escapeHtml(utils.getApiErrorMessage(error, 'No se pudieron cargar tus favoritos'))}</p></div>`);
+        errorMessage = utils.getApiErrorMessage(error, 'No se pudieron cargar tus favoritos');
+      } finally {
+        loading = false;
+        $update();
       }
     };
 
-    $on('pageInit', renderFavorites);
-    $on('pageAfterIn', renderFavorites);
+    const removeFavorite = async (event, favorito) => {
+      event.preventDefault();
+
+      try {
+        $f7.preloader.show();
+        await utils.removeFavorite(favorito.id);
+        favorites = favorites.filter((item) => String(item.id) !== String(favorito.id));
+        $update();
+      } catch (error) {
+        $f7.dialog.alert(utils.getApiErrorMessage(error, 'No se pudo eliminar el favorito'));
+      } finally {
+        $f7.preloader.hide();
+      }
+    };
+
+    $on('pageInit', loadFavorites);
+    $on('pageAfterIn', loadFavorites);
 
     return $render;
   }
