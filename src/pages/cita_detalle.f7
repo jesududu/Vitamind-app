@@ -36,6 +36,9 @@
 
       const props = cita.extendedProps || {};
       const centerName = props.empresa_razon_social || props.empresa || props.centro || cita.empresa || 'No especificado';
+      const addressText = props.direccion || '';
+      const mapsQuery = addressText ? encodeURIComponent(addressText) : '';
+      const mapsUrl = mapsQuery ? `https://www.google.com/maps/search/?api=1&query=${mapsQuery}` : '';
 
       container.innerHTML = `
         <div class="vm-card">
@@ -44,9 +47,10 @@
           <div class="vm-kv"><span>Fin</span><strong>${utils.escapeHtml(utils.formatDateTime(cita.end))}</strong></div>
           <div class="vm-kv"><span>Profesional</span><strong>${utils.escapeHtml(props.empleado || '')}</strong></div>
           <div class="vm-kv"><span>Centro</span><strong>${utils.escapeHtml(centerName)}</strong></div>
-          <div class="vm-kv"><span>Direccion</span><strong>${utils.escapeHtml(props.direccion || '')}</strong></div>
+          <div class="vm-kv"><span>Direccion</span><strong>${utils.escapeHtml(addressText)}</strong></div>
           <div class="vm-kv"><span>Modalidad</span><strong>${utils.escapeHtml(props.modalidad || '')}</strong></div>
           <div class="vm-kv"><span>Nota</span><strong>${utils.escapeHtml(props.nota || 'Sin nota')}</strong></div>
+          ${mapsUrl ? `<div class="vm-actions"><a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" class="button button-outline">Abrir en Google Maps</a></div>` : ''}
           ${cita.estado === 'activa' ? '<div class="vm-actions"><a href="#" id="cancelar-cita-btn" class="button button-fill color-red">Cancelar cita</a></div>' : ''}
         </div>
       `;
