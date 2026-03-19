@@ -43,7 +43,7 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $f7, $f7router, $on, $onMounted }) {
+  export default function (props, { $f7, $f7router, $on, $onMounted, $update }) {
     let draft = null;
     let initialized = false;
 
@@ -94,6 +94,7 @@
       if (!initialized) {
         initialized = true;
       }
+      $update();
     };
 
     $on('pageInit', initPage);
