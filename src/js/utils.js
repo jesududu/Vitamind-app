@@ -35,6 +35,7 @@ var tmApp = {
     appointmentDraft: 'vitamind_reserva_borrador',
     appointmentSelected: 'vitamind_cita_seleccionada',
     professionalMap: 'vitamind_professional_map',
+    profileImageDraft: 'vitamind_profile_image_draft',
   },
   missingApiEndpoints: {
     registerDevice: '/register-device',
@@ -568,6 +569,30 @@ var tmApp = {
     }
 
     return new File([bytes], fileName, { type: mime });
+  },
+
+  setProfileImageDraft: function (draft = null) {
+    if (!draft) {
+      localStorage.removeItem(tmApp.storageKeys.profileImageDraft);
+      return;
+    }
+
+    localStorage.setItem(tmApp.storageKeys.profileImageDraft, JSON.stringify(draft));
+  },
+
+  getProfileImageDraft: function () {
+    const raw = localStorage.getItem(tmApp.storageKeys.profileImageDraft);
+    if (!raw) return null;
+
+    try {
+      return JSON.parse(raw);
+    } catch (error) {
+      return null;
+    }
+  },
+
+  clearProfileImageDraft: function () {
+    localStorage.removeItem(tmApp.storageKeys.profileImageDraft);
   },
 
   selectProfileImage: async function (source = 'photos') {

@@ -87,11 +87,28 @@
       reader.readAsDataURL(file);
     };
 
+    const restoreSelectedImageDraft = () => {
+      const draft = utils.getProfileImageDraft();
+      const avatarImg = getField('#profile-avatar');
+
+      if (!draft || !draft.dataUrl || !avatarImg) {
+        return;
+      }
+
+      selectedImagePreviewUrl = draft.dataUrl;
+      selectedImageFile = utils.dataUrlToFile(draft.dataUrl, draft.fileName || 'perfil.jpg');
+      avatarImg.src = selectedImagePreviewUrl;
+    };
+
     const selectImage = async (source) => {
       try {
         const result = await utils.selectProfileImage(source);
         selectedImageFile = result.file;
         selectedImagePreviewUrl = result.previewUrl || null;
+        utils.setProfileImageDraft({
+          dataUrl: selectedImagePreviewUrl,
+          fileName: result.file ? result.file.name : 'perfil.jpg',
+        });
         const avatarImg = getField('#profile-avatar');
         if (avatarImg && selectedImagePreviewUrl) {
           avatarImg.src = selectedImagePreviewUrl;
@@ -154,7 +171,8 @@
       const nombreInput = getField('#profile-nombre');
       const apellidosInput = getField('#profile-apellidos');
       const emailInput = getField('#profile-email');
-      const file = selectedImageFile;
+      const draft = utils.getProfileImageDraft();
+      const file = selectedImageFile || (draft && draft.dataUrl ? utils.dataUrlToFile(draft.dataUrl, draft.fileName || 'perfil.jpg') : null);
 
       try {
         $f7.preloader.show();
@@ -169,6 +187,8 @@
 
         const refreshedUser = await utils.getCurrentUser();
         selectedImagePreviewUrl = null;
+        selectedImageFile = null;
+        utils.clearProfileImageDraft();
         utils.saveSession({
           token: ($store.state.session && $store.state.session.token) || utils.getSession().token,
           user: refreshedUser,
@@ -184,10 +204,12 @@
     };
 
     $on('pageInit', () => {
+      restoreSelectedImageDraft();
       loadProfile();
     });
 
     $on('pageAfterIn', () => {
+      restoreSelectedImageDraft();
       if (!selectedImagePreviewUrl) {
         loadProfile();
       }
