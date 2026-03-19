@@ -6,86 +6,186 @@
         <div class="title">Mis citas</div>
       </div>
     </div>
+
     <div class="page-content vm-page-content">
-      <div id="citas-content" class="vm-loading">Cargando citas...</div>
+      ${!utils.isAuthenticated() && $h`
+        <div class="block">
+          <p style="text-align:center;color:#bfbfbf;">
+            <i class="icon material-symbols-outlined icon-large">event_busy</i>
+          </p>
+          <p style="padding:0 40px;text-align:center;" class="vm-muted">
+            Inicia sesion para ver y gestionar tus citas.
+          </p>
+        </div>
+
+        <div class="block">
+          <a href="/login/" class="button button-large button-outline" style="text-transform:none;">Iniciar sesion</a>
+        </div>
+      `}
+
+      ${utils.isAuthenticated() && $h`
+        <div class="block block-strong inset vm-citas-summary">
+          <div class="vm-section-title">Resumen</div>
+          <div class="vm-chip-row">
+            <span class="vm-chip">Activas: ${counts.activas}</span>
+            <span class="vm-chip">Completadas: ${counts.completadas}</span>
+            <span class="vm-chip">Canceladas: ${counts.canceladas}</span>
+          </div>
+        </div>
+
+        ${loading && $h`
+          <div class="vm-loading">Cargando citas...</div>
+        `}
+
+        ${!loading && errorMessage && $h`
+          <div class="block">
+            <div class="vm-empty">${errorMessage}</div>
+          </div>
+        `}
+
+        ${!loading && !errorMessage && !hasAppointments() && $h`
+          <div class="block">
+            <div class="vm-empty">Todavia no tienes citas registradas.</div>
+          </div>
+        `}
+
+        ${!loading && !errorMessage && renderSection('Proximas', appointments.activas, 'activa')}
+        ${!loading && !errorMessage && renderSection('Completadas', appointments.completadas, 'completada')}
+        ${!loading && !errorMessage && renderSection('Canceladas', appointments.canceladas, 'cancelada')}
+      `}
     </div>
   </div>
 </template>
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $on, $onMounted, $f7router, $f7 }) {
-    const getPageEl = () => {
-      if ($el && typeof $el.find === 'function') return $el;
-      if ($el && $el.nodeType === 1) return $f7.$($el);
-      if ($el && $el[0]) return $f7.$($el[0]);
-      return $f7.$('.page[data-name="citas"].page-current');
+  export default function (props, { $f7router, $on, $onMounted, $update }) {
+    let loading = false;
+    let errorMessage = '';
+    let appointments = {
+      activas: [],
+      completadas: [],
+      canceladas: [],
+    };
+    let counts = {
+      activas: 0,
+      completadas: 0,
+      canceladas: 0,
     };
     let initialized = false;
 
-    const renderSection = (title, items = []) => `
-      <div class="vm-card">
-        <div class="vm-section-title">${title}</div>
-        ${items.length ? items.map((item) => `
-          <div class="vm-service-item vm-cita-item" data-id="${utils.escapeHtml(item.id)}">
-            <div class="vm-card-title">${utils.escapeHtml(item.title || (item.extendedProps && item.extendedProps.servicio) || 'Servicio')}</div>
-            <div class="vm-card-subtitle">${utils.escapeHtml((item.extendedProps && item.extendedProps.empleado) || '')}</div>
-            <div class="vm-chip-row">
-              <span class="vm-chip">${utils.escapeHtml(utils.formatDate(item.start))}</span>
-              <span class="vm-chip">${utils.escapeHtml((((item.start || '').split('T')[1]) || '').slice(0, 5))}</span>
-              <span class="vm-chip">${utils.escapeHtml((item.extendedProps && item.extendedProps.empresa) || '')}</span>
+    const statusLabel = (status) => {
+      if (status === 'activa') return 'Proxima';
+      if (status === 'completada') return 'Completada';
+      return 'Cancelada';
+    };
+
+    const getAppointmentTime = (item) => {
+      const start = ((item.start || '').split('T')[1] || '').slice(0, 5);
+      const end = ((item.end || '').split('T')[1] || '').slice(0, 5);
+      if (start && end) {
+        return `${start} - ${end}`;
+      }
+      return start || end || '';
+    };
+
+    const hasAppointments = () => {
+      return appointments.activas.length || appointments.completadas.length || appointments.canceladas.length;
+    };
+
+    const openAppointment = (item) => {
+      utils.setStoredObject(utils.storageKeys.appointmentSelected, item);
+      $f7router.navigate(`/cita-detalle/${encodeURIComponent(item.id)}/`);
+    };
+
+    const renderSection = (title, items = [], status) => {
+      if (!items.length) {
+        return $h`
+          <div class="block">
+            <div class="vm-card">
+              <div class="vm-section-title">${title}</div>
+              <div class="vm-empty">No hay citas en esta seccion.</div>
             </div>
           </div>
-        `).join('') : '<div class="vm-empty">No hay citas en esta seccion.</div>'}
-      </div>
-    `;
+        `;
+      }
+
+      return $h`
+        <div class="list media-list inset list-strong list-dividers-ios">
+          <ul>
+            <li>
+              <div class="item-content item-title">
+                <div class="item-inner">
+                  <div class="item-title-row">
+                    <div class="item-title">${title}</div>
+                  </div>
+                </div>
+              </div>
+            </li>
+            ${items.map((item) => $h`
+              <li>
+                <a href="#" class="item-link item-content" @click=${() => openAppointment(item)}>
+                  <div class="item-inner">
+                    <div class="item-title-row">
+                      <div class="item-title">${item.title || item.extendedProps?.servicio || 'Cita'}</div>
+                    </div>
+                    <div class="item-subtitle">${item.extendedProps?.empleado || ''}</div>
+                    <div class="item-text">
+                      <div class="vm-chip-row">
+                        <span class="vm-chip">${utils.formatDate(item.start)}</span>
+                        <span class="vm-chip">${getAppointmentTime(item)}</span>
+                        <span class="vm-chip">${statusLabel(status)}</span>
+                      </div>
+                      ${item.extendedProps?.empresa ? $h`<div class="vm-muted" style="margin-top:8px;">${item.extendedProps.empresa}</div>` : ''}
+                    </div>
+                  </div>
+                </a>
+              </li>
+            `)}
+          </ul>
+        </div>
+      `;
+    };
 
     const loadAppointments = async () => {
-      if (initialized) return;
-      initialized = true;
-      const pageEl = getPageEl();
-      const container = pageEl.find('#citas-content');
-
       if (!utils.isAuthenticated()) {
-        container.html(`
-          <div class="vm-form-card">
-            <div class="vm-section-title">Necesitas iniciar sesion</div>
-            <p class="vm-muted">Las citas solo estan disponibles para pacientes autenticados.</p>
-            <div class="vm-actions">
-              <a href="/login/" class="button button-fill">Ir a login</a>
-            </div>
-          </div>
-        `);
         return;
       }
 
+      loading = true;
+      errorMessage = '';
+      $update();
+
       try {
         const response = await utils.getMyAppointments();
-        container.html(
-          renderSection('Activas', (response && response.activas && response.activas.data) || []) +
-          renderSection('Completadas', (response && response.completadas && response.completadas.data) || []) +
-          renderSection('Canceladas', (response && response.canceladas && response.canceladas.data) || [])
-        );
-
-        const allAppointments = [
-          ...((response && response.activas && response.activas.data) || []),
-          ...((response && response.completadas && response.completadas.data) || []),
-          ...((response && response.canceladas && response.canceladas.data) || []),
-        ];
-
-        pageEl.find('.vm-cita-item').on('click', (event) => {
-          const cita = allAppointments.find((item) => String(item.id) === String(event.currentTarget.dataset.id));
-          if (!cita) return;
-          utils.setStoredObject(utils.storageKeys.appointmentSelected, cita);
-          $f7router.navigate(`/cita-detalle/${encodeURIComponent(cita.id)}/`);
-        });
+        appointments = {
+          activas: Array.isArray(response?.activas?.data) ? response.activas.data : [],
+          completadas: Array.isArray(response?.completadas?.data) ? response.completadas.data : [],
+          canceladas: Array.isArray(response?.canceladas?.data) ? response.canceladas.data : [],
+        };
+        counts = {
+          activas: response?.activas?.total || appointments.activas.length,
+          completadas: response?.completadas?.total || appointments.completadas.length,
+          canceladas: response?.canceladas?.total || appointments.canceladas.length,
+        };
       } catch (error) {
-        container.html(`<div class="vm-empty">${utils.escapeHtml(error.message)}</div>`);
+        errorMessage = utils.getApiErrorMessage(error, 'No se pudieron cargar tus citas');
+      } finally {
+        loading = false;
+        $update();
       }
     };
 
-    $on('pageInit', loadAppointments);
-    $onMounted(loadAppointments);
+    const initPage = () => {
+      if (!initialized) {
+        initialized = true;
+      }
+      loadAppointments();
+    };
+
+    $on('pageInit', initPage);
+    $on('pageAfterIn', loadAppointments);
+    $onMounted(initPage);
 
     return $render;
   }
