@@ -22,7 +22,7 @@
   export default function (props, { $on }) {
     $on('pageAfterIn', load);
     function load() {
-      utils.cargarContenido('cargar_normas', 'tmNormas');
+      utils.cargarContenido('cargar_informacion', 'tmNormas');
     }
 
     return $render;
