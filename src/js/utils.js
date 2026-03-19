@@ -1007,11 +1007,54 @@ var tmApp = {
     return tmApp.fetchPublicData(fullUrl);
   },
 
-  getProfessionalProfile: function (token) {
-    const url = apiUrl + `/profesional/${token}`;
-    const fullUrl = url;
-    return tmApp.fetchPublicData(fullUrl);
-  },
+    getProfessionalProfile: function (token) {
+      const url = apiUrl + `/profesional/${token}`;
+      const fullUrl = url;
+      return tmApp.fetchPublicData(fullUrl);
+    },
+
+    searchProfessionalsCatalog: async function (filters = {}) {
+      const params = {};
+
+      if (typeof filters.lat === 'number' && typeof filters.lng === 'number') {
+        params.lat = filters.lat;
+        params.lng = filters.lng;
+      }
+
+      const response = await tmApp.getProfessionalsList(params);
+      const tokens = Array.isArray(response?.empleados) ? response.empleados : [];
+      const normalizedQuery = String(filters.query || '').trim().toLowerCase();
+      const normalizedLocalidad = String(filters.localidad || '').trim().toLowerCase();
+
+      if (!tokens.length) {
+        return [];
+      }
+
+      const profiles = await Promise.allSettled(
+        tokens.slice(0, 40).map(async (token) => {
+          const profile = await tmApp.getProfessionalProfile(token);
+          return {
+            ...profile,
+            token,
+          };
+        }),
+      );
+
+      return profiles
+        .filter((result) => result.status === 'fulfilled')
+        .map((result) => result.value)
+        .filter((profile) => {
+          const fullName = String(profile.nombre_completo || profile.nombre || '').toLowerCase();
+          const localityText = String(profile.localidad || profile.empresa?.localidad || profile.direccion || '').toLowerCase();
+          const services = Array.isArray(profile.servicios) ? profile.servicios : [];
+          const servicesText = services.map((item) => String(item.titulo || '')).join(' ').toLowerCase();
+
+          const matchesQuery = !normalizedQuery || fullName.includes(normalizedQuery) || servicesText.includes(normalizedQuery);
+          const matchesLocalidad = !normalizedLocalidad || localityText.includes(normalizedLocalidad);
+
+          return matchesQuery && matchesLocalidad;
+        });
+    },
 
   getProfessionalSlots: function (token, params = {}) {
     const queryString = tmApp.objectToQueryString({
