@@ -163,13 +163,17 @@
 
   export default function (props, { $f7, $on, $store, $update }) {
     const version_app = env.version;
+    let avatarPreviewUrl = null;
 
     const getSession = () => $store.state.session || utils.getSession();
     const isLoggedIn = () => Boolean(getSession().token);
     const getUser = () => getSession().user || {};
     const getUserName = () => utils.escapeHtml(getUser().name || getUser().nombre || 'Paciente');
     const getUserEmail = () => utils.escapeHtml(getUser().email || '');
-    const getAvatarUrl = () => utils.normalizeProfessionalImage(getUser().imagen || getUser().avatar || '');
+    const getAvatarUrl = () => {
+      if (avatarPreviewUrl) return avatarPreviewUrl;
+      return utils.normalizeProfessionalImage(getUser().imagen_url || getUser().imagen || getUser().avatar || '');
+    };
 
     const refreshLoggedUser = async () => {
       await utils.refreshCurrentUser();
@@ -181,10 +185,16 @@
       try {
         $f7.preloader.show();
         const result = await utils.selectProfileImage(source);
+        avatarPreviewUrl = result.previewUrl || null;
+        $update();
         await utils.updateProfileImage(result.file);
         await refreshLoggedUser();
+        avatarPreviewUrl = null;
+        $update();
         $f7.dialog.alert('Imagen cambiada correctamente');
       } catch (error) {
+        avatarPreviewUrl = null;
+        $update();
         $f7.dialog.alert(utils.getApiErrorMessage(error, 'No se pudo cambiar la imagen'));
       } finally {
         $f7.preloader.hide();
