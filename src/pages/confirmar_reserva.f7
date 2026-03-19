@@ -81,12 +81,32 @@
         });
         utils.setStoredObject(utils.storageKeys.appointmentDraft, null);
         $f7.dialog.alert(response && response.message ? response.message : 'Reserva confirmada');
+        const homeView = $f7.views.get('#view-home');
+        const searchView = $f7.views.get('#view-busqueda');
         const citasView = $f7.views.get('#view-citas');
+
+        if (homeView && homeView.router) {
+          homeView.router.navigate('/cli/', {
+            ignoreCache: true,
+            reloadCurrent: true,
+            clearPreviousHistory: true,
+          });
+        }
+
+        if (searchView && searchView.router) {
+          searchView.router.navigate('/search/', {
+            ignoreCache: true,
+            reloadCurrent: true,
+            clearPreviousHistory: true,
+          });
+        }
+
         if (citasView && citasView.router) {
           $f7.tab.show('#view-citas');
           citasView.router.navigate('/citas/', {
             ignoreCache: true,
             reloadCurrent: true,
+            clearPreviousHistory: true,
           });
         }
       } catch (error) {
