@@ -62,7 +62,6 @@
               ></iframe>
             </div>
           ` : ''}
-          ${mapsUrl ? `<div class="vm-actions"><a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" class="button button-outline">Abrir en Google Maps</a></div>` : ''}
           ${cita.estado === 'activa' ? '<div class="vm-actions"><a href="#" id="cancelar-cita-btn" class="button button-fill color-red">Cancelar cita</a></div>' : ''}
         </div>
       `;
