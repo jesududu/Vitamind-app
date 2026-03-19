@@ -35,7 +35,7 @@
       }
 
       const props = cita.extendedProps || {};
-      const centerName = props.empresa || props.centro || 'No especificado';
+      const centerName = props.empresa_razon_social || props.empresa || props.centro || cita.empresa || 'No especificado';
 
       container.innerHTML = `
         <div class="vm-card">

@@ -92,9 +92,9 @@
                 </div>
                 <div class="item-subtitle">${utils.escapeHtml(props.empleado || '')}</div>
                 <div class="item-text">
-                  <div class="vm-chip-row">
-                    <span class="vm-chip">${utils.escapeHtml(utils.formatDate(item.start))}</span>
-                    <span class="vm-chip">${utils.escapeHtml(timeText)}</span>
+                  <div class="vm-chip-row vm-cita-meta-row">
+                    <span class="vm-chip vm-cita-meta-chip">${utils.escapeHtml(utils.formatDate(item.start))}</span>
+                    <span class="vm-chip vm-cita-meta-chip">${utils.escapeHtml(timeText)}</span>
                   </div>
                   ${props.empresa ? `<div class="vm-muted" style="margin-top:8px;">${utils.escapeHtml(props.empresa)}</div>` : ''}
                 </div>
