@@ -136,7 +136,7 @@
                         <span class="vm-chip">${getAppointmentTime(item)}</span>
                         <span class="vm-chip">${statusLabel(status)}</span>
                       </div>
-                      ${(item.extendedProps && item.extendedProps.empresa) ? $h`<div class="vm-muted" style="margin-top:8px;">${item.extendedProps.empresa}</div>` : ''}
+                      ${(item.extendedProps && item.extendedProps.empresa) ? `<div class="vm-muted" style="margin-top:8px;">${item.extendedProps.empresa}</div>` : ''}
                     </div>
                   </div>
                 </a>
@@ -159,14 +159,14 @@
       try {
         const response = await utils.getMyAppointments();
         appointments = {
-          activas: Array.isArray(response?.activas?.data) ? response.activas.data : [],
-          completadas: Array.isArray(response?.completadas?.data) ? response.completadas.data : [],
-          canceladas: Array.isArray(response?.canceladas?.data) ? response.canceladas.data : [],
+          activas: response && response.activas && Array.isArray(response.activas.data) ? response.activas.data : [],
+          completadas: response && response.completadas && Array.isArray(response.completadas.data) ? response.completadas.data : [],
+          canceladas: response && response.canceladas && Array.isArray(response.canceladas.data) ? response.canceladas.data : [],
         };
         counts = {
-          activas: response?.activas?.total || appointments.activas.length,
-          completadas: response?.completadas?.total || appointments.completadas.length,
-          canceladas: response?.canceladas?.total || appointments.canceladas.length,
+          activas: (response && response.activas && response.activas.total) || appointments.activas.length,
+          completadas: (response && response.completadas && response.completadas.total) || appointments.completadas.length,
+          canceladas: (response && response.canceladas && response.canceladas.total) || appointments.canceladas.length,
         };
       } catch (error) {
         errorMessage = utils.getApiErrorMessage(error, 'No se pudieron cargar tus citas');
