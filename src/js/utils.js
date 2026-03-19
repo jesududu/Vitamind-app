@@ -555,33 +555,40 @@ var tmApp = {
     });
   },
 
+  dataUrlToFile: function (dataUrl, fileName = 'perfil.jpg') {
+    const parts = String(dataUrl).split(',');
+    const match = parts[0].match(/:(.*?);/);
+    const mime = match ? match[1] : 'image/jpeg';
+    const binary = atob(parts[1] || '');
+    let length = binary.length;
+    const bytes = new Uint8Array(length);
+
+    while (length--) {
+      bytes[length] = binary.charCodeAt(length);
+    }
+
+    return new File([bytes], fileName, { type: mime });
+  },
+
   selectProfileImage: async function (source = 'photos') {
     const sourceType = source === 'camera' ? CameraSource.Camera : CameraSource.Photos;
     const image = await Camera.getPhoto({
       quality: 80,
       allowEditing: false,
-      resultType: CameraResultType.Uri,
+      resultType: CameraResultType.DataUrl,
       source: sourceType,
       width: 500,
       height: 500,
       correctOrientation: true,
     });
 
-    if (!image || !image.webPath) {
+    if (!image || !image.dataUrl) {
       throw new Error('No se ha seleccionado imagen');
     }
 
-    const response = await fetch(image.webPath);
-    const blob = await response.blob();
-    const extension = image.format || 'jpg';
-    const fileName = `perfil.${extension}`;
-    const file = new File([blob], fileName, {
-      type: blob.type || `image/${extension}`,
-    });
-
     return {
-      file,
-      previewUrl: image.webPath,
+      file: tmApp.dataUrlToFile(image.dataUrl, `perfil.${image.format || 'jpg'}`),
+      previewUrl: image.dataUrl,
     };
   },
 
