@@ -81,7 +81,14 @@
         });
         utils.setStoredObject(utils.storageKeys.appointmentDraft, null);
         $f7.dialog.alert(response && response.message ? response.message : 'Reserva confirmada');
-        $f7router.navigate('/citas/');
+        const citasView = $f7.views.get('#view-citas');
+        if (citasView && citasView.router) {
+          $f7.tab.show('#view-citas');
+          citasView.router.navigate('/citas/', {
+            ignoreCache: true,
+            reloadCurrent: true,
+          });
+        }
       } catch (error) {
         $f7.dialog.alert(utils.getApiErrorMessage(error, 'No se pudo confirmar la reserva'));
       } finally {
