@@ -12,13 +12,16 @@
         <div class="vm-section-title">Datos del paciente</div>
         <div class="vm-profile-cover">
           <img id="profile-avatar" class="vm-avatar vm-avatar--lg" src="/avatar.png" alt="Avatar" />
+          <div class="vm-actions" style="margin-top:12px;">
+            <a href="#" id="profile-select-image" class="button button-outline">Seleccionar foto</a>
+          </div>
         </div>
         <div class="list no-hairlines-md">
           <ul>
             <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Nombre</div><div class="item-input-wrap"><input type="text" id="profile-nombre" /></div></div></li>
             <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Apellidos</div><div class="item-input-wrap"><input type="text" id="profile-apellidos" /></div></div></li>
             <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Email</div><div class="item-input-wrap"><input type="email" id="profile-email" /></div></div></li>
-            <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Foto</div><div class="item-input-wrap"><input type="file" id="profile-image" accept="image/*" /></div></div></li>
+            <li class="item-content item-input" style="display:none;"><div class="item-inner"><div class="item-title item-label">Foto</div><div class="item-input-wrap"><input type="file" id="profile-image" accept="image/*" /></div></div></li>
           </ul>
         </div>
         <div class="vm-actions">
@@ -60,6 +63,19 @@
         const avatarUrl = utils.normalizeProfessionalImage((user && user.imagen_url) || (user && user.imagen) || '/avatar.png');
         avatarImg.src = avatarUrl.includes('?') ? `${avatarUrl}&t=${Date.now()}` : `${avatarUrl}?t=${Date.now()}`;
       }
+    };
+
+    const previewSelectedImage = (file) => {
+      const avatarImg = getField('#profile-avatar');
+      if (!avatarImg || !file) return;
+
+      const reader = new FileReader();
+      reader.onload = (loadEvent) => {
+        if (loadEvent && loadEvent.target && loadEvent.target.result) {
+          avatarImg.src = loadEvent.target.result;
+        }
+      };
+      reader.readAsDataURL(file);
     };
 
     const loadProfile = async () => {
@@ -118,8 +134,23 @@
       loadProfile();
 
       const submitButton = getField('#profile-submit');
+      const selectImageButton = getField('#profile-select-image');
+      const imageInput = getField('#profile-image');
+
       if (submitButton) {
         submitButton.addEventListener('click', submitProfile);
+      }
+      if (selectImageButton && imageInput) {
+        selectImageButton.addEventListener('click', (event) => {
+          event.preventDefault();
+          imageInput.click();
+        });
+      }
+      if (imageInput) {
+        imageInput.addEventListener('change', () => {
+          const file = imageInput.files && imageInput.files[0] ? imageInput.files[0] : null;
+          previewSelectedImage(file);
+        });
       }
     });
 
