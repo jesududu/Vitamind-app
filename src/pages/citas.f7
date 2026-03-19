@@ -79,6 +79,8 @@
         const startTime = ((item.start || '').split('T')[1] || '').slice(0, 5);
         const endTime = ((item.end || '').split('T')[1] || '').slice(0, 5);
         const timeText = startTime && endTime ? `${startTime} - ${endTime}` : (startTime || '');
+        const estado = item.estado === 'cancelada' ? 'Cancelada' : (item.estado === 'completada' ? 'Completada' : 'Proxima');
+        const estadoClass = item.estado === 'cancelada' ? 'vm-chip-cancelada' : (item.estado === 'completada' ? 'vm-chip-completada' : 'vm-chip-activa');
 
         return `
           <li>
@@ -86,6 +88,7 @@
               <div class="item-inner">
                 <div class="item-title-row">
                   <div class="item-title">${utils.escapeHtml(item.title || props.servicio || 'Cita')}</div>
+                  <span class="vm-chip ${estadoClass}">${utils.escapeHtml(estado)}</span>
                 </div>
                 <div class="item-subtitle">${utils.escapeHtml(props.empleado || '')}</div>
                 <div class="item-text">

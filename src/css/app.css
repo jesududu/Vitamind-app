@@ -506,6 +506,10 @@ body {
   margin-top: 10px;
 }
 
+.page[data-name="citas"] .page-content {
+  background: #f7f7f7;
+}
+
 .vm-reservas-list ul {
   display: flex;
   flex-direction: column;
@@ -523,12 +527,32 @@ body {
   padding-bottom: 12px;
 }
 
+.vm-reserva-item .item-title-row {
+  align-items: center;
+  gap: 8px;
+}
+
 .vm-reserva-item .item-subtitle {
   margin-top: 4px;
 }
 
 .vm-reserva-item .item-text {
   margin-top: 8px;
+}
+
+.vm-chip-activa {
+  background: rgba(76, 175, 80, 0.14);
+  color: #2e7d32;
+}
+
+.vm-chip-completada {
+  background: rgba(33, 150, 243, 0.14);
+  color: #1565c0;
+}
+
+.vm-chip-cancelada {
+  background: rgba(244, 67, 54, 0.14);
+  color: #c62828;
 }
 
 .vm-loading,
