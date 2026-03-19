@@ -393,30 +393,6 @@ body {
   min-width: 100%;
 }
 
-.vm-prof-calendar-block {
-  position: relative;
-}
-
-.vm-calendar-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-height: 120px;
-}
-
-.vm-prof-calendar-block .vm-calendar-loading {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  background: rgba(255, 255, 255, 0.92);
-  border-radius: 18px;
-}
-
-.vm-calendar-loading-inline {
-  min-height: 70px;
-}
 
 .horario {
   width: 100px;

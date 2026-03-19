@@ -91,12 +91,6 @@
 
           <div class="vm-card vm-profile-booking vm-prof-calendar-card">
             <div class="block block-strong vm-prof-calendar-block">
-              ${loadingCalendar && $h`
-                <div class="vm-calendar-loading">
-                  <div class="preloader"></div>
-                  <div class="vm-muted">Cargando calendario...</div>
-                </div>
-              `}
               <div id="calendario-profesional"></div>
             </div>
           </div>
@@ -104,12 +98,6 @@
 
         <div class="block-title" style="margin: 20px 10px 0px 10px;">Horarios</div>
         <div class="contenedor-horarios-tm" style="background: none;">
-          ${loadingSlots && $h`
-            <div class="vm-calendar-loading vm-calendar-loading-inline">
-              <div class="preloader"></div>
-              <div class="vm-muted">Cargando horarios...</div>
-            </div>
-          `}
           <div class="divHorarios"></div>
         </div>
 
@@ -135,8 +123,6 @@
     let selectedDate = null;
     let selectedServiceId = '';
     let lastCalendarDate = null;
-    let loadingCalendar = true;
-    let loadingSlots = false;
 
     const months = [
       'Enero',
@@ -213,9 +199,6 @@
     };
 
     const initCalendar = () => {
-      loadingCalendar = true;
-      $update();
-
       const pageEl = getPageEl();
       if (!pageEl) return;
 
@@ -262,8 +245,6 @@
             const year = date.getFullYear();
             selectedDate = `${year}-${month}-${day}`;
             lastCalendarDate = selectedDate;
-            loadingCalendar = false;
-            $update();
           },
           monthYearChangeStart: function (calendar) {
             const toolbarEl = pageEl.querySelector('.calendar-custom-toolbar');
@@ -352,10 +333,6 @@
         showAvailabilityMessage('Selecciona una fecha', 'Para ver los horarios');
         return;
       }
-
-      loadingSlots = true;
-      $update();
-
       try {
         const response = await utils.getProfessionalSlots($f7route.params.token, {
           fecha: selectedDate,
@@ -378,9 +355,6 @@
         }
       } catch (error) {
         showAvailabilityMessage('Error cargando horarios', utils.getApiErrorMessage(error));
-      } finally {
-        loadingSlots = false;
-        $update();
       }
     };
 
@@ -413,16 +387,12 @@
             await loadSlots();
           } else {
             showAvailabilityMessage('No hay servicios disponibles', 'Para este profesional');
-            loadingSlots = false;
-            $update();
           }
         });
       } catch (error) {
         profile = null;
         loadingProfile = false;
         profileError = utils.getApiErrorMessage(error, 'No se pudo cargar el perfil del profesional');
-        loadingCalendar = false;
-        loadingSlots = false;
         $update();
       }
     };
