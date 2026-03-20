@@ -344,6 +344,7 @@ body {
 }
 
 .vm-prof-calendar-card {
+  margin-top: 16px;
   padding: 10px 8px 12px;
   overflow: hidden;
 }

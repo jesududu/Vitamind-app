@@ -76,9 +76,8 @@
                 <div class="vm-section-title">Servicio</div>
                 <div class="list no-hairlines-md">
                   <ul>
-                    <li class="item-content item-input">
+                    <li class="item-content item-input item-input-outline vm-search-input">
                       <div class="item-inner">
-                        <div class="item-title item-label">Servicio</div>
                         <div class="item-input-wrap">
                           <select id="profile-servicio" @change=${onServiceChange}>
                             ${getServices().length ? getServices().map((servicio) => $h`
