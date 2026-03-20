@@ -431,14 +431,16 @@
       activeTab = tabName;
       if (tabName !== 'reserva' || !profile) return;
 
-      $f7.utils.nextTick(async () => {
-        initCalendar();
-        if (getServices().length) {
-          await loadSlots();
-        } else {
-          showAvailabilityMessage('No hay servicios disponibles', 'Para este profesional');
-        }
-      });
+      window.setTimeout(() => {
+        $f7.utils.nextTick(async () => {
+          initCalendar();
+          if (getServices().length) {
+            await loadSlots();
+          } else {
+            showAvailabilityMessage('No hay servicios disponibles', 'Para este profesional');
+          }
+        });
+      }, 80);
     };
 
     const initPage = () => {

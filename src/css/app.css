@@ -205,11 +205,12 @@ body {
 
 .vm-profile-segmented .button {
   color: var(--vm-secondary);
+  background: #ffffff;
 }
 
 .vm-profile-segmented .button-active,
 .vm-profile-segmented .tab-link-active {
-  background: #ffffff;
+  background: #f8f8f8;
   color: var(--vm-primary-dark);
 }
 
