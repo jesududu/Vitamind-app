@@ -8,12 +8,6 @@
       </div>
     </div>
     <div class="page-content vm-page-content">
-      ${loadingProfile && $h`
-        <div class="block" style="text-align:center; padding-top: 24px; padding-bottom: 24px;">
-          <div class="preloader"></div>
-        </div>
-      `}
-
       ${!loadingProfile && profileError && $h`
         <div class="vm-empty">${profileError}</div>
       `}
@@ -376,6 +370,7 @@
       $update();
 
       try {
+        $f7.preloader.show();
         const token = $f7route.params.token;
         profile = await utils.getProfessionalProfile(token);
         employeeId = profile && profile.id ? profile.id : null;
@@ -406,6 +401,8 @@
         loadingProfile = false;
         profileError = utils.getApiErrorMessage(error, 'No se pudo cargar el perfil del profesional');
         $update();
+      } finally {
+        $f7.preloader.hide();
       }
     };
 
