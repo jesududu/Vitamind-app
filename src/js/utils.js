@@ -1214,15 +1214,13 @@ var tmApp = {
       </div>
 
       ${mapsEmbedUrl ? `
-        <div class="block">
-          <div class="vm-map-embed">
-            <iframe
-              src="${mapsEmbedUrl}"
-              loading="lazy"
-              referrerpolicy="no-referrer-when-downgrade"
-              allowfullscreen
-            ></iframe>
-          </div>
+        <div class="vm-map-embed vm-map-embed-full">
+          <iframe
+            src="${mapsEmbedUrl}"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            allowfullscreen
+          ></iframe>
         </div>
       ` : ''}
 

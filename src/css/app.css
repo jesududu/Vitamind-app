@@ -732,10 +732,15 @@ body {
 }
 
 .vm-map-embed {
-  margin-top: 12px;
+  margin-top: 0;
   overflow: hidden;
   border: 1px solid rgba(29, 42, 59, 0.08);
   background: #f7f7f7;
+}
+
+.vm-map-embed-full {
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .vm-map-embed iframe {
