@@ -120,20 +120,7 @@
 
       const container = getContainer();
       if (!container) return;
-
-      container.innerHTML = `
-        <div class="list media-list inset list-strong list-dividers-ios vm-reservas-list">
-          <ul class="reservas_ul">
-            <li>
-              <div class="item-content">
-                <div class="item-inner">
-                  <div class="item-title">Cargando citas...</div>
-                </div>
-              </div>
-            </li>
-          </ul>
-        </div>
-      `;
+      container.innerHTML = '';
 
       try {
         $f7.preloader.show();

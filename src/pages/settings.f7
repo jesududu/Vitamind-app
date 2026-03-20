@@ -246,6 +246,15 @@
           ignoreCache: true,
         });
       }
+
+      const citasView = $f7.views.get('#view-citas');
+      if (citasView && citasView.router) {
+        citasView.router.navigate('/citas/', {
+          reloadCurrent: true,
+          ignoreCache: true,
+          clearPreviousHistory: true,
+        });
+      }
     };
 
     $on('pageInit', () => {
