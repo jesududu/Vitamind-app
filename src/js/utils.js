@@ -1178,86 +1178,37 @@ var tmApp = {
     const serviceName = appointment.title || props.servicio || 'Cita';
     const professionalName = props.empleado || '';
     const startTime = tmApp.formatTime(appointment.start);
-    const endTime = tmApp.formatTime(appointment.end);
-    const timeText = startTime && endTime ? `${startTime} - ${endTime}` : (startTime || endTime || '');
     const noteText = String(props.nota || '').trim();
 
     return `
-      <div class="list inset list-strong list-dividers-ios vm-cita-detalle-list">
-        <ul>
-          <li>
-            <div class="item-content">
-              <div class="item-inner">
-                <div class="item-title">${tmApp.escapeHtml(serviceName)}</div>
-                ${professionalName ? `<div class="item-after">${tmApp.escapeHtml(professionalName)}</div>` : ''}
-              </div>
-            </div>
-          </li>
-          <li>
-            <div class="item-content">
-              <div class="item-inner">
-                <div class="item-title">Fecha</div>
-                <div class="item-after">${tmApp.escapeHtml(tmApp.formatDate(appointment.start))}</div>
-              </div>
-            </div>
-          </li>
-          <li>
-            <div class="item-content">
-              <div class="item-inner">
-                <div class="item-title">Hora</div>
-                <div class="item-after">${tmApp.escapeHtml(timeText)}</div>
-              </div>
-            </div>
-          </li>
-          ${professionalName ? `
-            <li>
-              <div class="item-content">
-                <div class="item-inner">
-                  <div class="item-title">Profesional</div>
-                  <div class="item-after">${tmApp.escapeHtml(professionalName)}</div>
-                </div>
-              </div>
-            </li>
-          ` : ''}
-          <li>
-            <div class="item-content">
-              <div class="item-inner">
-                <div class="item-title">Centro</div>
-                <div class="item-after">${tmApp.escapeHtml(centerName)}</div>
-              </div>
-            </div>
-          </li>
-          ${addressText ? `
-            <li>
-              <div class="item-content">
-                <div class="item-inner">
-                  <div class="item-title">Direccion</div>
-                  <div class="item-after vm-detail-after">${tmApp.escapeHtml(addressText)}</div>
-                </div>
-              </div>
-            </li>
-          ` : ''}
-          ${props.modalidad ? `
-            <li>
-              <div class="item-content">
-                <div class="item-inner">
-                  <div class="item-title">Modalidad</div>
-                  <div class="item-after">${tmApp.escapeHtml(props.modalidad)}</div>
-                </div>
-              </div>
-            </li>
-          ` : ''}
-          ${noteText ? `
-            <li>
-              <div class="item-content">
-                <div class="item-inner">
-                  <div class="item-title">Nota</div>
-                  <div class="item-after vm-detail-after">${tmApp.escapeHtml(noteText)}</div>
-                </div>
-              </div>
-            </li>
-          ` : ''}
-        </ul>
+      <div class="block vm-cita-detalle-top">
+        <div class="vm-cita-detalle-fecha">${tmApp.escapeHtml(tmApp.formatDate(appointment.start))}</div>
+        <div class="vm-cita-detalle-hora">${tmApp.escapeHtml(startTime)}</div>
+      </div>
+
+      <div class="card vm-cita-detalle-card">
+        <div class="card-content card-content-padding">
+          <div class="vm-cita-detalle-servicio">${tmApp.escapeHtml(serviceName)}</div>
+          ${professionalName ? `<div class="vm-cita-detalle-profesional">${tmApp.escapeHtml(professionalName)}</div>` : ''}
+          ${props.modalidad ? `<div class="vm-cita-detalle-extra">${tmApp.escapeHtml(props.modalidad)}</div>` : ''}
+          ${noteText ? `<div class="vm-cita-detalle-extra">${tmApp.escapeHtml(noteText)}</div>` : ''}
+        </div>
+      </div>
+
+      ${appointment.estado === 'activa' ? `
+        <div class="block vm-cita-detalle-cancel-block">
+          <a href="#" class="button button-outline color-red vm-cita-cancel-btn btnCancelar" data-clase="${tmApp.escapeHtml(appointment.id)}">
+            <i class="icon f7-icons">xmark_circle</i>
+            <span>Cancelar cita</span>
+          </a>
+        </div>
+      ` : ''}
+
+      <div class="card vm-cita-detalle-card">
+        <div class="card-content card-content-padding">
+          <div class="vm-cita-detalle-centro">${tmApp.escapeHtml(centerName)}</div>
+          ${addressText ? `<div class="vm-cita-detalle-direccion">${tmApp.escapeHtml(addressText)}</div>` : ''}
+        </div>
       </div>
 
       ${mapsEmbedUrl ? `
@@ -1273,11 +1224,6 @@ var tmApp = {
         </div>
       ` : ''}
 
-      ${appointment.estado === 'activa' ? `
-        <div class="block">
-          <a href="#" class="button button-fill color-red btnCancelar" data-clase="${tmApp.escapeHtml(appointment.id)}">Cancelar cita</a>
-        </div>
-      ` : ''}
     `;
   },
 

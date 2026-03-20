@@ -762,6 +762,81 @@ body {
   text-align: right;
 }
 
+.vm-cita-detalle-top {
+  padding-top: 8px;
+  padding-bottom: 4px;
+}
+
+.vm-cita-detalle-fecha {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 6px;
+}
+
+.vm-cita-detalle-hora {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.1;
+}
+
+.vm-cita-detalle-card {
+  margin-top: 12px;
+  margin-bottom: 0;
+  border-radius: 18px;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+}
+
+.vm-cita-detalle-servicio {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.vm-cita-detalle-profesional {
+  margin-top: 6px;
+  font-size: 15px;
+  color: #374151;
+}
+
+.vm-cita-detalle-extra {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.vm-cita-detalle-cancel-block {
+  margin-top: 14px;
+  margin-bottom: 2px;
+}
+
+.vm-cita-cancel-btn {
+  border-width: 1.5px;
+  border-color: #dc2626;
+  color: #dc2626;
+  height: 48px;
+  border-radius: 14px;
+  font-weight: 600;
+  gap: 8px;
+}
+
+.vm-cita-cancel-btn .icon {
+  font-size: 18px;
+}
+
+.vm-cita-detalle-centro {
+  font-size: 17px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.vm-cita-detalle-direccion {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #6b7280;
+}
+
 .vm-loading,
 .vm-empty {
   padding: 18px;
