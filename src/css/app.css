@@ -512,6 +512,31 @@ body {
   background: #f7f7f7 !important;
 }
 
+.page[data-name="settings"],
+.page[data-name="settings"] .page-content,
+.page[data-name="favoritos"],
+.page[data-name="favoritos"] .page-content,
+.page[data-name="editar-perfil"],
+.page[data-name="editar-perfil"] .page-content {
+  background: #ffffff !important;
+}
+
+.page[data-name="settings"] .vm-card,
+.page[data-name="settings"] .vm-form-card,
+.page[data-name="favoritos"] .vm-card,
+.page[data-name="favoritos"] .vm-form-card,
+.page[data-name="editar-perfil"] .vm-card,
+.page[data-name="editar-perfil"] .vm-form-card {
+  background: #ffffff !important;
+  border-color: rgba(29, 42, 59, 0.08);
+}
+
+.page[data-name="settings"] .list ul,
+.page[data-name="favoritos"] .list ul,
+.page[data-name="editar-perfil"] .list ul {
+  background: #ffffff !important;
+}
+
 .vm-reservas-list ul {
   display: flex;
   flex-direction: column;
