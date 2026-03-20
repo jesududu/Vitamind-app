@@ -16,13 +16,13 @@
         <div class="vm-profile-layout">
           <div class="block block-strong inset vm-profile-tabs-block">
             <div class="segmented segmented-strong vm-profile-segmented">
-              <a href="#prof-tab-datos" class="button tab-link tab-link-active" @click=${() => switchTab('datos')}>Datos</a>
-              <a href="#prof-tab-reserva" class="button tab-link" @click=${() => switchTab('reserva')}>Reserva</a>
+              <a href="#prof-tab-datos" class="button tab-link" @click=${() => switchTab('datos')}>Datos</a>
+              <a href="#prof-tab-reserva" class="button tab-link tab-link-active" @click=${() => switchTab('reserva')}>Reserva</a>
             </div>
           </div>
 
           <div class="tabs vm-profile-inner-tabs">
-            <div id="prof-tab-datos" class="tab tab-active">
+            <div id="prof-tab-datos" class="tab">
               <div class="vm-card vm-profile-main">
                 <div class="vm-profile-image-wrap">
                   <img class="vm-profile-image" src="${getProfileImage()}" alt="${getProfileName()}" />
@@ -71,12 +71,12 @@
               </div>
             </div>
 
-            <div id="prof-tab-reserva" class="tab">
+            <div id="prof-tab-reserva" class="tab tab-active">
               <div class="vm-card vm-profile-booking">
                 <div class="vm-section-title">Servicio</div>
                 <div class="list no-hairlines-md">
                   <ul>
-                    <li class="item-content item-input item-input-outline vm-search-input">
+                    <li class="item-content item-input item-input-outline">
                       <div class="item-inner">
                         <div class="item-input-wrap">
                           <select id="profile-servicio" @change=${onServiceChange}>
@@ -131,7 +131,7 @@
     let selectedDate = null;
     let selectedServiceId = '';
     let lastCalendarDate = null;
-    let activeTab = 'datos';
+    let activeTab = 'reserva';
 
     const months = [
       'Enero',
