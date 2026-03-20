@@ -733,7 +733,6 @@ body {
 
 .vm-map-embed {
   margin-top: 12px;
-  border-radius: 18px;
   overflow: hidden;
   border: 1px solid rgba(29, 42, 59, 0.08);
   background: #f7f7f7;
@@ -833,10 +832,30 @@ body {
 }
 
 .vm-cita-detalle-direccion {
-  margin-top: 8px;
+  margin-top: 6px;
   font-size: 14px;
   line-height: 1.5;
   color: #6b7280;
+}
+
+.vm-cita-centro-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.vm-cita-centro-img {
+  width: 68px;
+  height: 68px;
+  border-radius: 14px;
+  object-fit: cover;
+  flex: 0 0 68px;
+  background: #f3f4f6;
+}
+
+.vm-cita-centro-info {
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .vm-loading,

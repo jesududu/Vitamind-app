@@ -1166,6 +1166,12 @@ var tmApp = {
     return `https://www.google.com/maps?q=${encodeURIComponent(addressText)}&output=embed`;
   },
 
+  getAppointmentCenterImage: function (appointment = {}) {
+    const props = appointment.extendedProps || {};
+    const image = props.empresa_imagen || props.empresa_imagen_url || props.imagen_empresa || props.logo_empresa || props.user_imagen || props.usuario_imagen || props.imagen || appointment.imagen || '';
+    return tmApp.normalizeProfessionalImage(image);
+  },
+
   getAppointmentDetailHtml: function (appointment = {}) {
     if (!appointment || !appointment.id) {
       return '<div class="block"><p class="vm-empty">No se ha encontrado la cita seleccionada.</p></div>';
@@ -1175,6 +1181,7 @@ var tmApp = {
     const centerName = tmApp.getAppointmentCenterName(appointment);
     const addressText = tmApp.getAppointmentAddress(appointment);
     const mapsEmbedUrl = tmApp.getAppointmentMapsEmbedUrl(appointment);
+    const centerImage = tmApp.getAppointmentCenterImage(appointment);
     const serviceName = appointment.title || props.servicio || 'Cita';
     const professionalName = props.empleado || '';
     const startTime = tmApp.formatTime(appointment.start);
@@ -1205,8 +1212,13 @@ var tmApp = {
 
       <div class="card vm-cita-detalle-card">
         <div class="card-content card-content-padding">
-          <div class="vm-cita-detalle-centro">${tmApp.escapeHtml(centerName)}</div>
-          ${addressText ? `<div class="vm-cita-detalle-direccion">${tmApp.escapeHtml(addressText)}</div>` : ''}
+          <div class="vm-cita-centro-row">
+            <img src="${centerImage}" alt="${tmApp.escapeHtml(centerName)}" class="vm-cita-centro-img" />
+            <div class="vm-cita-centro-info">
+              <div class="vm-cita-detalle-centro">${tmApp.escapeHtml(centerName)}</div>
+              ${addressText ? `<div class="vm-cita-detalle-direccion">${tmApp.escapeHtml(addressText)}</div>` : ''}
+            </div>
+          </div>
         </div>
       </div>
 
