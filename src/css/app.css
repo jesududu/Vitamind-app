@@ -91,6 +91,27 @@ body {
   padding: 16px;
 }
 
+.vm-search-input {
+  margin-bottom: 12px;
+}
+
+.vm-search-input:last-child {
+  margin-bottom: 0;
+}
+
+.vm-search-input .item-inner {
+  background: #fafafa;
+  border-radius: 16px;
+}
+
+.vm-search-input .item-input-wrap input {
+  color: var(--vm-text);
+}
+
+.vm-search-input .item-input-wrap input::placeholder {
+  color: #98a2b3;
+}
+
 .vm-section {
   margin-top: 18px;
 }

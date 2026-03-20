@@ -19,7 +19,7 @@
       <section class="vm-section vm-search-card">
         <div class="list no-hairlines-md">
           <ul>
-            <li class="item-content item-input">
+            <li class="item-content item-input item-input-outline vm-search-input">
               <div class="item-inner">
                 <div class="item-title item-label">Localidad</div>
                 <div class="item-input-wrap">
@@ -27,7 +27,7 @@
                 </div>
               </div>
             </li>
-            <li class="item-content item-input">
+            <li class="item-content item-input item-input-outline vm-search-input">
               <div class="item-inner">
                 <div class="item-title item-label">Profesional o servicio</div>
                 <div class="item-input-wrap">
