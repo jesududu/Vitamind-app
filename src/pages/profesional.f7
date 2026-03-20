@@ -9,7 +9,9 @@
     </div>
     <div class="page-content vm-page-content">
       ${loadingProfile && $h`
-        <div class="vm-loading">Cargando perfil profesional...</div>
+        <div class="block" style="text-align:center; padding-top: 24px; padding-bottom: 24px;">
+          <div class="preloader"></div>
+        </div>
       `}
 
       ${!loadingProfile && profileError && $h`
