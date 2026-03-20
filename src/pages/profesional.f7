@@ -14,92 +14,105 @@
 
       ${!loadingProfile && !profileError && profile && $h`
         <div class="vm-profile-layout">
-          <div class="vm-card vm-profile-main">
-            <div class="vm-profile-image-wrap">
-              <img class="vm-profile-image" src="${getProfileImage()}" alt="${getProfileName()}" />
+          <div class="block block-strong inset vm-profile-tabs-block">
+            <div class="segmented segmented-strong">
+              <a href="#prof-tab-datos" class="button tab-link tab-link-active">Datos</a>
+              <a href="#prof-tab-reserva" class="button tab-link">Reserva</a>
             </div>
-            <div class="vm-card-title">${getProfileName()}</div>
-            <div class="vm-card-subtitle">${profile.localidad || 'Localidad no disponible'}</div>
+          </div>
 
-            <div class="vm-profile-meta">
-              <div class="vm-profile-meta-item">
-                <strong><i class="icon material-icons">location_on</i> Direccion</strong>
-                <span>${profile.direccion || 'No disponible'}</span>
-              </div>
-              <div class="vm-profile-meta-item">
-                <strong><i class="icon material-icons">call</i> Telefono</strong>
-                <span>${profile.telefono || 'No disponible'}</span>
-              </div>
-              <div class="vm-profile-meta-item">
-                <strong><i class="icon material-icons">badge</i> Colegiado</strong>
-                <span>${profile.numero_colegiado || profile.cp || 'No disponible'}</span>
-              </div>
-            </div>
-
-            <div class="vm-actions">
-              <a href="#" class="button ${isFavorite ? 'button-fill' : 'button-outline'} button-small vm-favorite-btn" @click=${toggleFavorite}>
-                <i class="icon material-icons">${isFavorite ? 'favorite' : 'favorite_border'}</i>
-                <span>${isFavorite ? 'En favoritos' : 'Anadir a favoritos'}</span>
-              </a>
-            </div>
-
-            <div class="vm-section-title">Servicios</div>
-            <div class="vm-service-list">
-              ${getServices().length ? getServices().map((servicio) => $h`
-                <div class="vm-service-item">
-                  <div class="vm-card-title">${servicio.titulo}</div>
-                  <div class="vm-card-subtitle">${servicio.consulta_online ? 'Consulta online disponible' : 'Consulta presencial'}</div>
-                  ${servicio.precio ? $h`
-                    <div class="vm-chip-row">
-                      <span class="vm-chip">${utils.formatPrice(servicio.precio)}</span>
-                    </div>
-                  ` : ''}
+          <div class="tabs vm-profile-inner-tabs">
+            <div id="prof-tab-datos" class="tab tab-active">
+              <div class="vm-card vm-profile-main">
+                <div class="vm-profile-image-wrap">
+                  <img class="vm-profile-image" src="${getProfileImage()}" alt="${getProfileName()}" />
                 </div>
-              `) : $h`
-                <div class="vm-empty">No hay servicios disponibles.</div>
-              `}
-            </div>
-          </div>
+                <div class="vm-card-title">${getProfileName()}</div>
+                <div class="vm-card-subtitle">${profile.localidad || 'Localidad no disponible'}</div>
 
-          <div class="vm-card vm-profile-booking">
-            <div class="vm-section-title">Servicio</div>
-            <div class="list no-hairlines-md">
-              <ul>
-                <li class="item-content item-input">
-                  <div class="item-inner">
-                    <div class="item-title item-label">Servicio</div>
-                    <div class="item-input-wrap">
-                      <select id="profile-servicio" @change=${onServiceChange}>
-                        ${getServices().length ? getServices().map((servicio) => $h`
-                          <option value="${servicio.id}" selected=${String(servicio.id) === String(selectedServiceId)}>
-                            ${servicio.titulo}
-                          </option>
-                        `) : $h`
-                          <option value="">No hay servicios</option>
-                        `}
-                      </select>
-                    </div>
+                <div class="vm-profile-meta">
+                  <div class="vm-profile-meta-item">
+                    <strong><i class="icon material-icons">location_on</i> Direccion</strong>
+                    <span>${profile.direccion || 'No disponible'}</span>
                   </div>
-                </li>
-              </ul>
+                  <div class="vm-profile-meta-item">
+                    <strong><i class="icon material-icons">call</i> Telefono</strong>
+                    <span>${profile.telefono || 'No disponible'}</span>
+                  </div>
+                  <div class="vm-profile-meta-item">
+                    <strong><i class="icon material-icons">badge</i> Colegiado</strong>
+                    <span>${profile.numero_colegiado || profile.cp || 'No disponible'}</span>
+                  </div>
+                </div>
+
+                <div class="vm-actions">
+                  <a href="#" class="button ${isFavorite ? 'button-fill' : 'button-outline'} button-small vm-favorite-btn" @click=${toggleFavorite}>
+                    <i class="icon material-icons">${isFavorite ? 'favorite' : 'favorite_border'}</i>
+                    <span>${isFavorite ? 'En favoritos' : 'Anadir a favoritos'}</span>
+                  </a>
+                </div>
+
+                <div class="vm-section-title">Servicios</div>
+                <div class="vm-service-list">
+                  ${getServices().length ? getServices().map((servicio) => $h`
+                    <div class="vm-service-item">
+                      <div class="vm-card-title">${servicio.titulo}</div>
+                      <div class="vm-card-subtitle">${servicio.consulta_online ? 'Consulta online disponible' : 'Consulta presencial'}</div>
+                      ${servicio.precio ? $h`
+                        <div class="vm-chip-row">
+                          <span class="vm-chip">${utils.formatPrice(servicio.precio)}</span>
+                        </div>
+                      ` : ''}
+                    </div>
+                  `) : $h`
+                    <div class="vm-empty">No hay servicios disponibles.</div>
+                  `}
+                </div>
+              </div>
+            </div>
+
+            <div id="prof-tab-reserva" class="tab">
+              <div class="vm-card vm-profile-booking">
+                <div class="vm-section-title">Servicio</div>
+                <div class="list no-hairlines-md">
+                  <ul>
+                    <li class="item-content item-input">
+                      <div class="item-inner">
+                        <div class="item-title item-label">Servicio</div>
+                        <div class="item-input-wrap">
+                          <select id="profile-servicio" @change=${onServiceChange}>
+                            ${getServices().length ? getServices().map((servicio) => $h`
+                              <option value="${servicio.id}" selected=${String(servicio.id) === String(selectedServiceId)}>
+                                ${servicio.titulo}
+                              </option>
+                            `) : $h`
+                              <option value="">No hay servicios</option>
+                            `}
+                          </select>
+                        </div>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="vm-card vm-profile-booking vm-prof-calendar-card">
+                <div class="block block-strong vm-prof-calendar-block">
+                  <div id="calendario-profesional"></div>
+                </div>
+              </div>
+
+              <div class="block-title" style="margin: 20px 10px 0px 10px;">Horarios</div>
+              <div class="contenedor-horarios-tm" style="background: none;">
+                <div class="divHorarios"></div>
+              </div>
+
+              <div class="block noDisponibilidad" style="background: none; display: none;">
+                <p style="text-align: center; font-size: 19px; font-weight: bold; margin-bottom: 0px;">No hay disponibilidad</p>
+                <p style="text-align: center; margin-top: 0px;">Selecciona otra fecha</p>
+              </div>
             </div>
           </div>
-
-          <div class="vm-card vm-profile-booking vm-prof-calendar-card">
-            <div class="block block-strong vm-prof-calendar-block">
-              <div id="calendario-profesional"></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="block-title" style="margin: 20px 10px 0px 10px;">Horarios</div>
-        <div class="contenedor-horarios-tm" style="background: none;">
-          <div class="divHorarios"></div>
-        </div>
-
-        <div class="block noDisponibilidad" style="background: none; display: none;">
-          <p style="text-align: center; font-size: 19px; font-weight: bold; margin-bottom: 0px;">No hay disponibilidad</p>
-          <p style="text-align: center; margin-top: 0px;">Selecciona otra fecha</p>
         </div>
       `}
     </div>

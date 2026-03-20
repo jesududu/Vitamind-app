@@ -182,6 +182,14 @@ body {
   margin-bottom: 12px;
 }
 
+.vm-profile-tabs-block {
+  margin-bottom: 0;
+}
+
+.vm-profile-inner-tabs .tab {
+  padding-top: 0;
+}
+
 .vm-profile-image-wrap {
   display: flex;
   justify-content: center;
