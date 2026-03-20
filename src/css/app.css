@@ -102,10 +102,16 @@ body {
 .vm-search-input .item-inner {
   background: #fafafa;
   border-radius: 16px;
+  width: 100%;
 }
 
 .vm-search-input .item-input-wrap input {
   color: var(--vm-text);
+}
+
+.vm-search-input .item-input-wrap,
+.vm-search-input .item-input-wrap select {
+  width: 100%;
 }
 
 .vm-search-input .item-input-wrap input::placeholder {
