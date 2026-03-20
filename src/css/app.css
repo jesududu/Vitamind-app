@@ -704,21 +704,16 @@ body {
   min-width: 0;
 }
 
-.vm-cita-meta-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+.vm-cita-meta-lines {
+  display: grid;
+  gap: 4px;
   min-width: 0;
 }
 
-.vm-cita-meta-chip {
-  display: inline-flex;
-  align-items: center;
-  max-width: 100%;
-  white-space: nowrap;
-  line-height: 1.2;
-  min-height: 30px;
-  overflow: visible;
+.vm-cita-meta-line {
+  color: var(--vm-text);
+  line-height: 1.35;
+  word-break: break-word;
 }
 
 .vm-chip-activa {

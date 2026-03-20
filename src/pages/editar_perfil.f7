@@ -12,10 +12,10 @@
         <div class="vm-section-title">Datos del paciente</div>
         <div class="list no-hairlines-md">
           <ul>
-            <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Nombre</div><div class="item-input-wrap"><input type="text" id="profile-nombre" /></div></div></li>
-            <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Apellidos</div><div class="item-input-wrap"><input type="text" id="profile-apellidos" /></div></div></li>
-            <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Telefono</div><div class="item-input-wrap"><input type="tel" id="profile-telefono" /></div></div></li>
-            <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Email</div><div class="item-input-wrap"><input type="email" id="profile-email" /></div></div></li>
+            <li class="item-content item-input item-input-outline vm-search-input"><div class="item-inner"><div class="item-input-wrap"><input type="text" id="profile-nombre" placeholder="Nombre" /></div></div></li>
+            <li class="item-content item-input item-input-outline vm-search-input"><div class="item-inner"><div class="item-input-wrap"><input type="text" id="profile-apellidos" placeholder="Apellidos" /></div></div></li>
+            <li class="item-content item-input item-input-outline vm-search-input"><div class="item-inner"><div class="item-input-wrap"><input type="tel" id="profile-telefono" placeholder="Telefono" /></div></div></li>
+            <li class="item-content item-input item-input-outline vm-search-input"><div class="item-inner"><div class="item-input-wrap"><input type="email" id="profile-email" placeholder="Email" /></div></div></li>
           </ul>
         </div>
         <div class="vm-actions">
