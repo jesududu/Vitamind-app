@@ -1190,7 +1190,6 @@ var tmApp = {
         <div class="card-content card-content-padding">
           <div class="vm-cita-detalle-servicio">${tmApp.escapeHtml(String(serviceName).toUpperCase())}</div>
           ${professionalName ? `<div class="vm-cita-detalle-profesional">con ${tmApp.escapeHtml(professionalName)}</div>` : ''}
-          ${props.modalidad ? `<div class="vm-cita-detalle-extra">${tmApp.escapeHtml(props.modalidad)}</div>` : ''}
           ${noteText ? `<div class="vm-cita-detalle-extra">${tmApp.escapeHtml(noteText)}</div>` : ''}
         </div>
       </div>
