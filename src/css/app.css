@@ -763,27 +763,25 @@ body {
 }
 
 .vm-cita-detalle-top {
-  padding-top: 8px;
-  padding-bottom: 4px;
+  padding-top: 10px;
+  padding-bottom: 2px;
+  text-align: center;
 }
 
-.vm-cita-detalle-fecha {
-  font-size: 14px;
-  color: #6b7280;
-  margin-bottom: 6px;
-}
-
-.vm-cita-detalle-hora {
-  font-size: 28px;
+.vm-cita-detalle-datetime {
+  font-size: 24px;
   font-weight: 700;
   color: #111827;
-  line-height: 1.1;
+  line-height: 1.2;
 }
 
 .vm-cita-detalle-card {
   margin-top: 12px;
   margin-bottom: 0;
+  margin-left: 8px;
+  margin-right: 8px;
   border-radius: 18px;
+  background: #fff;
   box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
 }
 
@@ -791,12 +789,14 @@ body {
   font-size: 18px;
   font-weight: 700;
   color: #111827;
+  text-transform: uppercase;
 }
 
 .vm-cita-detalle-profesional {
   margin-top: 6px;
   font-size: 15px;
-  color: #374151;
+  font-weight: 700;
+  color: var(--vm-primary);
 }
 
 .vm-cita-detalle-extra {
@@ -808,6 +808,8 @@ body {
 .vm-cita-detalle-cancel-block {
   margin-top: 14px;
   margin-bottom: 2px;
+  padding-left: 8px;
+  padding-right: 8px;
 }
 
 .vm-cita-cancel-btn {

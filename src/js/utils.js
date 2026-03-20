@@ -1179,17 +1179,17 @@ var tmApp = {
     const professionalName = props.empleado || '';
     const startTime = tmApp.formatTime(appointment.start);
     const noteText = String(props.nota || '').trim();
+    const dateText = tmApp.formatDate(appointment.start);
 
     return `
       <div class="block vm-cita-detalle-top">
-        <div class="vm-cita-detalle-fecha">${tmApp.escapeHtml(tmApp.formatDate(appointment.start))}</div>
-        <div class="vm-cita-detalle-hora">${tmApp.escapeHtml(startTime)}</div>
+        <div class="vm-cita-detalle-datetime">${tmApp.escapeHtml(startTime)} - ${tmApp.escapeHtml(dateText)}</div>
       </div>
 
       <div class="card vm-cita-detalle-card">
         <div class="card-content card-content-padding">
-          <div class="vm-cita-detalle-servicio">${tmApp.escapeHtml(serviceName)}</div>
-          ${professionalName ? `<div class="vm-cita-detalle-profesional">${tmApp.escapeHtml(professionalName)}</div>` : ''}
+          <div class="vm-cita-detalle-servicio">${tmApp.escapeHtml(String(serviceName).toUpperCase())}</div>
+          ${professionalName ? `<div class="vm-cita-detalle-profesional">con ${tmApp.escapeHtml(professionalName)}</div>` : ''}
           ${props.modalidad ? `<div class="vm-cita-detalle-extra">${tmApp.escapeHtml(props.modalidad)}</div>` : ''}
           ${noteText ? `<div class="vm-cita-detalle-extra">${tmApp.escapeHtml(noteText)}</div>` : ''}
         </div>
