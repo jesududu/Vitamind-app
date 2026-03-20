@@ -437,11 +437,14 @@ body {
 }
 
 .contenedor-horarios-tm {
-  overflow-x: scroll;
+  overflow-x: auto;
+  overflow-y: hidden;
   scrollbar-width: none;
   -ms-overflow-style: none;
   background: white;
   padding: 0px 15px;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
 }
 
 .contenedor-horarios-tm::-webkit-scrollbar {
@@ -449,15 +452,17 @@ body {
 }
 
 .divHorarios {
-  display: flex;
-  overflow-x: scroll;
+  display: inline-flex;
+  flex-wrap: nowrap;
   gap: 10px;
-  float: left;
-  min-width: 100%;
+  width: max-content;
+  min-width: 0;
+  white-space: nowrap;
 }
 
 
 .horario {
+  flex: 0 0 auto;
   width: 100px;
   height: auto;
   background-color: #ffffff;
