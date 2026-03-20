@@ -88,6 +88,14 @@
             clearPreviousHistory: true,
           });
         }
+        const citasView = $f7.views.get('#view-citas');
+        if (citasView && citasView.router) {
+          citasView.router.navigate('/citas/', {
+            reloadCurrent: true,
+            ignoreCache: true,
+            clearPreviousHistory: true,
+          });
+        }
         $f7.tab.show('#view-home');
       } catch (error) {
         $f7.dialog.alert(utils.getApiErrorMessage(error, 'No se pudo iniciar sesion'));

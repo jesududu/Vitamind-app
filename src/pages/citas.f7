@@ -136,6 +136,7 @@
       `;
 
       try {
+        $f7.preloader.show();
         const response = await utils.getMyAppointments();
         const activas = response && response.activas && Array.isArray(response.activas.data) ? response.activas.data : [];
         const completadas = response && response.completadas && Array.isArray(response.completadas.data) ? response.completadas.data : [];
@@ -158,6 +159,8 @@
             </ul>
           </div>
         `;
+      } finally {
+        $f7.preloader.hide();
       }
     };
 
