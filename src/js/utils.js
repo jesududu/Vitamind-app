@@ -1346,6 +1346,16 @@ var tmApp = {
     }).format(new Date(value));
   },
 
+  formatTime: function (value) {
+    if (!value) return '';
+
+    return new Intl.DateTimeFormat('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).format(new Date(value));
+  },
+
   formatPrice: function (value) {
     return new Intl.NumberFormat('es-ES', {
       style: 'currency',
