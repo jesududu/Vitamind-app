@@ -61,7 +61,8 @@ body {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  width: 220px;
+  width: auto;
+  max-width: calc(100% - 120px);
   display: flex;
   justify-content: center;
   pointer-events: none;
@@ -71,6 +72,8 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  justify-content: center;
+  max-width: 100%;
 }
 
 .vm-home-logo {
@@ -114,7 +117,7 @@ body {
 }
 
 .vm-search-input .item-inner {
-  background: #fafafa;
+  background: transparent;
   border-radius: 16px;
   width: 100%;
 }
