@@ -14,7 +14,7 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $f7, $on, $onMounted }) {
+  export default function (props, { $el, $f7, $on, $onMounted, $store }) {
     const getPageNode = () => {
       if ($el && $el[0]) return $el[0];
       if ($el && $el.nodeType === 1) return $el;
@@ -112,7 +112,8 @@
     };
 
     const loadCitas = async () => {
-      if (!utils.isAuthenticated()) {
+      const session = ($store && $store.state && $store.state.session) ? $store.state.session : utils.getSession();
+      if (!session || !session.token) {
         renderLoggedOut();
         return;
       }
@@ -161,8 +162,18 @@
     };
 
     $on('pageInit', loadCitas);
-    $on('pageAfterIn', loadCitas);
-    $onMounted(loadCitas);
+    $on('pageAfterIn', () => {
+      if ($store) {
+        $store.dispatch('refreshSession');
+      }
+      loadCitas();
+    });
+    $onMounted(() => {
+      if ($store) {
+        $store.dispatch('refreshSession');
+      }
+      loadCitas();
+    });
 
     return $render;
   }
