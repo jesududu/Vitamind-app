@@ -12,17 +12,15 @@
           <ul>
             <li class="item-content item-input item-input-outline vm-search-input">
               <div class="item-inner">
-                <div class="item-title item-label">Localidad</div>
                 <div class="item-input-wrap">
-                  <input type="text" id="search-localidad" placeholder="Ciudad o provincia" value="${searchLocalidad}" />
+                  <input type="text" id="search-localidad" placeholder="Buscar localidad" value="${searchLocalidad}" />
                 </div>
               </div>
             </li>
             <li class="item-content item-input item-input-outline vm-search-input">
               <div class="item-inner">
-                <div class="item-title item-label">Profesional o servicio</div>
                 <div class="item-input-wrap">
-                  <input type="text" id="search-query" placeholder="Nombre o especialidad" value="${searchQuery}" />
+                  <input type="text" id="search-query" placeholder="Buscar profesional o servicio" value="${searchQuery}" />
                 </div>
               </div>
             </li>
