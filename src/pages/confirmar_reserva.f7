@@ -22,18 +22,25 @@
       `}
 
       ${utils.isAuthenticated() && draft && $h`
-        <div class="block block-strong inset">
-          <div class="vm-section-title">Resumen de la cita</div>
-          <div class="vm-kv"><span>Profesional</span><strong>${draft.profesional || 'Profesional'}</strong></div>
-          <div class="vm-kv"><span>Servicio</span><strong>${draft.servicio_titulo || 'Servicio'}</strong></div>
-          <div class="vm-kv"><span>Fecha</span><strong>${utils.formatDate(draft.fecha)}</strong></div>
-          <div class="vm-kv"><span>Hora</span><strong>${formatTimeRange()}</strong></div>
-          <div class="vm-kv"><span>Centro</span><strong>${draft.empresa_nombre || draft.empresa || 'No especificado'}</strong></div>
-          <div class="vm-kv"><span>Modalidad</span><strong>${draft.consulta_online ? 'Online o presencial segun servicio' : 'Presencial'}</strong></div>
-          <div class="vm-kv"><span>Nota</span><strong>${draft.nota || 'Sin nota'}</strong></div>
+        <div class="block vm-cita-detalle-top">
+          <div class="vm-cita-detalle-datetime">${formatTimeStart()} - ${utils.formatDate(draft.fecha)}</div>
         </div>
 
-        <div class="block">
+        <div class="card vm-cita-detalle-card">
+          <div class="card-content card-content-padding">
+            <div class="vm-cita-detalle-servicio">${String(draft.servicio_titulo || 'Servicio').toUpperCase()}</div>
+            <div class="vm-cita-detalle-profesional">con ${draft.profesional || 'Profesional'}</div>
+            ${draft.nota ? $h`<div class="vm-cita-detalle-extra">${draft.nota}</div>` : ''}
+          </div>
+        </div>
+
+        <div class="card vm-cita-detalle-card">
+          <div class="card-content card-content-padding">
+            <div class="vm-cita-detalle-centro">${draft.empresa_nombre || draft.empresa || 'No especificado'}</div>
+          </div>
+        </div>
+
+        <div class="block vm-cita-detalle-cancel-block">
           <a href="#" class="button button-fill button-large" @click=${submitReservation}>Confirmar cita</a>
         </div>
       `}
@@ -59,6 +66,11 @@
         return `${start} - ${end}`;
       }
       return start || end || '';
+    };
+
+    const formatTimeStart = () => {
+      if (!draft) return '';
+      return String(draft.hora_inicio || '').slice(0, 5);
     };
 
     const submitReservation = async () => {

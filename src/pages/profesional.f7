@@ -73,11 +73,10 @@
 
             <div id="prof-tab-reserva" class="tab tab-active">
               <div class="vm-card vm-profile-booking">
-                <div class="vm-section-title">Servicio</div>
                 <div class="list no-hairlines-md">
                   <ul>
                     <li>
-                      <a href="#" class="item-link item-content smart-select smart-select-init" data-open-in="sheet">
+                      <a href="#" class="item-link item-content smart-select smart-select-init" data-open-in="popup">
                         <select id="profile-servicio" @change=${onServiceChange}>
                           ${getServices().length ? getServices().map((servicio) => $h`
                             <option value="${servicio.id}" selected=${String(servicio.id) === String(selectedServiceId)}>
