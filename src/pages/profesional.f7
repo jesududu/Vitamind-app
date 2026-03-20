@@ -72,15 +72,14 @@
             </div>
 
             <div id="prof-tab-reserva" class="tab tab-active">
-              <div class="vm-card vm-profile-main vm-profile-reserva-head">
-                <div class="vm-profile-image-wrap">
-                  <img class="vm-profile-image" src="${getProfileImage()}" alt="${getProfileName()}" />
-                </div>
-                <div class="vm-card-title">${getProfileName()}</div>
-                <div class="vm-card-subtitle">${profile.localidad || 'Localidad no disponible'}</div>
-              </div>
-
               <div class="vm-card vm-profile-booking">
+                <div class="vm-profile-reserva-header">
+                  <div class="vm-profile-image-wrap">
+                    <img class="vm-profile-image" src="${getProfileImage()}" alt="${getProfileName()}" />
+                  </div>
+                  <div class="vm-card-title">${getProfileName()}</div>
+                  <div class="vm-card-subtitle">${profile.localidad || 'Localidad no disponible'}</div>
+                </div>
                 <div class="list no-hairlines-md">
                   <ul>
                     <li>
@@ -118,6 +117,7 @@
                 <p style="text-align: center; font-size: 19px; font-weight: bold; margin-bottom: 0px;">No hay disponibilidad</p>
                 <p style="text-align: center; margin-top: 0px;">Selecciona otra fecha</p>
               </div>
+              <div style="height:50px;"></div>
             </div>
           </div>
         </div>

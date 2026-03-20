@@ -818,12 +818,13 @@ body {
   box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
 }
 
-.vm-profile-reserva-head {
-  margin-bottom: 18px;
-}
-
 .vm-profile-booking {
   margin-top: 0;
+}
+
+.vm-profile-reserva-header {
+  padding-top: 16px;
+  padding-bottom: 8px;
 }
 
 .vm-prof-calendar-card {
