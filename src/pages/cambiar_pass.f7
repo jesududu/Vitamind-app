@@ -2,24 +2,57 @@
   <div class="page" data-name="cambiar-pass">
     <div class="navbar">
       <div class="navbar-bg"></div>
-      <div class="navbar-inner">
-        <div class="left"><a href="#" class="link back"><i class="icon icon-back"></i></a></div>
-        <div class="title">Cambiar contrasena</div>
+      <div class="navbar-inner sliding">
+        <div class="left">
+          <a href="#" class="link back">
+            <i class="icon icon-back"></i>
+          </a>
+        </div>
+        <div class="title">Contrasena</div>
+        <div class="right">
+          <a href="#" class="link btnEditPass" @click=${enableEdit}>Editar</a>
+          <a href="#" class="link btnSavePass" style="display:none;" @click=${submitPassword}>Guardar</a>
+        </div>
       </div>
     </div>
     <div class="page-content vm-page-content">
-      <div class="vm-form-card">
-        <div class="vm-section-title">Seguridad</div>
-        <p class="vm-muted">Esta pantalla sigue el plan de la app, pero el endpoint autenticado de cambio de contrasena todavia no esta disponible en la API.</p>
-        <div class="list no-hairlines-md">
-          <ul>
-            <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Nueva contrasena</div><div class="item-input-wrap"><input type="password" id="change-password" disabled /></div></div></li>
-            <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Confirmar contrasena</div><div class="item-input-wrap"><input type="password" id="change-password-confirmation" disabled /></div></div></li>
-          </ul>
-        </div>
-        <div class="vm-actions">
-          <a href="#" id="change-pass-submit" class="button button-fill">Probar endpoint</a>
-        </div>
+      <div class="block-title">Cambiar contrasena</div>
+      <form id="loginCambiarPass" class="list inset list-dividers-ios form-store-data">
+        <ul>
+          <li class="item-content item-input item-input-outline">
+            <div class="item-inner">
+              <div class="item-title item-floating-label">Nueva contrasena</div>
+              <div class="item-input-wrap">
+                <input
+                  type="password"
+                  id="txtPasNew"
+                  class="cambiarPass"
+                  placeholder="Minimo 8 caracteres"
+                  disabled
+                />
+                <span class="input-clear-button"></span>
+              </div>
+            </div>
+          </li>
+          <li class="item-content item-input item-input-outline">
+            <div class="item-inner">
+              <div class="item-title item-floating-label">Confirmar contrasena</div>
+              <div class="item-input-wrap">
+                <input
+                  type="password"
+                  id="txtPasCon"
+                  class="cambiarPass"
+                  placeholder="Confirma tu contrasena"
+                  disabled
+                />
+                <span class="input-clear-button"></span>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </form>
+      <div class="block">
+        <p class="vm-inline-note">La pantalla ya queda preparada. El cambio real de contrasena desde la app sigue pendiente de endpoint autenticado en la API.</p>
       </div>
     </div>
   </div>
@@ -27,16 +60,75 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $on, $f7 }) {
-    $on('pageInit', () => {
-      $el.find('#change-pass-submit').on('click', async () => {
-        try {
-          await utils.changePassword();
-        } catch (error) {
-          $f7.dialog.alert(utils.getApiErrorMessage(error, 'Endpoint no disponible'));
-        }
+  export default function (props, { $el, $f7 }) {
+    const getPageNode = () => {
+      if ($el && $el[0]) return $el[0];
+      if ($el && $el.nodeType === 1) return $el;
+      return document.querySelector('.page[data-name="cambiar-pass"].page-current') || document.querySelector('.page[data-name="cambiar-pass"]');
+    };
+
+    const getField = (selector) => {
+      const pageNode = getPageNode();
+      return pageNode ? pageNode.querySelector(selector) : null;
+    };
+
+    const setEditingState = (isEditing) => {
+      const pageNode = getPageNode();
+      if (!pageNode) return;
+
+      const editLink = pageNode.querySelector('.btnEditPass');
+      const saveLink = pageNode.querySelector('.btnSavePass');
+      const inputs = pageNode.querySelectorAll('.cambiarPass');
+
+      if (editLink) editLink.style.display = isEditing ? 'none' : 'block';
+      if (saveLink) saveLink.style.display = isEditing ? 'block' : 'none';
+      inputs.forEach((input) => {
+        input.disabled = !isEditing;
       });
-    });
+
+      if (isEditing) {
+        const newPassInput = getField('#txtPasNew');
+        if (newPassInput) newPassInput.focus();
+      }
+    };
+
+    const enableEdit = (event) => {
+      event.preventDefault();
+      setEditingState(true);
+    };
+
+    const submitPassword = async (event) => {
+      event.preventDefault();
+
+      const newPassword = (getField('#txtPasNew') || {}).value || '';
+      const confirmPassword = (getField('#txtPasCon') || {}).value || '';
+
+      if (!newPassword || !confirmPassword) {
+        $f7.dialog.alert('Introduce todos los campos.');
+        return;
+      }
+
+      if (newPassword.length < 8) {
+        $f7.dialog.alert('La contrasena debe tener al menos 8 caracteres.');
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        $f7.dialog.alert('Las contrasenas no coinciden.');
+        return;
+      }
+
+      try {
+        await utils.changePassword({
+          password: newPassword,
+          password_confirmation: confirmPassword,
+        });
+        $f7.dialog.alert('Contrasena actualizada correctamente.');
+        setEditingState(false);
+      } catch (error) {
+        $f7.dialog.alert(utils.getApiErrorMessage(error, 'No se pudo cambiar la contrasena'));
+      }
+    };
 
     return $render;
   }

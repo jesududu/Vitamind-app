@@ -626,6 +626,18 @@ body {
   background: #ffffff !important;
 }
 
+.page[data-name="normas"],
+.page[data-name="normas"] .page-content,
+.page[data-name="terminos"],
+.page[data-name="terminos"] .page-content {
+  background: #f7f7f7 !important;
+}
+
+.page[data-name="normas"] .block,
+.page[data-name="terminos"] .block {
+  background: transparent !important;
+}
+
 .vm-reservas-list ul {
   display: flex;
   flex-direction: column;

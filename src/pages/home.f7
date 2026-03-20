@@ -44,7 +44,9 @@
         <div class="vm-section-title">Ultimos profesionales</div>
         <div class="vm-list">
           ${loadingLatest && $h`
-            <div class="vm-loading">Cargando profesionales...</div>
+            <div class="block" style="text-align:center; padding-top: 20px; padding-bottom: 20px;">
+              <div class="preloader"></div>
+            </div>
           `}
           ${!loadingLatest && latestError && $h`
             <div class="vm-empty">${latestError}</div>
