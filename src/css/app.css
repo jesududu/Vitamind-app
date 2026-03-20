@@ -518,7 +518,7 @@ body {
 .page[data-name="favoritos"] .page-content,
 .page[data-name="editar-perfil"],
 .page[data-name="editar-perfil"] .page-content {
-  background: #ffffff !important;
+  background: #f7f7f7 !important;
 }
 
 .page[data-name="settings"] .vm-card,
