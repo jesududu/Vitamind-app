@@ -15,9 +15,9 @@
       ${!loadingProfile && !profileError && profile && $h`
         <div class="vm-profile-layout">
           <div class="block block-strong inset vm-profile-tabs-block">
-            <div class="segmented segmented-strong">
-              <a href="#prof-tab-datos" class="button tab-link tab-link-active">Datos</a>
-              <a href="#prof-tab-reserva" class="button tab-link">Reserva</a>
+            <div class="segmented segmented-strong vm-profile-segmented">
+              <a href="#prof-tab-datos" class="button tab-link tab-link-active" @click=${() => switchTab('datos')}>Datos</a>
+              <a href="#prof-tab-reserva" class="button tab-link" @click=${() => switchTab('reserva')}>Reserva</a>
             </div>
           </div>
 
@@ -132,6 +132,7 @@
     let selectedDate = null;
     let selectedServiceId = '';
     let lastCalendarDate = null;
+    let activeTab = 'datos';
 
     const months = [
       'Enero',
@@ -401,14 +402,16 @@
         loadingProfile = false;
         $update();
 
-        $f7.utils.nextTick(async () => {
-          initCalendar();
-          if (getServices().length) {
-            await loadSlots();
-          } else {
-            showAvailabilityMessage('No hay servicios disponibles', 'Para este profesional');
-          }
-        });
+        if (activeTab === 'reserva') {
+          $f7.utils.nextTick(async () => {
+            initCalendar();
+            if (getServices().length) {
+              await loadSlots();
+            } else {
+              showAvailabilityMessage('No hay servicios disponibles', 'Para este profesional');
+            }
+          });
+        }
       } catch (error) {
         profile = null;
         loadingProfile = false;
@@ -424,6 +427,20 @@
       loadSlots();
     };
 
+    const switchTab = (tabName) => {
+      activeTab = tabName;
+      if (tabName !== 'reserva' || !profile) return;
+
+      $f7.utils.nextTick(async () => {
+        initCalendar();
+        if (getServices().length) {
+          await loadSlots();
+        } else {
+          showAvailabilityMessage('No hay servicios disponibles', 'Para este profesional');
+        }
+      });
+    };
+
     const initPage = () => {
       if (initialized) return;
       initialized = true;
@@ -433,7 +450,7 @@
     $on('pageInit', initPage);
     $onMounted(initPage);
     $on('pageAfterIn', () => {
-      if (!profile) return;
+      if (!profile || activeTab !== 'reserva') return;
       $f7.utils.nextTick(() => {
         initCalendar();
         loadSlots();

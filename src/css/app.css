@@ -184,10 +184,33 @@ body {
 
 .vm-profile-tabs-block {
   margin-bottom: 0;
+  background: transparent;
+  box-shadow: none;
+  border: 0;
+  padding: 0;
 }
 
 .vm-profile-inner-tabs .tab {
   padding-top: 0;
+}
+
+.vm-profile-segmented {
+  --f7-segmented-bg-color: #ffffff;
+  --f7-segmented-strong-padding: 4px;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid rgba(29, 42, 59, 0.08);
+  box-shadow: 0 8px 20px rgba(29, 42, 59, 0.05);
+}
+
+.vm-profile-segmented .button {
+  color: var(--vm-secondary);
+}
+
+.vm-profile-segmented .button-active,
+.vm-profile-segmented .tab-link-active {
+  background: #ffffff;
+  color: var(--vm-primary-dark);
 }
 
 .vm-profile-image-wrap {
@@ -306,10 +329,20 @@ body {
   margin: 0;
   padding: 12px 8px 16px;
   background: #fff;
+  overflow: hidden;
 }
 
 .vm-prof-calendar-card {
   padding: 10px 8px 12px;
+  overflow: hidden;
+}
+
+#calendario-profesional {
+  overflow: hidden;
+}
+
+#calendario-profesional .calendar {
+  width: 100%;
 }
 
 #calendario-profesional .calendar-day-today .calendar-day-number {
