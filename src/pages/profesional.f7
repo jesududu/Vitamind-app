@@ -452,6 +452,11 @@
 
     const onServiceChange = (event) => {
       selectedServiceId = event.target.value;
+      const smartSelectEl = event.target.closest('.smart-select');
+      const smartSelect = smartSelectEl ? (smartSelectEl.f7SmartSelect || $f7.smartSelect.get(smartSelectEl)) : null;
+      if (smartSelect && typeof smartSelect.close === 'function') {
+        smartSelect.close();
+      }
       loadSlots(true);
     };
 
