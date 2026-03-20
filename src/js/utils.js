@@ -1178,7 +1178,6 @@ var tmApp = {
     const centerName = tmApp.getAppointmentCenterName(appointment);
     const addressText = tmApp.getAppointmentAddress(appointment);
     const mapsEmbedUrl = tmApp.getAppointmentMapsEmbedUrl(appointment);
-    const centerImage = tmApp.getAppointmentCenterImage(appointment);
     const serviceName = appointment.title || props.servicio || 'Cita';
     const professionalName = props.empleado || '';
     const startTime = tmApp.formatTime(appointment.start);
@@ -1209,13 +1208,8 @@ var tmApp = {
 
       <div class="card vm-cita-detalle-card">
         <div class="card-content card-content-padding">
-          <div class="vm-cita-centro-row">
-            <img src="${centerImage}" alt="${tmApp.escapeHtml(centerName)}" class="vm-cita-centro-img" />
-            <div class="vm-cita-centro-info">
-              <div class="vm-cita-detalle-centro">${tmApp.escapeHtml(centerName)}</div>
-              ${addressText ? `<div class="vm-cita-detalle-direccion">${tmApp.escapeHtml(addressText)}</div>` : ''}
-            </div>
-          </div>
+          <div class="vm-cita-detalle-centro">${tmApp.escapeHtml(centerName)}</div>
+          ${addressText ? `<div class="vm-cita-detalle-direccion">${tmApp.escapeHtml(addressText)}</div>` : ''}
         </div>
       </div>
 
