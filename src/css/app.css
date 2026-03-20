@@ -180,6 +180,7 @@ body {
   display: grid;
   gap: 16px;
   margin-bottom: 12px;
+  min-width: 0;
 }
 
 .vm-profile-tabs-block {
@@ -192,6 +193,15 @@ body {
 
 .vm-profile-inner-tabs .tab {
   padding-top: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.vm-profile-inner-tabs,
+#prof-tab-reserva,
+.vm-profile-booking,
+.vm-prof-calendar-card {
+  min-width: 0;
 }
 
 .vm-profile-segmented {
@@ -437,6 +447,9 @@ body {
 }
 
 .contenedor-horarios-tm {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
@@ -457,6 +470,7 @@ body {
   gap: 10px;
   width: max-content;
   min-width: 0;
+  max-width: none;
   white-space: nowrap;
 }
 
