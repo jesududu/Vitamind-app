@@ -818,6 +818,28 @@ body {
   box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
 }
 
+.vm-profile-reserva-head {
+  margin-bottom: 18px;
+}
+
+.vm-profile-booking {
+  margin-top: 0;
+}
+
+.vm-profile-booking .list {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.vm-profile-booking .item-content {
+  min-height: 52px;
+}
+
+.vm-profile-booking .item-inner {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
 .vm-cita-detalle-servicio {
   font-size: 18px;
   font-weight: 700;
