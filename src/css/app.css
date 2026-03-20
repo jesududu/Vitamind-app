@@ -621,6 +621,11 @@ body {
   margin-top: 10px;
 }
 
+.page[data-name="citas"] .vm-reservas-list {
+  margin-left: -16px;
+  margin-right: -16px;
+}
+
 .page[data-name="citas"] .page-content,
 .page[data-name="citas"] {
   background: #f7f7f7 !important;
