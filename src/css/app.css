@@ -845,11 +845,11 @@ body {
 }
 
 .vm-cita-centro-img {
-  width: 68px;
-  height: 68px;
-  border-radius: 14px;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
   object-fit: cover;
-  flex: 0 0 68px;
+  flex: 0 0 42px;
   background: #f3f4f6;
 }
 

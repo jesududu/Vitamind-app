@@ -761,15 +761,11 @@ var tmApp = {
       return 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160"><rect width="160" height="160" rx="80" fill="%23f3efe9"/><circle cx="80" cy="62" r="28" fill="%23d7c8bc"/><path d="M36 132c8-24 28-38 44-38s36 14 44 38" fill="%23d7c8bc"/></svg>';
     }
 
-    if (image.startsWith('http')) {
+    if (image.startsWith('http') || image.startsWith('data:') || image.startsWith('blob:')) {
       return image;
     }
 
-    if (image.startsWith('/')) {
-      return image;
-    }
-
-    return `${appUrl}${image.replace(/^\/+/, '')}`;
+    return `${appUrl}${String(image).replace(/^\/+/, '')}`;
   },
 
   normalizeHomeProfessional: function (professional = {}) {
