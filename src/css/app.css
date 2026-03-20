@@ -622,8 +622,8 @@ body {
 }
 
 .page[data-name="citas"] .vm-reservas-list {
-  margin-left: -16px;
-  margin-right: -16px;
+  margin-left: -8px;
+  margin-right: -8px;
 }
 
 .page[data-name="citas"] .page-content,
@@ -702,6 +702,11 @@ body {
 
 .vm-reserva-item .item-subtitle {
   margin-top: 4px;
+}
+
+.vm-cita-profesional-line {
+  color: var(--vm-primary) !important;
+  font-weight: 600;
 }
 
 .vm-reserva-item .item-text {

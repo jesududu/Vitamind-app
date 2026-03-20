@@ -66,10 +66,10 @@
             <a href="#" class="item-link item-content reserva-item vm-reserva-item" data-id="${utils.escapeHtml(item.id)}">
               <div class="item-inner">
                 <div class="item-title-row">
-                  <div class="item-title">${utils.escapeHtml(item.title || props.servicio || 'Cita')}</div>
+                  <div class="item-title">${utils.escapeHtml(String(item.title || props.servicio || 'Cita').toUpperCase())}</div>
                   <span class="vm-chip ${estadoClass}">${utils.escapeHtml(estado)}</span>
                 </div>
-                <div class="item-subtitle">${utils.escapeHtml(props.empleado || '')}</div>
+                <div class="item-subtitle vm-cita-profesional-line">${props.empleado ? `con ${utils.escapeHtml(props.empleado)}` : ''}</div>
                 <div class="item-text">
                   <div class="vm-cita-date-pill">
                     <i class="icon material-icons">calendar_month</i>
