@@ -76,20 +76,21 @@
                 <div class="vm-section-title">Servicio</div>
                 <div class="list no-hairlines-md">
                   <ul>
-                    <li class="item-content item-input item-input-outline">
-                      <div class="item-inner">
-                        <div class="item-input-wrap">
-                          <select id="profile-servicio" @change=${onServiceChange}>
-                            ${getServices().length ? getServices().map((servicio) => $h`
-                              <option value="${servicio.id}" selected=${String(servicio.id) === String(selectedServiceId)}>
-                                ${servicio.titulo}
-                              </option>
-                            `) : $h`
-                              <option value="">No hay servicios</option>
-                            `}
-                          </select>
+                    <li>
+                      <a href="#" class="item-link item-content smart-select smart-select-init" data-open-in="sheet">
+                        <select id="profile-servicio" @change=${onServiceChange}>
+                          ${getServices().length ? getServices().map((servicio) => $h`
+                            <option value="${servicio.id}" selected=${String(servicio.id) === String(selectedServiceId)}>
+                              ${servicio.titulo}
+                            </option>
+                          `) : $h`
+                            <option value="">No hay servicios</option>
+                          `}
+                        </select>
+                        <div class="item-inner">
+                          <div class="item-title">Servicio</div>
                         </div>
-                      </div>
+                      </a>
                     </li>
                   </ul>
                 </div>
