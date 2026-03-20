@@ -12,11 +12,7 @@
       </div>
     </div>
     <div class="page-content vm-page-content">
-      <div class="detalle-cita">
-        <div class="block">
-          <p class="vm-muted">Cargando detalle de la cita...</p>
-        </div>
-      </div>
+      <div class="detalle-cita"></div>
     </div>
   </div>
 </template>
@@ -30,14 +26,21 @@
       return document.querySelector('.page[data-name="cita-detalle"].page-current') || document.querySelector('.page[data-name="cita-detalle"]');
     };
 
+    const getAppointmentId = () => {
+      if ($f7route && $f7route.params && $f7route.params.id) return String($f7route.params.id);
+      if (props && props.id) return String(props.id);
+      return '';
+    };
+
     const render = () => {
       const pageNode = getPageNode();
       const container = pageNode ? pageNode.querySelector('.detalle-cita') : null;
       const cita = utils.getStoredObject(utils.storageKeys.appointmentSelected);
+      const appointmentId = getAppointmentId();
 
       if (!container) return;
 
-      if (!cita || String(cita.id) !== String($f7route.params.id)) {
+      if (!cita || (appointmentId && String(cita.id) !== appointmentId)) {
         container.innerHTML = utils.getAppointmentDetailHtml(null);
         return;
       }
@@ -69,7 +72,20 @@
     };
 
     const initPage = () => {
-      setTimeout(render, 0);
+      $f7.preloader.show();
+      setTimeout(() => {
+        try {
+          render();
+        } catch (error) {
+          const pageNode = getPageNode();
+          const container = pageNode ? pageNode.querySelector('.detalle-cita') : null;
+          if (container) {
+            container.innerHTML = `<div class="block"><p class="vm-empty">${utils.escapeHtml(utils.getApiErrorMessage(error, 'No se pudo cargar el detalle de la cita'))}</p></div>`;
+          }
+        } finally {
+          $f7.preloader.hide();
+        }
+      }, 0);
     };
 
     $on('pageInit', initPage);
