@@ -11,15 +11,19 @@
         <div class="title">Citas</div>
       </div>
     </div>
-    <div class="page-content">
-      <div class="detalle-cita"></div>
+    <div class="page-content vm-page-content">
+      <div class="detalle-cita">
+        <div class="block">
+          <p class="vm-muted">Cargando detalle de la cita...</p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $on, $f7route, $f7 }) {
+  export default function (props, { $el, $on, $onMounted, $f7route, $f7 }) {
     const getPageNode = () => {
       if ($el && $el[0]) return $el[0];
       if ($el && $el.nodeType === 1) return $el;
@@ -64,8 +68,13 @@
       }
     };
 
-    $on('pageInit', render);
-    $on('pageAfterIn', render);
+    const initPage = () => {
+      setTimeout(render, 0);
+    };
+
+    $on('pageInit', initPage);
+    $on('pageAfterIn', initPage);
+    $onMounted(initPage);
 
     return $render;
   }
