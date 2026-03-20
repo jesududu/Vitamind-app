@@ -12,19 +12,17 @@
         <div class="vm-section-title">Iniciar sesion como paciente</div>
         <form class="list no-hairlines-md" @submit=${submitLogin}>
           <ul>
-            <li class="item-content item-input">
+            <li class="item-content item-input item-input-outline vm-search-input">
               <div class="item-inner">
-                <div class="item-title item-label">Email</div>
                 <div class="item-input-wrap">
-                  <input type="email" id="login-email" placeholder="tucorreo@ejemplo.com" />
+                  <input type="email" id="login-email" placeholder="Email" />
                 </div>
               </div>
             </li>
-            <li class="item-content item-input">
+            <li class="item-content item-input item-input-outline vm-search-input">
               <div class="item-inner">
-                <div class="item-title item-label">Contrasena</div>
                 <div class="item-input-wrap">
-                  <input type="password" id="login-password" placeholder="********" />
+                  <input type="password" id="login-password" placeholder="Contrasena" />
                 </div>
               </div>
             </li>

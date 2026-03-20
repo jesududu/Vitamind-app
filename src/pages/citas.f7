@@ -29,32 +29,11 @@
     const renderLoggedOut = () => {
       const container = getContainer();
       if (!container) return;
-
       container.innerHTML = `
-        <div class="block">
-          <p style="text-align:center;color:#bfbfbf;">
-            <i class="icon material-symbols-outlined icon-large">event_busy</i>
-          </p>
-          <p style="padding:0 50px;text-align:center;">Inicia sesion para ver tus citas.</p>
-        </div>
-        <div class="block">
-          <button id="btnLogin" class="col button button-large button-outline" style="text-transform:none;">Iniciar sesion</button>
+        <div class="block" style="padding-top: 24px; text-align: center;">
+          <p class="vm-muted">Inicia sesion. Aqui se reflejaran tus citas.</p>
         </div>
       `;
-
-      const loginBtn = container.querySelector('#btnLogin');
-      if (loginBtn) {
-        loginBtn.addEventListener('click', () => {
-          const settingsView = $f7.views.get('#view-settings');
-          if (settingsView && settingsView.router) {
-            $f7.tab.show('#view-settings');
-            settingsView.router.navigate('/login/', {
-              ignoreCache: true,
-              reloadCurrent: true,
-            });
-          }
-        });
-      }
     };
 
     const renderReservations = (items) => {

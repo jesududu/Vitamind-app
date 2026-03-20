@@ -12,12 +12,12 @@
         <div class="vm-section-title">Crear cuenta paciente</div>
         <div class="list no-hairlines-md">
           <ul>
-            <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Nombre</div><div class="item-input-wrap"><input type="text" id="reg-nombre" /></div></div></li>
-            <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Apellidos</div><div class="item-input-wrap"><input type="text" id="reg-apellidos" /></div></div></li>
-            <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Teléfono</div><div class="item-input-wrap"><input type="tel" id="reg-telefono" /></div></div></li>
-            <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Email</div><div class="item-input-wrap"><input type="email" id="reg-email" /></div></div></li>
-            <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Contraseña</div><div class="item-input-wrap"><input type="password" id="reg-password" /></div></div></li>
-            <li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">Confirmar contraseña</div><div class="item-input-wrap"><input type="password" id="reg-password-confirmation" /></div></div></li>
+            <li class="item-content item-input item-input-outline vm-search-input"><div class="item-inner"><div class="item-input-wrap"><input type="text" id="reg-nombre" placeholder="Nombre" /></div></div></li>
+            <li class="item-content item-input item-input-outline vm-search-input"><div class="item-inner"><div class="item-input-wrap"><input type="text" id="reg-apellidos" placeholder="Apellidos" /></div></div></li>
+            <li class="item-content item-input item-input-outline vm-search-input"><div class="item-inner"><div class="item-input-wrap"><input type="tel" id="reg-telefono" placeholder="Telefono" /></div></div></li>
+            <li class="item-content item-input item-input-outline vm-search-input"><div class="item-inner"><div class="item-input-wrap"><input type="email" id="reg-email" placeholder="Email" /></div></div></li>
+            <li class="item-content item-input item-input-outline vm-search-input"><div class="item-inner"><div class="item-input-wrap"><input type="password" id="reg-password" placeholder="Contrasena" /></div></div></li>
+            <li class="item-content item-input item-input-outline vm-search-input"><div class="item-inner"><div class="item-input-wrap"><input type="password" id="reg-password-confirmation" placeholder="Confirmar contrasena" /></div></div></li>
           </ul>
         </div>
         <div class="vm-actions">
