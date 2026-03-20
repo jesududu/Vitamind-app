@@ -55,17 +55,25 @@ body {
 
 .vm-home-left-spacer {
   width: 44px;
+  min-width: 44px;
 }
 
 .vm-home-title {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  width: auto;
-  max-width: calc(100% - 120px);
+  width: 100%;
+  max-width: calc(100% - 96px);
   display: flex;
   justify-content: center;
   pointer-events: none;
+}
+
+.page[data-name="home"] .navbar-inner .right {
+  width: 44px;
+  min-width: 44px;
+  display: flex;
+  justify-content: center;
 }
 
 .vm-home-brand {
@@ -73,7 +81,7 @@ body {
   align-items: center;
   gap: 10px;
   justify-content: center;
-  max-width: 100%;
+  max-width: calc(100% - 16px);
 }
 
 .vm-home-logo {
