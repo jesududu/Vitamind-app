@@ -61,10 +61,16 @@ body {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  width: 160px;
+  width: 220px;
   display: flex;
   justify-content: center;
   pointer-events: none;
+}
+
+.vm-home-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .vm-home-logo {
@@ -73,6 +79,14 @@ body {
   max-height: 42px;
   object-fit: contain;
   border-radius: 14px;
+}
+
+.vm-home-brand-text {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1;
+  color: currentColor;
 }
 
 .vm-hero,

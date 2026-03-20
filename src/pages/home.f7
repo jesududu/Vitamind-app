@@ -5,7 +5,10 @@
       <div class="navbar-inner">
         <div class="left vm-home-left-spacer"></div>
         <div class="title vm-home-title">
-          <img src="/home-logo.png" alt="VitaMind" class="vm-home-logo" />
+          <div class="vm-home-brand">
+            <img src="/home-logo.png" alt="VitaMind" class="vm-home-logo" />
+            <span class="vm-home-brand-text">VitaMind</span>
+          </div>
         </div>
         <div class="right">
           <a href="/notificaciones/" class="link icon-only">
