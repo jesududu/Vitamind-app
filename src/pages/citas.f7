@@ -71,9 +71,9 @@
                 </div>
                 <div class="item-subtitle">${utils.escapeHtml(props.empleado || '')}</div>
                 <div class="item-text">
-                  <div class="vm-cita-meta-lines">
-                    <div class="vm-cita-meta-line"><strong>Fecha:</strong> ${utils.escapeHtml(utils.formatDate(item.start))}</div>
-                    <div class="vm-cita-meta-line"><strong>Hora:</strong> ${utils.escapeHtml(timeText)}</div>
+                  <div class="vm-cita-date-pill">
+                    <i class="icon material-icons">calendar_month</i>
+                    <span>${utils.escapeHtml(utils.formatDate(item.start))} · ${utils.escapeHtml(timeText)}</span>
                   </div>
                   ${props.empresa ? `<div class="vm-muted" style="margin-top:8px;">${utils.escapeHtml(props.empresa)}</div>` : ''}
                 </div>

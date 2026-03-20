@@ -710,6 +710,24 @@ body {
   min-width: 0;
 }
 
+.vm-cita-date-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid rgba(29, 42, 59, 0.08);
+  color: #374151;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.vm-cita-date-pill .icon {
+  font-size: 18px;
+  color: var(--vm-primary);
+}
+
 .vm-cita-meta-line {
   color: var(--vm-text);
   line-height: 1.35;
