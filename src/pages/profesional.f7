@@ -317,6 +317,7 @@
         token: $f7route.params.token,
         empleado_id: profile.id,
         empresa_id: profile.empresa_id,
+        empresa_nombre: profile.empresa_nombre || profile.empresa_razon_social || profile.razon_social || profile.centro || profile.localidad || '',
         paciente_id: utils.getSession().pacienteId,
         servicio_id: selectedService.id,
         servicio_titulo: selectedService.titulo,
