@@ -746,6 +746,22 @@ body {
   border: 0;
 }
 
+.vm-cita-detalle-list .item-title {
+  font-weight: 600;
+}
+
+.vm-cita-detalle-list .item-after {
+  color: #1f2937;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.vm-cita-detalle-list .vm-detail-after {
+  white-space: normal;
+  max-width: 58%;
+  text-align: right;
+}
+
 .vm-loading,
 .vm-empty {
   padding: 18px;

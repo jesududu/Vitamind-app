@@ -1150,6 +1150,137 @@ var tmApp = {
     return tmApp.ajaxPostData(fullUrl, {});
   },
 
+  getAppointmentCenterName: function (appointment = {}) {
+    const props = appointment.extendedProps || {};
+    return props.empresa_razon_social || props.empresa || props.centro || appointment.empresa || 'No especificado';
+  },
+
+  getAppointmentAddress: function (appointment = {}) {
+    const props = appointment.extendedProps || {};
+    return props.direccion || appointment.direccion || '';
+  },
+
+  getAppointmentMapsEmbedUrl: function (appointment = {}) {
+    const addressText = tmApp.getAppointmentAddress(appointment);
+    if (!addressText) return '';
+    return `https://www.google.com/maps?q=${encodeURIComponent(addressText)}&output=embed`;
+  },
+
+  getAppointmentDetailHtml: function (appointment = {}) {
+    if (!appointment || !appointment.id) {
+      return '<div class="block"><p class="vm-empty">No se ha encontrado la cita seleccionada.</p></div>';
+    }
+
+    const props = appointment.extendedProps || {};
+    const centerName = tmApp.getAppointmentCenterName(appointment);
+    const addressText = tmApp.getAppointmentAddress(appointment);
+    const mapsEmbedUrl = tmApp.getAppointmentMapsEmbedUrl(appointment);
+    const serviceName = appointment.title || props.servicio || 'Cita';
+    const professionalName = props.empleado || '';
+    const startTime = tmApp.formatTime(appointment.start);
+    const endTime = tmApp.formatTime(appointment.end);
+    const timeText = startTime && endTime ? `${startTime} - ${endTime}` : (startTime || endTime || '');
+    const noteText = String(props.nota || '').trim();
+
+    return `
+      <div class="list inset list-strong list-dividers-ios vm-cita-detalle-list">
+        <ul>
+          <li>
+            <div class="item-content">
+              <div class="item-inner">
+                <div class="item-title">${tmApp.escapeHtml(serviceName)}</div>
+                ${professionalName ? `<div class="item-after">${tmApp.escapeHtml(professionalName)}</div>` : ''}
+              </div>
+            </div>
+          </li>
+          <li>
+            <div class="item-content">
+              <div class="item-inner">
+                <div class="item-title">Fecha</div>
+                <div class="item-after">${tmApp.escapeHtml(tmApp.formatDate(appointment.start))}</div>
+              </div>
+            </div>
+          </li>
+          <li>
+            <div class="item-content">
+              <div class="item-inner">
+                <div class="item-title">Hora</div>
+                <div class="item-after">${tmApp.escapeHtml(timeText)}</div>
+              </div>
+            </div>
+          </li>
+          ${professionalName ? `
+            <li>
+              <div class="item-content">
+                <div class="item-inner">
+                  <div class="item-title">Profesional</div>
+                  <div class="item-after">${tmApp.escapeHtml(professionalName)}</div>
+                </div>
+              </div>
+            </li>
+          ` : ''}
+          <li>
+            <div class="item-content">
+              <div class="item-inner">
+                <div class="item-title">Centro</div>
+                <div class="item-after">${tmApp.escapeHtml(centerName)}</div>
+              </div>
+            </div>
+          </li>
+          ${addressText ? `
+            <li>
+              <div class="item-content">
+                <div class="item-inner">
+                  <div class="item-title">Direccion</div>
+                  <div class="item-after vm-detail-after">${tmApp.escapeHtml(addressText)}</div>
+                </div>
+              </div>
+            </li>
+          ` : ''}
+          ${props.modalidad ? `
+            <li>
+              <div class="item-content">
+                <div class="item-inner">
+                  <div class="item-title">Modalidad</div>
+                  <div class="item-after">${tmApp.escapeHtml(props.modalidad)}</div>
+                </div>
+              </div>
+            </li>
+          ` : ''}
+          ${noteText ? `
+            <li>
+              <div class="item-content">
+                <div class="item-inner">
+                  <div class="item-title">Nota</div>
+                  <div class="item-after vm-detail-after">${tmApp.escapeHtml(noteText)}</div>
+                </div>
+              </div>
+            </li>
+          ` : ''}
+        </ul>
+      </div>
+
+      ${mapsEmbedUrl ? `
+        <div class="block">
+          <div class="vm-map-embed">
+            <iframe
+              src="${mapsEmbedUrl}"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              allowfullscreen
+            ></iframe>
+          </div>
+        </div>
+      ` : ''}
+
+      ${appointment.estado === 'activa' ? `
+        <div class="block">
+          <a href="#" class="button button-fill color-red btnCancelar" data-clase="${tmApp.escapeHtml(appointment.id)}">Cancelar cita</a>
+        </div>
+      ` : ''}
+    `;
+  },
+
   getFavorites: function () {
     const url = apiUrl + '/favoritos';
     const fullUrl = url;
