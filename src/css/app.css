@@ -826,6 +826,10 @@ body {
   margin-top: 0;
 }
 
+.vm-prof-calendar-card {
+  margin-top: 18px;
+}
+
 .vm-profile-booking .list {
   margin-top: 0;
   margin-bottom: 0;
