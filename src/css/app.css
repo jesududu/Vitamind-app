@@ -638,6 +638,13 @@ body {
   background: transparent !important;
 }
 
+.page[data-name="normas"] .tmNormas,
+.page[data-name="terminos"] .tmTerminos,
+.page[data-name="normas"] .tmNormas *,
+.page[data-name="terminos"] .tmTerminos * {
+  background: transparent !important;
+}
+
 .vm-reservas-list ul {
   display: flex;
   flex-direction: column;

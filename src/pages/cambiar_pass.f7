@@ -17,42 +17,44 @@
     </div>
     <div class="page-content vm-page-content">
       <div class="block-title">Cambiar contrasena</div>
-      <form id="loginCambiarPass" class="list inset list-dividers-ios form-store-data">
-        <ul>
-          <li class="item-content item-input item-input-outline">
-            <div class="item-inner">
-              <div class="item-title item-floating-label">Nueva contrasena</div>
-              <div class="item-input-wrap">
-                <input
-                  type="password"
-                  id="txtPasNew"
-                  class="cambiarPass"
-                  placeholder="Minimo 8 caracteres"
-                  disabled
-                />
-                <span class="input-clear-button"></span>
+      <div class="vm-form-card">
+        <form id="loginCambiarPass" class="list inset list-dividers-ios form-store-data">
+          <ul>
+            <li class="item-content item-input item-input-outline">
+              <div class="item-inner">
+                <div class="item-title item-floating-label">Nueva contrasena</div>
+                <div class="item-input-wrap">
+                  <input
+                    type="password"
+                    id="txtPasNew"
+                    class="cambiarPass"
+                    placeholder="Minimo 8 caracteres"
+                    disabled
+                  />
+                  <span class="input-clear-button"></span>
+                </div>
               </div>
-            </div>
-          </li>
-          <li class="item-content item-input item-input-outline">
-            <div class="item-inner">
-              <div class="item-title item-floating-label">Confirmar contrasena</div>
-              <div class="item-input-wrap">
-                <input
-                  type="password"
-                  id="txtPasCon"
-                  class="cambiarPass"
-                  placeholder="Confirma tu contrasena"
-                  disabled
-                />
-                <span class="input-clear-button"></span>
+            </li>
+            <li class="item-content item-input item-input-outline">
+              <div class="item-inner">
+                <div class="item-title item-floating-label">Confirmar contrasena</div>
+                <div class="item-input-wrap">
+                  <input
+                    type="password"
+                    id="txtPasCon"
+                    class="cambiarPass"
+                    placeholder="Confirma tu contrasena"
+                    disabled
+                  />
+                  <span class="input-clear-button"></span>
+                </div>
               </div>
-            </div>
-          </li>
-        </ul>
-      </form>
-      <div class="block">
-        <p class="vm-inline-note">La pantalla ya queda preparada. El cambio real de contrasena desde la app sigue pendiente de endpoint autenticado en la API.</p>
+            </li>
+          </ul>
+        </form>
+        <div class="block" style="margin: 0; padding: 0;">
+          <p class="vm-inline-note">La pantalla ya queda preparada. El cambio real de contrasena desde la app sigue pendiente de endpoint autenticado en la API.</p>
+        </div>
       </div>
     </div>
   </div>
