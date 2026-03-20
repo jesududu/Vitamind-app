@@ -341,7 +341,7 @@
       $f7router.navigate('/confirmar-reserva/');
     };
 
-    const loadSlots = async () => {
+    const loadSlots = async (showLoader = true) => {
       if (!selectedServiceId) {
         showAvailabilityMessage('Selecciona un servicio', 'Para ver los horarios');
         return;
@@ -352,6 +352,9 @@
         return;
       }
       try {
+        if (showLoader) {
+          $f7.preloader.show();
+        }
         const response = await utils.getProfessionalSlots($f7route.params.token, {
           fecha: selectedDate,
           servicio_id: selectedServiceId,
@@ -383,6 +386,30 @@
         }
       } catch (error) {
         showAvailabilityMessage('Error cargando horarios', utils.getApiErrorMessage(error));
+      } finally {
+        if (showLoader) {
+          $f7.preloader.hide();
+        }
+      }
+    };
+
+    const loadReservationTab = async (showLoader = true) => {
+      if (!profile || activeTab !== 'reserva') return;
+
+      try {
+        if (showLoader) {
+          $f7.preloader.show();
+        }
+        initCalendar();
+        if (getServices().length) {
+          await loadSlots(false);
+        } else {
+          showAvailabilityMessage('No hay servicios disponibles', 'Para este profesional');
+        }
+      } finally {
+        if (showLoader) {
+          $f7.preloader.hide();
+        }
       }
     };
 
@@ -411,14 +438,7 @@
         $update();
 
         if (activeTab === 'reserva') {
-          $f7.utils.nextTick(async () => {
-            initCalendar();
-            if (getServices().length) {
-              await loadSlots();
-            } else {
-              showAvailabilityMessage('No hay servicios disponibles', 'Para este profesional');
-            }
-          });
+          $f7.utils.nextTick(() => loadReservationTab(false));
         }
       } catch (error) {
         profile = null;
@@ -432,7 +452,7 @@
 
     const onServiceChange = (event) => {
       selectedServiceId = event.target.value;
-      loadSlots();
+      loadSlots(true);
     };
 
     const switchTab = (tabName) => {
@@ -440,14 +460,7 @@
       if (tabName !== 'reserva' || !profile) return;
 
       window.setTimeout(() => {
-        $f7.utils.nextTick(async () => {
-          initCalendar();
-          if (getServices().length) {
-            await loadSlots();
-          } else {
-            showAvailabilityMessage('No hay servicios disponibles', 'Para este profesional');
-          }
-        });
+        $f7.utils.nextTick(() => loadReservationTab(true));
       }, 80);
     };
 
@@ -461,10 +474,7 @@
     $onMounted(initPage);
     $on('pageAfterIn', () => {
       if (!profile || activeTab !== 'reserva') return;
-      $f7.utils.nextTick(() => {
-        initCalendar();
-        loadSlots();
-      });
+      $f7.utils.nextTick(() => loadReservationTab(true));
     });
     $on('pageBeforeRemove', () => {
       if (calendarProfessional) {
