@@ -80,26 +80,37 @@
       const apellidosInput = getField('#profile-apellidos');
       const telefonoInput = getField('#profile-telefono');
       const emailInput = getField('#profile-email');
+      const submittedProfile = {
+        nombre: nombreInput ? nombreInput.value : '',
+        apellidos: apellidosInput ? apellidosInput.value : '',
+        telefono: telefonoInput ? telefonoInput.value : '',
+        email: emailInput ? emailInput.value : '',
+      };
 
       try {
         $f7.preloader.show();
-        const response = await utils.updateProfile(
-          {
-            nombre: nombreInput ? nombreInput.value : '',
-            apellidos: apellidosInput ? apellidosInput.value : '',
-            telefono: telefonoInput ? telefonoInput.value : '',
-            email: emailInput ? emailInput.value : '',
-          }
-        );
+        await utils.updateProfile(submittedProfile);
 
         const refreshedUser = await utils.getCurrentUser();
+        const normalizedUser = {
+          ...(refreshedUser || {}),
+          paciente: {
+            ...((refreshedUser && refreshedUser.paciente) || {}),
+            nombre: ((refreshedUser && refreshedUser.paciente && refreshedUser.paciente.nombre) || submittedProfile.nombre),
+            apellidos: ((refreshedUser && refreshedUser.paciente && refreshedUser.paciente.apellidos) || submittedProfile.apellidos),
+            email: ((refreshedUser && refreshedUser.paciente && refreshedUser.paciente.email) || submittedProfile.email),
+            telefono: ((refreshedUser && refreshedUser.paciente && refreshedUser.paciente.telefono) || submittedProfile.telefono),
+          },
+          telefono: ((refreshedUser && refreshedUser.telefono) || submittedProfile.telefono),
+          email: ((refreshedUser && refreshedUser.email) || submittedProfile.email),
+        };
         utils.saveSession({
           token: ($store.state.session && $store.state.session.token) || utils.getSession().token,
-          user: refreshedUser,
+          user: normalizedUser,
         });
         $store.dispatch('refreshSession');
-        fillForm(refreshedUser);
-        $f7.dialog.alert((response && response.message) || 'Perfil actualizado correctamente');
+        fillForm(normalizedUser);
+        $f7.dialog.alert('Perfil actualizado con éxito');
       } catch (error) {
         $f7.dialog.alert(utils.getApiErrorMessage(error, 'No se pudo guardar tu perfil'));
       } finally {
