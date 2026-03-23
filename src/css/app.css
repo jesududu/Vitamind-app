@@ -192,6 +192,10 @@ body {
   display: none;
 }
 
+.page[data-name="home"] .vm-section:has(.vm-visited-row) {
+  background: transparent;
+}
+
 .vm-visited-card {
   min-width: 240px;
   max-width: 240px;
