@@ -185,6 +185,11 @@ body {
   padding-bottom: 4px;
   -webkit-overflow-scrolling: touch;
   background: transparent;
+  scrollbar-width: none;
+}
+
+.vm-visited-row::-webkit-scrollbar {
+  display: none;
 }
 
 .vm-visited-card {
@@ -200,6 +205,7 @@ body {
 .vm-visited-image-wrap {
   height: 118px;
   background: transparent;
+  overflow: hidden;
 }
 
 .vm-visited-image {
@@ -216,6 +222,7 @@ body {
   font-size: 34px;
   font-weight: 700;
   color: var(--vm-secondary);
+  background: #ffffff;
 }
 
 .vm-visited-content {
