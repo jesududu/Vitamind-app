@@ -68,6 +68,40 @@
           `)}
         </div>
       </section>
+
+      ${isLoggedIn && $h`
+        <section class="vm-section">
+          <div class="vm-section-title">Visitados</div>
+          ${!loadingVisited && visitedError && $h`
+            <div class="vm-empty">${visitedError}</div>
+          `}
+          ${!loadingVisited && !visitedError && !visitedCenters.length && $h`
+            <div class="vm-empty">Aun no has reservado en ningun centro.</div>
+          `}
+          ${!loadingVisited && !visitedError && !!visitedCenters.length && $h`
+            <div class="vm-visited-row">
+              ${visitedCenters.map((item) => $h`
+                <div class="vm-visited-card">
+                  <div class="vm-visited-image-wrap">
+                    ${item.imagen ? $h`
+                      <img src="${item.imagen}" alt="${item.nombre}" class="vm-visited-image" />
+                    ` : $h`
+                      <div class="vm-visited-image vm-visited-image-fallback">${String(item.nombre || '?').charAt(0)}</div>
+                    `}
+                  </div>
+                  <div class="vm-visited-content">
+                    <div class="vm-card-title">${item.nombre}</div>
+                    <div class="vm-card-subtitle">
+                      ${item.distancia ? `${item.distancia} · ` : ''}${item.direccion || item.localidad || ''}
+                    </div>
+                    <div class="vm-visited-meta">${item.totalReservas} ${item.totalReservas === 1 ? 'reserva' : 'reservas'}</div>
+                  </div>
+                </div>
+              `)}
+            </div>
+          `}
+        </section>
+      `}
     </div>
   </div>
 </template>
@@ -78,6 +112,10 @@
     let latestProfessionals = [];
     let loadingLatest = true;
     let latestError = '';
+    let visitedCenters = [];
+    let loadingVisited = false;
+    let visitedError = '';
+    let isLoggedIn = utils.isAuthenticated();
     let initialized = false;
 
     const getPageNode = () => {
@@ -100,6 +138,44 @@
       } finally {
         loadingLatest = false;
         $f7.preloader.hide();
+        $update();
+      }
+    };
+
+    const normalizeVisitedCenters = (response) => {
+      if (!response) return [];
+      if (Array.isArray(response)) return response;
+      if (Array.isArray(response.centros)) return response.centros;
+      if (Array.isArray(response.data)) return response.data;
+      return [];
+    };
+
+    const loadVisitedCenters = async () => {
+      isLoggedIn = utils.isAuthenticated();
+      if (!isLoggedIn) {
+        visitedCenters = [];
+        visitedError = '';
+        loadingVisited = false;
+        $update();
+        return;
+      }
+
+      loadingVisited = true;
+      visitedError = '';
+      $update();
+
+      try {
+        const response = await utils.getVisitedCenters();
+        visitedCenters = normalizeVisitedCenters(response).map((item) => ({
+          ...item,
+          imagen: item.imagen ? utils.normalizeProfessionalImage(item.imagen) : '',
+          totalReservas: Number(item.total_reservas || item.totalReservas || 0),
+        }));
+      } catch (error) {
+        visitedCenters = [];
+        visitedError = utils.getApiErrorMessage(error, 'No se pudieron cargar tus centros visitados');
+      } finally {
+        loadingVisited = false;
         $update();
       }
     };
@@ -127,12 +203,18 @@
     };
 
     const initPage = () => {
-      if (initialized) return;
+      isLoggedIn = utils.isAuthenticated();
+      if (initialized) {
+        loadVisitedCenters();
+        return;
+      }
       initialized = true;
       loadLatestProfessionals();
+      loadVisitedCenters();
     };
 
     $on('pageInit', initPage);
+    $on('pageAfterIn', initPage);
     $onMounted(initPage);
     return $render;
   }

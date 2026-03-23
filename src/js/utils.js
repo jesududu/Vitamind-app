@@ -865,6 +865,17 @@ var tmApp = {
     return professionals;
   },
 
+  getVisitedCenters: async function () {
+    const coords = tmApp.getStoredObject(tmApp.storageKeys.searchCoordinates);
+    const url = apiUrl + '/centros-visitados';
+    const query = tmApp.objectToQueryString({
+      lat: coords?.lat || '',
+      lng: coords?.lng || '',
+    });
+    const fullUrl = query ? `${url}?${query}` : url;
+    return tmApp.ajaxData(fullUrl);
+  },
+
   getLocalidades: function () {
     const url = apiUrl + '/localidades';
     const fullUrl = url;

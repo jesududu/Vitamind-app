@@ -178,6 +178,56 @@ body {
   gap: 14px;
 }
 
+.vm-visited-row {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.vm-visited-card {
+  min-width: 240px;
+  max-width: 240px;
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 14px 34px rgba(29, 42, 59, 0.08);
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+
+.vm-visited-image-wrap {
+  height: 118px;
+  background: linear-gradient(135deg, rgba(var(--vm-primary-rgb), 0.2), rgba(29, 42, 59, 0.12));
+}
+
+.vm-visited-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.vm-visited-image-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--vm-secondary);
+}
+
+.vm-visited-content {
+  padding: 14px 16px 16px;
+}
+
+.vm-visited-meta {
+  margin-top: 8px;
+  color: var(--vm-primary);
+  font-weight: 600;
+  font-size: 13px;
+}
+
 .vm-avatar,
 .vm-professional img {
   width: 68px;
