@@ -674,19 +674,23 @@ var tmApp = {
   },
 
   getNotifications: function () {
-    throw tmApp.createMissingEndpointError('notifications');
+    const url = apiUrl + '/notificaciones';
+    return tmApp.ajaxData(url);
   },
 
-  getNotificationDetail: function () {
-    throw tmApp.createMissingEndpointError('notificationDetail');
+  getNotificationDetail: function (id) {
+    const url = apiUrl + `/notificaciones/${id}`;
+    return tmApp.ajaxData(url);
   },
 
   getNotificationsUnreadCount: function () {
-    throw tmApp.createMissingEndpointError('notificationsUnreadCount');
+    const url = apiUrl + '/notificaciones/nuevas';
+    return tmApp.ajaxData(url);
   },
 
-  deleteNotification: function () {
-    throw tmApp.createMissingEndpointError('deleteNotification');
+  deleteNotification: function (id) {
+    const url = apiUrl + `/notificaciones/${id}/eliminar`;
+    return tmApp.ajaxPostData(url, {});
   },
 
   registerDevice: function () {
