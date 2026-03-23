@@ -184,6 +184,7 @@ body {
   overflow-x: auto;
   padding-bottom: 4px;
   -webkit-overflow-scrolling: touch;
+  background: transparent;
 }
 
 .vm-visited-card {
@@ -198,7 +199,7 @@ body {
 
 .vm-visited-image-wrap {
   height: 118px;
-  background: linear-gradient(135deg, rgba(var(--vm-primary-rgb), 0.2), rgba(29, 42, 59, 0.12));
+  background: transparent;
 }
 
 .vm-visited-image {
