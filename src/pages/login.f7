@@ -42,16 +42,27 @@
 <script>
   import utils from '../js/utils.js';
 
-  export default function (props, { $el, $f7, $store }) {
-    const getPageNode = (event = null) => {
+	  export default function (props, { $el, $f7, $store }) {
+	    const getPageNode = (event = null) => {
       const fromEvent = event && event.target && event.target.closest ? event.target.closest('.page[data-name="login"]') : null;
       if (fromEvent) return fromEvent;
       if ($el && $el[0]) return $el[0];
-      if ($el && $el.nodeType === 1) return $el;
-      return document.querySelector('.page[data-name="login"].page-current') || document.querySelector('.page[data-name="login"]');
-    };
+	      if ($el && $el.nodeType === 1) return $el;
+	      return document.querySelector('.page[data-name="login"].page-current') || document.querySelector('.page[data-name="login"]');
+	    };
 
-    const submitLogin = async (event) => {
+        const syncPushDevice = () => {
+          if (!window.vitaMindSetupPushNotifications) return Promise.resolve();
+
+          const storedToken = localStorage.getItem('vitamind_registration_id');
+          if (storedToken && window.vitaMindRegisterPushToken) {
+            return window.vitaMindRegisterPushToken(storedToken);
+          }
+
+          return window.vitaMindSetupPushNotifications($f7);
+        };
+
+	    const submitLogin = async (event) => {
       if (event) event.preventDefault();
 
       const pageNode = getPageNode(event);
@@ -71,12 +82,20 @@
           email,
           password,
           remember: true,
-        });
-        $store.dispatch('refreshSession');
-        if (window.vitaMindSetupPushNotifications) {
-          await window.vitaMindSetupPushNotifications($f7);
-        }
-        const homeView = $f7.views.get('#view-home');
+	        });
+	        $store.dispatch('refreshSession');
+	        await syncPushDevice();
+            setTimeout(() => {
+              syncPushDevice().catch((error) => {
+                console.error('Error reintentando registro push tras login:', error);
+              });
+            }, 1500);
+            setTimeout(() => {
+              syncPushDevice().catch((error) => {
+                console.error('Error reintentando registro push tras login:', error);
+              });
+            }, 4000);
+	        const homeView = $f7.views.get('#view-home');
         if (homeView && homeView.router) {
           homeView.router.navigate('/cli/', {
             reloadCurrent: true,

@@ -277,6 +277,8 @@ async function checkPushNotificationPermission() {
 
 async function setupPushNotifications(app) {
   if (!Capacitor.isNativePlatform()) return;
+
+  await checkPushNotificationPermission();
   if (pushSetupDone) {
     var existingToken = localStorage.getItem('vitamind_registration_id');
     if (existingToken) {
@@ -341,6 +343,10 @@ async function registerPushToken(tokenValue) {
   } catch (error) {
     console.error('Error registrando dispositivo en backend:', error);
   }
+}
+
+if (typeof window !== 'undefined') {
+  window.vitaMindRegisterPushToken = registerPushToken;
 }
 
 initApp();
