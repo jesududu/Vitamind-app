@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1050946078141",
+    "project_id": "vitamind-23ab3",
+    "storage_bucket": "vitamind-23ab3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1050946078141:android:d81a9ad96a7be52507bed4",
+        "android_client_info": {
+          "package_name": "es.tmwebs.vitamind"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQzc6Onqb9xrxSHy-kf_Rv-wIil0TEbX0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -2,6 +2,7 @@ import $ from 'dom7';
 import Framework7, { getDevice } from 'framework7/bundle';
 
 import { PushNotifications } from '@capacitor/push-notifications';
+import { Device as CapacitorDevice } from '@capacitor/device';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { Capacitor } from '@capacitor/core';
 import { SplashScreen } from '@capacitor/splash-screen';
@@ -20,6 +21,7 @@ import env from './env.js';
 import utils from './utils.js';
 
 var device = getDevice();
+let pushSetupDone = false;
 
 function initApp() {
   document.documentElement.style.setProperty('--vm-home-navbar-bg', '#f4934e');
@@ -53,6 +55,9 @@ function initApp() {
       utils.refreshCurrentUser().catch(function () {
         // Mantenemos la sesion local aunque falle el refresco remoto.
       });
+      safeRun(function () {
+        setupPushNotifications(app);
+      }, 'push-pageinit');
     }
   });
 
@@ -73,6 +78,13 @@ function initApp() {
       }
 
       safeInitNativeFeatures(f7);
+
+      var authTokenOnInit = localStorage.getItem(utils.storageKeys.token);
+      if (authTokenOnInit) {
+        safeRun(function () {
+          setupPushNotifications(f7);
+        }, 'push-init');
+      }
     }
 
     if (process.env.NODE_ENV !== 'production') {
@@ -183,10 +195,6 @@ function safeInitNativeFeatures(f7) {
   safeRun(function () {
     checkPushNotificationPermission();
   }, 'push-permissions');
-
-  // Desactivamos el registro push automatico hasta estabilizar la app.
-  // La estructura del app.js sigue la de Buktiem, pero evitamos el punto
-  // nativo que ahora mismo puede cerrar la aplicacion en ciertos Android.
 }
 
 function safeRun(fn, label) {
@@ -269,9 +277,21 @@ async function checkPushNotificationPermission() {
 
 async function setupPushNotifications(app) {
   if (!Capacitor.isNativePlatform()) return;
+  if (pushSetupDone) {
+    var existingToken = localStorage.getItem('vitamind_registration_id');
+    if (existingToken) {
+      await registerPushToken(existingToken);
+    }
+    return;
+  }
+
+  pushSetupDone = true;
 
   PushNotifications.addListener('registration', function (token) {
     localStorage.setItem('vitamind_registration_id', token.value);
+    registerPushToken(token.value).catch(function (error) {
+      console.error('Error guardando token push en backend:', error);
+    });
   });
 
   PushNotifications.addListener('registrationError', function (error) {
@@ -291,8 +311,31 @@ async function setupPushNotifications(app) {
 
   try {
     await PushNotifications.register();
+    var storedToken = localStorage.getItem('vitamind_registration_id');
+    if (storedToken) {
+      await registerPushToken(storedToken);
+    }
   } catch (error) {
     console.error('Error al registrar notificaciones push:', error);
+  }
+}
+
+async function registerPushToken(tokenValue) {
+  var authToken = localStorage.getItem(utils.storageKeys.token);
+  if (!authToken || !tokenValue) return;
+
+  try {
+    var info = await CapacitorDevice.getInfo();
+    await utils.registerDevice({
+      regid: tokenValue,
+      device: info.name || info.model || 'device',
+      modelo: info.model || '',
+      platform: info.platform || Capacitor.getPlatform(),
+      version: info.osVersion || info.operatingSystem || '',
+      manufacturer: info.manufacturer || '',
+    });
+  } catch (error) {
+    console.error('Error registrando dispositivo en backend:', error);
   }
 }
 

@@ -693,8 +693,12 @@ var tmApp = {
     return tmApp.ajaxPostData(url, {});
   },
 
-  registerDevice: function () {
-    throw tmApp.createMissingEndpointError('registerDevice');
+  registerDevice: function (payload = {}) {
+    const url = apiUrl + '/register-device';
+    return tmApp.ajaxPostData(url, {
+      ln: idiomaAlmacenado || 'es',
+      ...payload,
+    });
   },
 
   getAppVersion: function () {
