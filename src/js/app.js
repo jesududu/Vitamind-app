@@ -261,14 +261,18 @@ async function checkPushNotificationPermission() {
   if (!Capacitor.isNativePlatform()) return;
 
   try {
+    console.log('[VitaMind][push] checkPushNotificationPermission start');
     if (!PushNotifications || typeof PushNotifications.checkPermissions !== 'function') {
+      console.log('[VitaMind][push] PushNotifications plugin no disponible');
       return;
     }
 
     var permissionStatus = await PushNotifications.checkPermissions();
+    console.log('[VitaMind][push] checkPermissions', permissionStatus);
 
     if (permissionStatus.receive !== 'granted') {
-      await PushNotifications.requestPermissions();
+      var requestedPermissions = await PushNotifications.requestPermissions();
+      console.log('[VitaMind][push] requestPermissions', requestedPermissions);
     }
   } catch (error) {
     console.error('Error verificando permisos de notificaciones:', error);
@@ -278,9 +282,17 @@ async function checkPushNotificationPermission() {
 async function setupPushNotifications(app) {
   if (!Capacitor.isNativePlatform()) return;
 
+  console.log('[VitaMind][push] setupPushNotifications start', {
+    pushSetupDone,
+    hasStoredToken: Boolean(localStorage.getItem('vitamind_registration_id')),
+    hasAuthToken: Boolean(localStorage.getItem(utils.storageKeys.token)),
+  });
   await checkPushNotificationPermission();
   if (pushSetupDone) {
     var existingToken = localStorage.getItem('vitamind_registration_id');
+    console.log('[VitaMind][push] setupPushNotifications already initialized', {
+      existingToken: existingToken ? 'present' : 'missing',
+    });
     if (existingToken) {
       await registerPushToken(existingToken);
     }
@@ -290,6 +302,10 @@ async function setupPushNotifications(app) {
   pushSetupDone = true;
 
   PushNotifications.addListener('registration', function (token) {
+    console.log('[VitaMind][push] registration token received', {
+      hasToken: Boolean(token && token.value),
+      preview: token && token.value ? token.value.slice(0, 24) : null,
+    });
     localStorage.setItem('vitamind_registration_id', token.value);
     registerPushToken(token.value).catch(function (error) {
       console.error('Error guardando token push en backend:', error);
@@ -297,6 +313,7 @@ async function setupPushNotifications(app) {
   });
 
   PushNotifications.addListener('registrationError', function (error) {
+    console.error('[VitaMind][push] registrationError', error);
     console.error('Error en el registro de notificaciones:', error);
   });
 
@@ -312,12 +329,17 @@ async function setupPushNotifications(app) {
   });
 
   try {
+    console.log('[VitaMind][push] calling PushNotifications.register()');
     await PushNotifications.register();
     var storedToken = localStorage.getItem('vitamind_registration_id');
+    console.log('[VitaMind][push] register finished', {
+      storedToken: storedToken ? 'present' : 'missing',
+    });
     if (storedToken) {
       await registerPushToken(storedToken);
     }
   } catch (error) {
+    console.error('[VitaMind][push] PushNotifications.register failed', error);
     console.error('Error al registrar notificaciones push:', error);
   }
 }
@@ -328,10 +350,19 @@ if (typeof window !== 'undefined') {
 
 async function registerPushToken(tokenValue) {
   var authToken = localStorage.getItem(utils.storageKeys.token);
+  console.log('[VitaMind][push] registerPushToken called', {
+    hasAuthToken: Boolean(authToken),
+    hasTokenValue: Boolean(tokenValue),
+    preview: tokenValue ? tokenValue.slice(0, 24) : null,
+  });
   if (!authToken || !tokenValue) return;
 
   try {
     var info = await CapacitorDevice.getInfo();
+    console.log('[VitaMind][push] sending register-device', {
+      model: info.model || '',
+      platform: info.platform || Capacitor.getPlatform(),
+    });
     await utils.registerDevice({
       regid: tokenValue,
       device: info.name || info.model || 'device',
@@ -340,7 +371,9 @@ async function registerPushToken(tokenValue) {
       version: info.osVersion || info.operatingSystem || '',
       manufacturer: info.manufacturer || '',
     });
+    console.log('[VitaMind][push] register-device OK');
   } catch (error) {
+    console.error('[VitaMind][push] register-device failed', error);
     console.error('Error registrando dispositivo en backend:', error);
   }
 }
