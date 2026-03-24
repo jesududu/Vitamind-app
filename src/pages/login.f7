@@ -73,6 +73,9 @@
           remember: true,
         });
         $store.dispatch('refreshSession');
+        if (window.vitaMindSetupPushNotifications) {
+          await window.vitaMindSetupPushNotifications($f7);
+        }
         const homeView = $f7.views.get('#view-home');
         if (homeView && homeView.router) {
           homeView.router.navigate('/cli/', {

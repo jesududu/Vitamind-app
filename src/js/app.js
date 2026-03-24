@@ -320,6 +320,10 @@ async function setupPushNotifications(app) {
   }
 }
 
+if (typeof window !== 'undefined') {
+  window.vitaMindSetupPushNotifications = setupPushNotifications;
+}
+
 async function registerPushToken(tokenValue) {
   var authToken = localStorage.getItem(utils.storageKeys.token);
   if (!authToken || !tokenValue) return;
