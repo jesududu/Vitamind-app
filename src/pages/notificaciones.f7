@@ -177,7 +177,6 @@
     };
 
     $on('pageInit', loadNotifications);
-    $on('pageAfterIn', loadNotifications);
 
     return $render;
   }

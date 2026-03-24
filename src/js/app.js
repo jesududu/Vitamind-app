@@ -319,6 +319,18 @@ async function setupPushNotifications(app) {
 
   PushNotifications.addListener('pushNotificationReceived', function (notification) {
     console.log('Notificacion recibida:', notification);
+    try {
+      var title = notification?.title || notification?.data?.title || 'Nueva notificacion';
+      var text = notification?.body || notification?.data?.body || notification?.data?.mensaje || '';
+      app.notification.create({
+        title: title,
+        text: text,
+        closeTimeout: 4000,
+        closeButton: true,
+      }).open();
+    } catch (error) {
+      console.error('[VitaMind][push] No se pudo mostrar la notificacion en primer plano', error);
+    }
   });
 
   PushNotifications.addListener('pushNotificationActionPerformed', function () {
